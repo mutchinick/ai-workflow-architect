@@ -1,8 +1,8 @@
 {
-  "name": "gen-ai-agent-consensus-infra",
+  "name": "ai-agent-designer-deployer-infra",
   "version": "0.1.0",
   "config": {
-    "deployment_prefix": "genAiAgentConsensus"
+    "deployment_prefix": "aiAgentDesigner"
   },
   "bin": {
     "main": "bin/main.ts"

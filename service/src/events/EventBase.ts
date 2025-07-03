@@ -26,12 +26,16 @@ export type QueryRespondedData = {
   response: string
 }
 
-export type EventDataMap = {
+type EventStoreEventData = Record<string, unknown>
+
+type EventDataMapping<T extends Record<EventStoreEventName, EventStoreEventData>> = T
+
+export type EventDataMap = EventDataMapping<{
   [EventStoreEventName.USER_QUERY_RECEIVED]: UserQueryReceivedData
   [EventStoreEventName.QUERY_ENRICHED]: QueryEnrichedData
   [EventStoreEventName.ENRICHED_QUERY_GRADED]: EnrichedQueryGradedData
   [EventStoreEventName.QUERY_RESPONDED]: QueryRespondedData
-}
+}>
 
 export class EventStoreEvent<TEventName extends EventStoreEventName> {
   public readonly idempotencyKey: string

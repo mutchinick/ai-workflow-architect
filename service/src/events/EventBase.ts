@@ -5,28 +5,28 @@ export enum EventStoreEventName {
   QUERY_RESPONDED = 'QUERY_RESPONDED',
 }
 
-export interface UserQueryReceivedData {
+export type UserQueryReceivedData = {
   query: string
 }
 
-export interface QueryEnrichedData {
+export type QueryEnrichedData = {
   query: string
   context: string
 }
 
-export interface EnrichedQueryGradedData {
+export type EnrichedQueryGradedData = {
   query: string
   grade: 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0
   reason: string
 }
 
-export interface QueryRespondedData {
+export type QueryRespondedData = {
   query: string
   context: string
   response: string
 }
 
-export interface EventDataMap {
+export type EventDataMap = {
   [EventStoreEventName.USER_QUERY_RECEIVED]: UserQueryReceivedData
   [EventStoreEventName.QUERY_ENRICHED]: QueryEnrichedData
   [EventStoreEventName.ENRICHED_QUERY_GRADED]: EnrichedQueryGradedData
@@ -52,6 +52,15 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
     this.eventData = eventData
     this.createdAt = createdAt
     this.updatedAt = updatedAt
+  }
+
+  public static fromData<TEventName extends EventStoreEventName>(
+    idempotencyKey: string,
+    eventName: TEventName,
+    eventData: EventDataMap[TEventName],
+  ): EventStoreEvent<TEventName> {
+    const now = new Date().toISOString()
+    return new EventStoreEvent<TEventName>(idempotencyKey, eventName, eventData, now, now)
   }
 }
 

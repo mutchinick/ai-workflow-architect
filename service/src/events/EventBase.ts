@@ -1,3 +1,6 @@
+//
+//
+//
 export enum EventStoreEventName {
   USER_QUERY_RECEIVED = 'USER_QUERY_RECEIVED',
   QUERY_ENRICHED = 'QUERY_ENRICHED',
@@ -5,6 +8,9 @@ export enum EventStoreEventName {
   QUERY_RESPONDED = 'QUERY_RESPONDED',
 }
 
+//
+//
+//
 export type UserQueryReceivedData = {
   query: string
 }
@@ -26,6 +32,9 @@ export type QueryRespondedData = {
   response: string
 }
 
+//
+//
+//
 type EventStoreEventData = Record<string, unknown>
 
 type EventDataMapping<T extends Record<EventStoreEventName, EventStoreEventData>> = T
@@ -37,6 +46,9 @@ export type EventDataMap = EventDataMapping<{
   [EventStoreEventName.QUERY_RESPONDED]: QueryRespondedData
 }>
 
+//
+//
+//
 export class EventStoreEvent<TEventName extends EventStoreEventName> {
   public readonly idempotencyKey: string
   public readonly eventName: TEventName
@@ -68,6 +80,9 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   }
 }
 
+//
+//
+//
 const queryReceivedEvent = new EventStoreEvent(
   'key-123',
   EventStoreEventName.USER_QUERY_RECEIVED,

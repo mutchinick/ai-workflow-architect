@@ -1,9 +1,11 @@
 import { z } from 'zod'
+import type { EventStoreEventDefinition } from './EventStoreEventDefinition'
 
 //
 //
 //
 export const schema = z.object({
+  workflowId: z.string().min(1),
   query: z.string().min(1),
   context: z.string().min(1),
   grade: z.union([
@@ -23,11 +25,9 @@ export const schema = z.object({
 
 export type EnrichedQueryGradedEventData = z.infer<typeof schema>
 
-const parseValidatedData = (data: unknown): EnrichedQueryGradedEventData => {
-  return schema.parse(data)
-}
-
-export const EnrichedQueryGradedEvent = {
-  parseValidatedData,
+export const EnrichedQueryGradedEventDefinition: EventStoreEventDefinition<typeof schema> = {
   schema,
-} as const
+  generateIdempotencyKey: (data) => {
+    return `user-query-received:${data.query}`
+  },
+}

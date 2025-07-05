@@ -1,9 +1,28 @@
+import { AttributeValue } from '@aws-sdk/client-dynamodb'
+import { EventBridgeEvent } from 'aws-lambda'
 import { EventStoreEventDefinition } from './EventStoreEventDefinition'
 import { EventStoreEventName } from './EventStoreEventName'
 import { WorkflowAgentsDeployedEventDefinition } from './WorkflowAgentsDeployedEvent'
 import { WorkflowCreatedEventDefinition } from './WorkflowCreatedEvent'
 import { WorkflowPromptCompletedEventDefinition } from './WorkflowPromptCompletedEvent'
 import { WorkflowPromptEnhancedEventDefinition } from './WorkflowPromptEnhancedEvent'
+import { unmarshall } from '@aws-sdk/util-dynamodb'
+
+/**
+ *
+ */
+type EventDetail = {
+  eventName: 'INSERT'
+  eventSource: 'aws:dynamodb'
+  eventID: string
+  eventVersion: string
+  awsRegion: string
+  dynamodb: {
+    NewImage: Record<string, AttributeValue>
+  }
+}
+
+export type IncomingEventBridgeEvent = EventBridgeEvent<string, EventDetail>
 
 /**
  *
@@ -53,13 +72,12 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   /**
    *
    */
-  public static fromEventBridge<T extends EventStoreEventName>(payload: {
-    eventName: string
-    eventData: unknown
-  }): EventStoreEvent<T> {
-    const eventName = payload.eventName as T
+  public static fromEventBridge<T extends EventStoreEventName>(incoming: IncomingEventBridgeEvent): EventStoreEvent<T> {
+    const eventDetail = incoming.detail
+    const event = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEvent<T>
+    const eventName = event.eventName
     const definition = eventDefinitions[eventName]
-    const validatedData = definition.parseValidate(payload.eventData) as EventDataMap[T]
+    const validatedData = definition.parseValidate(event.eventData) as EventDataMap[T]
     const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
     return new EventStoreEvent(idempotencyKey, eventName, validatedData)
   }

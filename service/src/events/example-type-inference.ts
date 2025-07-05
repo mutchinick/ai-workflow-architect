@@ -2,65 +2,51 @@ import { EventStoreEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
 
 //
-// EventStoreEventName.USER_QUERY_RECEIVED
+// WORKFLOW_CREATED
 //
-try {
-  const event = EventStoreEvent.fromData(EventStoreEventName.USER_QUERY_RECEIVED, {
+{
+  const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_CREATED, {
     workflowId: 'workflow-123',
-    query: 'Why is the sky blue?',
+    eventKey: 'asdf-1234-created',
   })
-  console.log('Successfully created event:', event)
-  console.log('Successfully created event with query:', event.eventData.query)
-} catch (error) {
-  console.error('This should not have failed:', error)
+
+  console.log(event.idempotencyKey)
+  console.log(event.eventData.workflowId)
+  console.log(event.eventData.eventKey)
 }
 
 //
-// EventStoreEventName.USER_QUERY_RECEIVED
+// WORKFLOW_CREATED
 //
-try {
-  const event = EventStoreEvent.fromData(EventStoreEventName.QUERY_ENRICHED, {
+{
+  const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED, {
     workflowId: 'workflow-123',
-    query: 'Why is the sky blue?',
-    context: 'According to a well respected source it has to do with sunlight and atmospherical conditions.',
+    eventKey: 'asdf-2345-agents-deployed',
   })
-  console.log('Successfully created event:', event)
-  console.log('Successfully created event with query:', event.eventData.query)
-  console.log('Successfully created event with context:', event.eventData.context)
-} catch (error) {
-  console.error('This should not have failed:', error)
+
+  console.log(event.idempotencyKey)
+  console.log(event.eventData.workflowId)
+  console.log(event.eventData.eventKey)
 }
 
 //
-// EventStoreEventName.USER_QUERY_RECEIVED
+// Event Bridge UNKNOWN_EVENT
 //
-try {
-  const event = EventStoreEvent.fromData(EventStoreEventName.QUERY_RESPONDED, {
-    workflowId: 'workflow-123',
-    query: 'Why is the sky blue?',
-    response: 'The sky appears blue due to the scattering of sunlight by the atmosphere.',
+{
+  const event = EventStoreEvent.fromEventBridge({
+    eventName: 'UNKNOWN_EVENT',
+    eventData: {
+      workflowId: 'workflow-123',
+      query: 'What is AI?',
+      response: 'AI is the simulation of human intelligence processes by machines.',
+    },
   })
-  console.log('Successfully created event:', event)
-  console.log('Successfully created event with query:', event.eventData.query)
-  console.log('Successfully created event with response:', event.eventData.response)
-} catch (error) {
-  console.error('This should not have failed:', error)
-}
 
-//
-// EventStoreEventName.USER_QUERY_RECEIVED
-//
-try {
-  const event = EventStoreEvent.fromData(EventStoreEventName.ENRICHED_QUERY_GRADED, {
-    workflowId: 'workflow-123',
-    query: 'Why is the sky blue?',
-    context: 'According to a well respected source it has to do with sunlight and atmospherical conditions.',
-    grade: 10,
-  })
-  console.log('Successfully created event:', event)
-  console.log('Successfully created event with query:', event.eventData.query)
-  console.log('Successfully created event with context:', event.eventData.context)
-  console.log('Successfully created event with grade:', event.eventData.grade)
-} catch (error) {
-  console.error('This should not have failed:', error)
+  console.log(event.idempotencyKey)
+  console.log(event.eventData.workflowId)
+  console.log(event.eventData.eventKey)
+  if (event.isOfType(EventStoreEventName.WORKFLOW_PROMPT_ENHANCED)) {
+    console.log(event.eventData.agentId)
+    console.log(event.eventData.round)
+  }
 }

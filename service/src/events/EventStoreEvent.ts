@@ -10,8 +10,8 @@ import { WorkflowPromptEnhancedEventDefinition } from './WorkflowPromptEnhancedE
  */
 const eventDefinitions = {
   [EventStoreEventName.WORKFLOW_CREATED]: WorkflowCreatedEventDefinition,
-  [EventStoreEventName.WORKFLOW_PROMPT_ENHANCED]: WorkflowPromptEnhancedEventDefinition,
   [EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED]: WorkflowAgentsDeployedEventDefinition,
+  [EventStoreEventName.WORKFLOW_PROMPT_ENHANCED]: WorkflowPromptEnhancedEventDefinition,
   [EventStoreEventName.WORKFLOW_PROMPT_COMPLETED]: WorkflowPromptCompletedEventDefinition,
 }
 

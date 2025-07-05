@@ -53,7 +53,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['*.spec.ts', '*.test.ts'],
+    files: ['**/*.spec.ts', '**/*.test.ts'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': [
         'error',

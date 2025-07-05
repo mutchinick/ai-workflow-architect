@@ -3,7 +3,9 @@ import type { EventStoreEventDefinition } from './EventStoreEventDefinition'
 
 const schema = z.object({
   workflowId: z.string().min(1),
-  eventKey: z.string().min(1),
+  promptEnhancementRounds: z.number().int().min(1).max(10),
+  responseEnhancementRounds: z.number().int().min(1).max(10),
+  objectKey: z.string().min(1),
 })
 
 export type WorkflowCreatedEventData = z.infer<typeof schema>
@@ -13,6 +15,6 @@ export const WorkflowCreatedEventDefinition: EventStoreEventDefinition<WorkflowC
     return schema.parse(data)
   },
   generateIdempotencyKey: (data) => {
-    return `workflowId:${data.workflowId}:eventKey:${data.eventKey}`
+    return `workflowId:${data.workflowId}:objectKey:${data.objectKey}`
   },
 }

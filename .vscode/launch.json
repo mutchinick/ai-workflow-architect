@@ -1,0 +1,39 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "name": "Jest services",
+      "request": "launch",
+      "args": [
+        "--runInBand",
+        "--watchAll=false",
+        "--testNamePattern",
+        "${jest.testNamePattern}",
+        "--runTestsByPath",
+        "${jest.testFile}"
+      ],
+      "cwd": "${workspaceFolder}/services",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "program": "${workspaceFolder}/services/node_modules/.bin/jest"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Node services",
+      "sourceMaps": true,
+      "stopOnEntry": true,
+      "console": "internalConsole",
+      "cwd": "${workspaceRoot}/services",
+      "program": "${file}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart"
+    }
+  ]
+}

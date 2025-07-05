@@ -1,0 +1,21 @@
+{
+  "jest.virtualFolders": [
+    { "name": "infra", "rootPath": "infra" },
+    { "name": "service", "rootPath": "service" }
+  ],
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/cdk.out": true,
+    "**/.build": true,
+    "**/node_modules": true,
+    "**/coverage": true
+  },
+  "explorerExclude.backup": {},
+  "eslint.workingDirectories": ["services", "infra"],
+  "markdown.preview.fontSize": 12
+}

@@ -10,10 +10,16 @@ export const schema = z.object({
   response: z.string().min(1),
 })
 
-export type QueryRespondedEventData = z.infer<typeof schema>
+export type QueryRespondedEventData = {
+  workflowId: string
+  query: string
+  response: string
+}
 
-export const QueryRespondedEventDefinition: EventStoreEventDefinition<typeof schema> = {
-  schema,
+export const QueryRespondedEventDefinition: EventStoreEventDefinition<QueryRespondedEventData> = {
+  parseValidate: (data) => {
+    return schema.parse(data) as QueryRespondedEventData
+  },
   generateIdempotencyKey: (data) => {
     return `user-query-received:${data.query}`
   },

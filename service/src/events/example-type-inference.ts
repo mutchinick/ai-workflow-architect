@@ -5,7 +5,8 @@ import { EventStoreEventName } from './EventStoreEventName'
 // EventStoreEventName.USER_QUERY_RECEIVED
 //
 try {
-  const event = EventStoreEvent.fromData('idempotency-key-123', EventStoreEventName.USER_QUERY_RECEIVED, {
+  const event = EventStoreEvent.fromData(EventStoreEventName.USER_QUERY_RECEIVED, {
+    workflowId: 'workflow-123',
     query: 'Why is the sky blue?',
   })
   console.log('Successfully created event:', event)
@@ -18,7 +19,8 @@ try {
 // EventStoreEventName.USER_QUERY_RECEIVED
 //
 try {
-  const event = EventStoreEvent.fromData('idempotency-key-123', EventStoreEventName.QUERY_ENRICHED, {
+  const event = EventStoreEvent.fromData(EventStoreEventName.QUERY_ENRICHED, {
+    workflowId: 'workflow-123',
     query: 'Why is the sky blue?',
     context: 'According to a well respected source it has to do with sunlight and atmospherical conditions.',
   })
@@ -33,7 +35,8 @@ try {
 // EventStoreEventName.USER_QUERY_RECEIVED
 //
 try {
-  const event = EventStoreEvent.fromData('idempotency-key-123', EventStoreEventName.QUERY_RESPONDED, {
+  const event = EventStoreEvent.fromData(EventStoreEventName.QUERY_RESPONDED, {
+    workflowId: 'workflow-123',
     query: 'Why is the sky blue?',
     response: 'The sky appears blue due to the scattering of sunlight by the atmosphere.',
   })
@@ -48,7 +51,8 @@ try {
 // EventStoreEventName.USER_QUERY_RECEIVED
 //
 try {
-  const event = EventStoreEvent.fromData('idempotency-key-123', EventStoreEventName.ENRICHED_QUERY_GRADED, {
+  const event = EventStoreEvent.fromData(EventStoreEventName.ENRICHED_QUERY_GRADED, {
+    workflowId: 'workflow-123',
     query: 'Why is the sky blue?',
     context: 'According to a well respected source it has to do with sunlight and atmospherical conditions.',
     grade: 10,

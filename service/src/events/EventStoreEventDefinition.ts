@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import { EventStoreEventData } from './EventStoreEventData'
 
-export interface EventStoreEventDefinition<T extends z.ZodTypeAny> {
-  schema: T
-  generateIdempotencyKey: (data: z.infer<T>) => string
+export interface EventStoreEventDefinition<T extends EventStoreEventData> {
+  parseValidate: (data: unknown) => T
+  generateIdempotencyKey: (data: T) => string
 }

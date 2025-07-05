@@ -23,10 +23,17 @@ export const schema = z.object({
   ]),
 })
 
-export type EnrichedQueryGradedEventData = z.infer<typeof schema>
+export type EnrichedQueryGradedEventData = {
+  workflowId: string
+  query: string
+  context: string
+  grade: number
+}
 
-export const EnrichedQueryGradedEventDefinition: EventStoreEventDefinition<typeof schema> = {
-  schema,
+export const EnrichedQueryGradedEventDefinition: EventStoreEventDefinition<EnrichedQueryGradedEventData> = {
+  parseValidate: (data) => {
+    return schema.parse(data) as EnrichedQueryGradedEventData
+  },
   generateIdempotencyKey: (data) => {
     return `user-query-received:${data.query}`
   },

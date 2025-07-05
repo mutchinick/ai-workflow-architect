@@ -1,24 +1,19 @@
-import z from 'zod'
 import { EnrichedQueryGradedEventDefinition } from './EnrichedQueryGradedEvent'
+import { EventStoreEventData } from './EventStoreEventData'
+import { EventStoreEventDefinition } from './EventStoreEventDefinition'
 import { EventStoreEventName } from './EventStoreEventName'
 import { QueryEnrichedEventDefinition } from './QueryEnrichedEvent'
 import { QueryRespondedEventDefinition } from './QueryRespondedEvent'
 import { UserQueryReceivedEventDefinition } from './UserQueryReceivedEvent'
 
 const eventDefinitions = {
-  [EventStoreEventName.USER_QUERY_RECEIVED]: UserQueryReceivedEventDefinition,
-  [EventStoreEventName.QUERY_ENRICHED]: QueryEnrichedEventDefinition,
-  [EventStoreEventName.ENRICHED_QUERY_GRADED]: EnrichedQueryGradedEventDefinition,
-  [EventStoreEventName.QUERY_RESPONDED]: QueryRespondedEventDefinition,
-}
+  USER_QUERY_RECEIVED: UserQueryReceivedEventDefinition,
+  QUERY_ENRICHED: QueryEnrichedEventDefinition,
+  ENRICHED_QUERY_GRADED: EnrichedQueryGradedEventDefinition,
+  QUERY_RESPONDED: QueryRespondedEventDefinition,
+} as const
 
-type AnyEventDefinition = (typeof eventDefinitions)[keyof typeof eventDefinitions]
-
-const eventDefinitionMap = eventDefinitions satisfies Record<EventStoreEventName, AnyEventDefinition>
-
-export type EventDataMap = {
-  [K in EventStoreEventName]: z.infer<(typeof eventDefinitionMap)[K]['schema']>
-}
+type DataType<T> = T extends EventStoreEventDefinition<infer D> ? D : EventStoreEventData
 
 /**
  *
@@ -26,13 +21,17 @@ export type EventDataMap = {
 export class EventStoreEvent<TEventName extends EventStoreEventName> {
   public readonly idempotencyKey: string
   public readonly eventName: TEventName
-  public readonly eventData: EventDataMap[TEventName]
+  public readonly eventData: DataType<(typeof eventDefinitions)[TEventName]>
   public readonly createdAt: string
 
   /**
    *
    */
-  private constructor(idempotencyKey: string, eventName: TEventName, validatedData: EventDataMap[TEventName]) {
+  private constructor(
+    idempotencyKey: string,
+    eventName: TEventName,
+    validatedData: DataType<(typeof eventDefinitions)[TEventName]>,
+  ) {
     this.idempotencyKey = idempotencyKey
     this.eventName = eventName
     this.eventData = validatedData
@@ -42,9 +41,12 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   /**
    *
    */
-  public static fromData<T extends EventStoreEventName>(eventName: T, eventData: EventDataMap[T]): EventStoreEvent<T> {
-    const definition = eventDefinitionMap[eventName]
-    const validatedData = definition.schema.parse(eventData) as EventDataMap[T]
+  public static fromData<T extends EventStoreEventName>(
+    eventName: T,
+    eventData: DataType<(typeof eventDefinitions)[T]>,
+  ): EventStoreEvent<T> {
+    const definition = eventDefinitions[eventName]
+    const validatedData = definition.parseValidate(eventData) as DataType<(typeof eventDefinitions)[T]>
     const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
     return new EventStoreEvent(idempotencyKey, eventName, validatedData)
   }
@@ -57,13 +59,8 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
     eventData: unknown
   }): EventStoreEvent<T> {
     const eventName = payload.eventName as T
-    const definition = eventDefinitionMap[eventName]
-
-    if (!definition) {
-      throw new Error(`Unknown event name from event bridge: ${eventName}`)
-    }
-
-    const validatedData = definition.schema.parse(payload.eventData) as EventDataMap[T]
+    const definition = eventDefinitions[eventName]
+    const validatedData = definition.parseValidate(payload.eventData) as DataType<(typeof eventDefinitions)[T]>
     const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
     return new EventStoreEvent(idempotencyKey, eventName, validatedData)
   }

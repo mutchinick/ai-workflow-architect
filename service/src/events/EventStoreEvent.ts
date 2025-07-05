@@ -5,6 +5,9 @@ import { QueryEnrichedEventDefinition } from './QueryEnrichedEvent'
 import { QueryRespondedEventDefinition } from './QueryRespondedEvent'
 import { UserQueryReceivedEventDefinition } from './UserQueryReceivedEvent'
 
+/**
+ *
+ */
 const eventDefinitions = {
   [EventStoreEventName.USER_QUERY_RECEIVED]: UserQueryReceivedEventDefinition,
   [EventStoreEventName.QUERY_ENRICHED]: QueryEnrichedEventDefinition,

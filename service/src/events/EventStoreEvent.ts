@@ -1,5 +1,4 @@
 import { EnrichedQueryGradedEventDefinition } from './EnrichedQueryGradedEvent'
-import { EventStoreEventData } from './EventStoreEventData'
 import { EventStoreEventDefinition } from './EventStoreEventDefinition'
 import { EventStoreEventName } from './EventStoreEventName'
 import { QueryEnrichedEventDefinition } from './QueryEnrichedEvent'
@@ -7,13 +6,17 @@ import { QueryRespondedEventDefinition } from './QueryRespondedEvent'
 import { UserQueryReceivedEventDefinition } from './UserQueryReceivedEvent'
 
 const eventDefinitions = {
-  USER_QUERY_RECEIVED: UserQueryReceivedEventDefinition,
-  QUERY_ENRICHED: QueryEnrichedEventDefinition,
-  ENRICHED_QUERY_GRADED: EnrichedQueryGradedEventDefinition,
-  QUERY_RESPONDED: QueryRespondedEventDefinition,
-} as const
+  [EventStoreEventName.USER_QUERY_RECEIVED]: UserQueryReceivedEventDefinition,
+  [EventStoreEventName.QUERY_ENRICHED]: QueryEnrichedEventDefinition,
+  [EventStoreEventName.ENRICHED_QUERY_GRADED]: EnrichedQueryGradedEventDefinition,
+  [EventStoreEventName.QUERY_RESPONDED]: QueryRespondedEventDefinition,
+}
 
-type DataType<T> = T extends EventStoreEventDefinition<infer D> ? D : EventStoreEventData
+type DataType<T> = T extends EventStoreEventDefinition<infer D> ? D : never
+
+export type EventDataMap = {
+  [K in EventStoreEventName]: DataType<(typeof eventDefinitions)[K]>
+}
 
 /**
  *
@@ -21,17 +24,13 @@ type DataType<T> = T extends EventStoreEventDefinition<infer D> ? D : EventStore
 export class EventStoreEvent<TEventName extends EventStoreEventName> {
   public readonly idempotencyKey: string
   public readonly eventName: TEventName
-  public readonly eventData: DataType<(typeof eventDefinitions)[TEventName]>
+  public readonly eventData: EventDataMap[TEventName]
   public readonly createdAt: string
 
   /**
    *
    */
-  private constructor(
-    idempotencyKey: string,
-    eventName: TEventName,
-    validatedData: DataType<(typeof eventDefinitions)[TEventName]>,
-  ) {
+  private constructor(idempotencyKey: string, eventName: TEventName, validatedData: EventDataMap[TEventName]) {
     this.idempotencyKey = idempotencyKey
     this.eventName = eventName
     this.eventData = validatedData
@@ -41,12 +40,9 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   /**
    *
    */
-  public static fromData<T extends EventStoreEventName>(
-    eventName: T,
-    eventData: DataType<(typeof eventDefinitions)[T]>,
-  ): EventStoreEvent<T> {
+  public static fromData<T extends EventStoreEventName>(eventName: T, eventData: EventDataMap[T]): EventStoreEvent<T> {
     const definition = eventDefinitions[eventName]
-    const validatedData = definition.parseValidate(eventData) as DataType<(typeof eventDefinitions)[T]>
+    const validatedData = definition.parseValidate(eventData) as EventDataMap[T]
     const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
     return new EventStoreEvent(idempotencyKey, eventName, validatedData)
   }
@@ -60,7 +56,7 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   }): EventStoreEvent<T> {
     const eventName = payload.eventName as T
     const definition = eventDefinitions[eventName]
-    const validatedData = definition.parseValidate(payload.eventData) as DataType<(typeof eventDefinitions)[T]>
+    const validatedData = definition.parseValidate(payload.eventData) as EventDataMap[T]
     const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
     return new EventStoreEvent(idempotencyKey, eventName, validatedData)
   }

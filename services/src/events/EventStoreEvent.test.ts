@@ -2,6 +2,7 @@ import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventStoreEvent, IncomingEventBridgeEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
 import { WorkflowStartedEventData, WorkflowStartedEventDefinition } from './WorkflowStartedEvent'
+import { Result } from './errors/Result'
 
 /**
  * Mock AWS DynamoDB unmarshall function
@@ -25,20 +26,20 @@ function buildFromDataInput(): WorkflowStartedEventData {
  */
 function buildEventBridgeInput(): IncomingEventBridgeEvent {
   return {
-    version: '0',
-    id: 'some-event-id',
-    'detail-type': 'DynamoDB Stream Record',
-    source: 'aws.dynamodb',
-    account: '123456789012',
-    time: new Date().toISOString(),
-    region: 'us-east-1',
-    resources: ['some-arn'],
+    version: 'mockVersion',
+    id: 'mockId',
+    'detail-type': 'mockDetailType',
+    source: 'mockSource',
+    account: 'mockAccount',
+    time: 'mocTime',
+    region: 'mockRegion',
+    resources: ['mockResource'],
     detail: {
       eventName: 'INSERT',
       eventSource: 'aws:dynamodb',
-      eventID: 'some-stream-event-id',
-      eventVersion: '1.1',
-      awsRegion: 'us-east-1',
+      eventID: 'mockEventId',
+      eventVersion: 'mockEventVersion',
+      awsRegion: 'mockAwsRegion',
       dynamodb: {
         NewImage: {} as never,
       },
@@ -65,9 +66,10 @@ describe('Test EventStoreEvent', () => {
       const parseValidateSpy = jest.spyOn(WorkflowStartedEventDefinition, 'parseValidate')
       const generateIdempotencyKeySpy = jest
         .spyOn(WorkflowStartedEventDefinition, 'generateIdempotencyKey')
-        .mockReturnValue(`key-for:${eventData.workflowId}`)
+        .mockReturnValue(`mockKey:${eventData.workflowId}`)
 
-      const event = EventStoreEvent.fromData(eventName, eventData)
+      const eventResult = EventStoreEvent.fromData(eventName, eventData)
+      const event = Result.getSuccessValueOrThrow(eventResult)
 
       // Verify the spies were called correctly
       expect(parseValidateSpy).toHaveBeenCalledTimes(1)
@@ -79,7 +81,7 @@ describe('Test EventStoreEvent', () => {
       expect(event).toBeInstanceOf(EventStoreEvent)
       expect(event.eventName).toBe(eventName)
       expect(event.eventData).toStrictEqual(eventData)
-      expect(event.idempotencyKey).toBe(`key-for:${eventData.workflowId}`)
+      expect(event.idempotencyKey).toBe(`mockKey:${eventData.workflowId}`)
       expect(event.createdAt).toBeDefined()
     })
   })
@@ -99,9 +101,10 @@ describe('Test EventStoreEvent', () => {
       const parseValidateSpy = jest.spyOn(WorkflowStartedEventDefinition, 'parseValidate')
       const generateIdempotencyKeySpy = jest
         .spyOn(WorkflowStartedEventDefinition, 'generateIdempotencyKey')
-        .mockReturnValue(`key-for:${eventData.workflowId}`)
+        .mockReturnValue(`mockKey:${eventData.workflowId}`)
 
-      const event = EventStoreEvent.fromEventBridge(incomingEvent)
+      const eventResult = EventStoreEvent.fromEventBridge(incomingEvent)
+      const event = Result.getSuccessValueOrThrow(eventResult)
 
       // Verify external mocks and internal stubs
       expect(unmarshall).toHaveBeenCalledTimes(1)
@@ -112,7 +115,7 @@ describe('Test EventStoreEvent', () => {
       // Verify the final event object is correct
       expect(event.eventName).toBe(eventName)
       expect(event.eventData).toStrictEqual(eventData)
-      expect(event.idempotencyKey).toBe(`key-for:${eventData.workflowId}`)
+      expect(event.idempotencyKey).toBe(`mockKey:${eventData.workflowId}`)
     })
   })
 
@@ -122,7 +125,8 @@ describe('Test EventStoreEvent', () => {
   describe('Test EventStoreEvent.isOfType', () => {
     it('returns true and narrows type for the correct event name', () => {
       const eventData = buildFromDataInput()
-      const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
+      const eventResult = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
+      const event = Result.getSuccessValueOrThrow(eventResult)
       expect(event.isOfType(EventStoreEventName.WORKFLOW_STARTED)).toBe(true)
       if (event.isOfType(EventStoreEventName.WORKFLOW_STARTED)) {
         expect(event.eventData.started).toBeDefined()
@@ -131,7 +135,8 @@ describe('Test EventStoreEvent', () => {
 
     it('returns false for an incorrect event name', () => {
       const eventData = buildFromDataInput()
-      const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
+      const eventResult = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
+      const event = Result.getSuccessValueOrThrow(eventResult)
       expect(event.isOfType(EventStoreEventName.WORKFLOW_CONTINUED as never)).toBe(false)
     })
   })

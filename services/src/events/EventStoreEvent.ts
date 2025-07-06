@@ -9,6 +9,7 @@ import { WorkflowCreatedEventDefinition } from './WorkflowCreatedEvent'
 import { WorkflowPromptCompletedEventDefinition } from './WorkflowPromptCompletedEvent'
 import { WorkflowPromptEnhancedEventDefinition } from './WorkflowPromptEnhancedEvent'
 import { WorkflowStartedEventDefinition } from './WorkflowStartedEvent'
+import { Failure, Result, Success } from './errors/Result'
 
 /**
  *
@@ -66,24 +67,47 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   /**
    *
    */
-  public static fromData<T extends EventStoreEventName>(eventName: T, eventData: EventDataMap[T]): EventStoreEvent<T> {
-    const definition = eventDefinitions[eventName]
-    const validatedData = definition.parseValidate(eventData) as EventDataMap[T]
-    const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
-    return new EventStoreEvent(idempotencyKey, eventName, validatedData)
+  public static fromData<T extends EventStoreEventName>(
+    eventName: T,
+    eventData: EventDataMap[T],
+  ): Success<EventStoreEvent<T>> | Failure<'InvalidArgumentsError'> {
+    try {
+      const definition = eventDefinitions[eventName]
+      const validatedData = definition.parseValidate(eventData) as EventDataMap[T]
+      const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
+      const event = new EventStoreEvent(idempotencyKey, eventName, validatedData)
+      const eventResult = Result.makeSuccess(event)
+      console.info('exit success:', { eventResult, eventName, eventData })
+      return eventResult
+    } catch (error) {
+      const failure = Result.makeFailure('InvalidArgumentsError', error, false)
+      console.error('exit failure:', { failure, eventName, eventData })
+      return failure
+    }
   }
 
   /**
    *
    */
-  public static fromEventBridge<T extends EventStoreEventName>(incoming: IncomingEventBridgeEvent): EventStoreEvent<T> {
-    const eventDetail = incoming.detail
-    const event = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEvent<T>
-    const eventName = event.eventName
-    const definition = eventDefinitions[eventName]
-    const validatedData = definition.parseValidate(event.eventData) as EventDataMap[T]
-    const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
-    return new EventStoreEvent(idempotencyKey, eventName, validatedData)
+  public static fromEventBridge<T extends EventStoreEventName>(
+    incomingEvent: IncomingEventBridgeEvent,
+  ): Success<EventStoreEvent<T>> | Failure<'InvalidArgumentsError'> {
+    try {
+      const eventDetail = incomingEvent.detail
+      const incomingEventPayload = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEvent<T>
+      const eventName = incomingEventPayload.eventName
+      const definition = eventDefinitions[eventName]
+      const validatedData = definition.parseValidate(incomingEventPayload.eventData) as EventDataMap[T]
+      const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
+      const event = new EventStoreEvent(idempotencyKey, eventName, validatedData)
+      const eventResult = Result.makeSuccess(event)
+      console.info('exit success:', { eventResult, incomingEvent })
+      return eventResult
+    } catch (error) {
+      const failure = Result.makeFailure('InvalidArgumentsError', error, false)
+      console.error('exit failure:', { failure, incomingEvent })
+      return failure
+    }
   }
 
   /**

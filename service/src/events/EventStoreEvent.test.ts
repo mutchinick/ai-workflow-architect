@@ -1,7 +1,7 @@
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventStoreEvent, IncomingEventBridgeEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
-import { WorkflowCreatedEventData, WorkflowCreatedEventDefinition } from './WorkflowCreatedEvent'
+import { WorkflowStartedEventData, WorkflowStartedEventDefinition } from './WorkflowStartedEvent'
 
 /**
  * Mock AWS DynamoDB unmarshall function
@@ -11,14 +11,12 @@ jest.mock('@aws-sdk/util-dynamodb', () => ({
 }))
 
 /**
- * Helper function to build a mock input for WorkflowCreatedEventData
+ * Helper function to build a mock input for WorkflowStartedEventData
  */
-function buildFromDataInput(): WorkflowCreatedEventData {
+function buildFromDataInput(): WorkflowStartedEventData {
   return {
-    workflowId: 'wf-from-data-123',
-    promptEnhancementRounds: 2,
-    responseEnhancementRounds: 2,
-    objectKey: 'test/object.key',
+    workflowId: 'mockWorkflowId',
+    started: true,
   }
 }
 
@@ -61,12 +59,12 @@ describe('Test EventStoreEvent', () => {
    */
   describe('Test EventStoreEvent.fromData', () => {
     it('creates a valid event and calls the correct definition methods', () => {
-      const eventName = EventStoreEventName.WORKFLOW_CREATED
+      const eventName = EventStoreEventName.WORKFLOW_STARTED
       const eventData = buildFromDataInput()
 
-      const parseValidateSpy = jest.spyOn(WorkflowCreatedEventDefinition, 'parseValidate')
+      const parseValidateSpy = jest.spyOn(WorkflowStartedEventDefinition, 'parseValidate')
       const generateIdempotencyKeySpy = jest
-        .spyOn(WorkflowCreatedEventDefinition, 'generateIdempotencyKey')
+        .spyOn(WorkflowStartedEventDefinition, 'generateIdempotencyKey')
         .mockReturnValue(`key-for:${eventData.workflowId}`)
 
       const event = EventStoreEvent.fromData(eventName, eventData)
@@ -91,16 +89,16 @@ describe('Test EventStoreEvent', () => {
    */
   describe('Test EventStoreEvent.fromEventBridge', () => {
     it('creates a valid event from a DynamoDB stream payload', () => {
-      const eventName = EventStoreEventName.WORKFLOW_CREATED
+      const eventName = EventStoreEventName.WORKFLOW_STARTED
       const eventData = buildFromDataInput()
       const incomingEvent = buildEventBridgeInput()
 
       const mockUnmarshalledEvent = { eventName, eventData }
       ;(unmarshall as jest.Mock).mockReturnValue(mockUnmarshalledEvent)
 
-      const parseValidateSpy = jest.spyOn(WorkflowCreatedEventDefinition, 'parseValidate')
+      const parseValidateSpy = jest.spyOn(WorkflowStartedEventDefinition, 'parseValidate')
       const generateIdempotencyKeySpy = jest
-        .spyOn(WorkflowCreatedEventDefinition, 'generateIdempotencyKey')
+        .spyOn(WorkflowStartedEventDefinition, 'generateIdempotencyKey')
         .mockReturnValue(`key-for:${eventData.workflowId}`)
 
       const event = EventStoreEvent.fromEventBridge(incomingEvent)
@@ -124,17 +122,17 @@ describe('Test EventStoreEvent', () => {
   describe('Test EventStoreEvent.isOfType', () => {
     it('returns true and narrows type for the correct event name', () => {
       const eventData = buildFromDataInput()
-      const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_CREATED, eventData)
-      expect(event.isOfType(EventStoreEventName.WORKFLOW_CREATED)).toBe(true)
-      if (event.isOfType(EventStoreEventName.WORKFLOW_CREATED)) {
-        expect(event.eventData.promptEnhancementRounds).toBe(2)
+      const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
+      expect(event.isOfType(EventStoreEventName.WORKFLOW_STARTED)).toBe(true)
+      if (event.isOfType(EventStoreEventName.WORKFLOW_STARTED)) {
+        expect(event.eventData.started).toBeDefined()
       }
     })
 
     it('returns false for an incorrect event name', () => {
       const eventData = buildFromDataInput()
-      const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_CREATED, eventData)
-      expect(event.isOfType(EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED as never)).toBe(false)
+      const event = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
+      expect(event.isOfType(EventStoreEventName.WORKFLOW_CONTINUED as never)).toBe(false)
     })
   })
 })

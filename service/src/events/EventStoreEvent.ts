@@ -1,12 +1,14 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb'
+import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventBridgeEvent } from 'aws-lambda'
 import { EventStoreEventDefinition } from './EventStoreEventDefinition'
 import { EventStoreEventName } from './EventStoreEventName'
 import { WorkflowAgentsDeployedEventDefinition } from './WorkflowAgentsDeployedEvent'
+import { WorkflowContinuedEventDefinition } from './WorkflowContinuedEvent'
 import { WorkflowCreatedEventDefinition } from './WorkflowCreatedEvent'
 import { WorkflowPromptCompletedEventDefinition } from './WorkflowPromptCompletedEvent'
 import { WorkflowPromptEnhancedEventDefinition } from './WorkflowPromptEnhancedEvent'
-import { unmarshall } from '@aws-sdk/util-dynamodb'
+import { WorkflowStartedEventDefinition } from './WorkflowStartedEvent'
 
 /**
  *
@@ -28,6 +30,8 @@ export type IncomingEventBridgeEvent = EventBridgeEvent<string, EventDetail>
  *
  */
 const eventDefinitions = {
+  [EventStoreEventName.WORKFLOW_STARTED]: WorkflowStartedEventDefinition,
+  [EventStoreEventName.WORKFLOW_CONTINUED]: WorkflowContinuedEventDefinition,
   [EventStoreEventName.WORKFLOW_CREATED]: WorkflowCreatedEventDefinition,
   [EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED]: WorkflowAgentsDeployedEventDefinition,
   [EventStoreEventName.WORKFLOW_PROMPT_ENHANCED]: WorkflowPromptEnhancedEventDefinition,

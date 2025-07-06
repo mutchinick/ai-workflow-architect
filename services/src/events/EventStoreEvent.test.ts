@@ -127,8 +127,8 @@ describe('Test EventStoreEvent', () => {
       const eventData = buildFromDataInput()
       const eventResult = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
       const event = Result.getSuccessValueOrThrow(eventResult)
-      expect(event.isOfType(EventStoreEventName.WORKFLOW_STARTED)).toBe(true)
-      if (event.isOfType(EventStoreEventName.WORKFLOW_STARTED)) {
+      expect(EventStoreEvent.isOfType(event, EventStoreEventName.WORKFLOW_STARTED)).toBe(true)
+      if (EventStoreEvent.isOfType(event, EventStoreEventName.WORKFLOW_STARTED)) {
         expect(event.eventData.started).toBeDefined()
       }
     })
@@ -137,7 +137,7 @@ describe('Test EventStoreEvent', () => {
       const eventData = buildFromDataInput()
       const eventResult = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
       const event = Result.getSuccessValueOrThrow(eventResult)
-      expect(event.isOfType(EventStoreEventName.WORKFLOW_CONTINUED as never)).toBe(false)
+      expect(EventStoreEvent.isOfType(event, EventStoreEventName.WORKFLOW_CONTINUED as never)).toBe(false)
     })
   })
 })

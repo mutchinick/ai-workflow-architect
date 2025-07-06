@@ -113,7 +113,10 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   /**
    *
    */
-  public isOfType<T extends TEventName>(eventName: T): this is EventStoreEvent<T> {
-    return this.eventName === eventName
+  public static isOfType<T extends EventStoreEventName>(
+    event: EventStoreEvent<T>,
+    eventName: T,
+  ): this is EventStoreEvent<T> {
+    return event.eventName === eventName
   }
 }

@@ -12,16 +12,19 @@ process.env.EVENT_STORE_TABLE_NAME = mockEventStoreTableName
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
-const mockDate = new Date().toISOString()
-const mockEventName = EventStoreEventName.WORKFLOW_STARTED
-const mockWorkflowId = 'mockWorkflowId'
-
-function buildMockEventStoreEvent(): TypeUtilsMutable<EventStoreEvent<typeof mockEventName>> {
-  const mockClass = EventStoreEvent.fromData(mockEventName, {
-    workflowId: mockWorkflowId,
-    started: true,
-  })
-  return Result.getSuccessValueOrThrow(mockClass)
+function buildMockEventStoreEvent(): TypeUtilsMutable<EventStoreEvent<EventStoreEventName>> {
+  const mockClass = {
+    eventName: 'mockEventName' as unknown as EventStoreEventName,
+    idempotencyKey: 'mockIdempotencyKey',
+    eventData: {
+      foo: 'bar',
+      baz: 42,
+      qux: [1, 2, 3],
+    },
+    createdAt: new Date().toISOString(),
+  }
+  Object.setPrototypeOf(mockClass, EventStoreEvent.prototype)
+  return mockClass as unknown as EventStoreEvent<EventStoreEventName>
 }
 
 const mockEventStoreEvent = buildMockEventStoreEvent()
@@ -35,14 +38,11 @@ function buildMockDdbCommand(): PutCommand {
       idempotencyKey: mockEventStoreEvent.idempotencyKey,
       _tn: `EVENTS#EVENT`,
       _sn: `EVENTS`,
-      eventName: EventStoreEventName.WORKFLOW_STARTED,
-      eventData: {
-        workflowId: mockWorkflowId,
-        started: true,
-      },
-      createdAt: mockDate,
+      eventName: mockEventStoreEvent.eventName,
+      eventData: { ...mockEventStoreEvent.eventData },
+      createdAt: mockEventStoreEvent.createdAt,
       gsi1pk: `EVENTS#EVENT`,
-      gsi1sk: `CREATED_AT#${mockDate}`,
+      gsi1sk: `CREATED_AT#${mockEventStoreEvent.createdAt}`,
     },
     ConditionExpression: 'attribute_not_exists(pk) AND attribute_not_exists(sk)',
   })
@@ -75,7 +75,9 @@ describe(`Events EventStoreClient tests`, () => {
   it(`does not return a Failure if the input EventStoreEvent is valid`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
-    const result = await eventStoreClient.publish(mockEventStoreEvent)
+    const result = await eventStoreClient.publish(
+      mockEventStoreEvent as unknown as EventStoreEvent<EventStoreEventName>,
+    )
     expect(Result.isFailure(result)).toBe(false)
   })
 

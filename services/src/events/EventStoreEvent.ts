@@ -71,17 +71,19 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
     eventName: T,
     eventData: EventDataMap[T],
   ): Success<EventStoreEvent<T>> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'EventStoreEvent.fromData'
+
     try {
       const definition = eventDefinitions[eventName]
       const validatedData = definition.parseValidate(eventData) as EventDataMap[T]
       const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
       const event = new EventStoreEvent(idempotencyKey, eventName, validatedData)
       const eventResult = Result.makeSuccess(event)
-      console.info('exit success:', { eventResult, eventName, eventData })
+      console.info(`${logCtx} exit success:`, { eventResult, eventName, eventData })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error('exit failure:', { failure, eventName, eventData })
+      console.error(`${logCtx} exit failure:`, { failure, eventName, eventData })
       return failure
     }
   }
@@ -92,6 +94,8 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
   public static fromEventBridge<T extends EventStoreEventName>(
     incomingEvent: IncomingEventBridgeEvent,
   ): Success<EventStoreEvent<T>> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'EventStoreEvent.fromEventBridge'
+
     try {
       const eventDetail = incomingEvent.detail
       const incomingEventPayload = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEvent<T>
@@ -101,11 +105,11 @@ export class EventStoreEvent<TEventName extends EventStoreEventName> {
       const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
       const event = new EventStoreEvent(idempotencyKey, eventName, validatedData)
       const eventResult = Result.makeSuccess(event)
-      console.info('exit success:', { eventResult, incomingEvent })
+      console.info(`${logCtx} exit success:`, { eventResult, incomingEvent })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error('exit failure:', { failure, incomingEvent })
+      console.error(`${logCtx} exit failure:`, { failure, incomingEvent })
       return failure
     }
   }

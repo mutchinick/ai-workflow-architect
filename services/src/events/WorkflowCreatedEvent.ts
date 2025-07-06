@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { EventStoreEventDefinition } from './EventStoreEventDefinition'
+import { EventStoreEventName } from './EventStoreEventName'
 
 const schema = z.object({
   workflowId: z.string().min(1),
@@ -11,6 +12,7 @@ const schema = z.object({
 export type WorkflowCreatedEventData = z.infer<typeof schema>
 
 export const WorkflowCreatedEventDefinition: EventStoreEventDefinition<WorkflowCreatedEventData> = {
+  __eventName: EventStoreEventName.WORKFLOW_CREATED,
   parseValidate: (data) => {
     return schema.parse(data)
   },

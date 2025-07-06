@@ -1,7 +1,7 @@
 {
   "jest.virtualFolders": [
     { "name": "infra", "rootPath": "infra" },
-    { "name": "service", "rootPath": "service" }
+    { "name": "services", "rootPath": "services" }
   ],
   "files.exclude": {
     "**/.git": true,

@@ -1,133 +1,307 @@
-import { z } from 'zod'
-import { WorkflowPromptEnhancedEventData, WorkflowPromptEnhancedEventDefinition } from './WorkflowPromptEnhancedEvent'
+import { Result } from './errors/Result'
+import { EventStoreEventName } from './EventStoreEventName'
+import { WorkflowPromptEnhancedEvent, WorkflowPromptEnhancedEventData } from './WorkflowPromptEnhancedEvent'
+
+jest.useFakeTimers().setSystemTime(new Date('2025-07-06T19:08:00Z'))
+
+const mockDate = new Date().toISOString()
+const mockWorkflowId = 'mockWorkflowId'
+const mockObjectKey = 'mockObjectKey'
+const mockAgentId = 'mockAgentId'
+const mockRound = 1
 
 function buildTestInputData(): WorkflowPromptEnhancedEventData {
   return {
-    workflowId: 'wf-12345',
-    objectKey: 'prompts/input.txt',
-    agentId: 'agent-007',
-    round: 1,
+    workflowId: mockWorkflowId,
+    objectKey: mockObjectKey,
+    agentId: mockAgentId,
+    round: mockRound,
   }
 }
 
-describe('Test WorkflowPromptEnhancedEvent', () => {
-  /***
-   * Test parseValidate
-   */
-  describe('Test parseValidate', () => {
-    it('correctly parses and returns a completely valid data object', () => {
-      const testData = buildTestInputData()
-      const parsedData = WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-      expect(parsedData).toStrictEqual(testData)
+describe(`Test WorkflowPromptEnhancedEvent`, () => {
+  /*
+   *
+   *
+   ************************************************************
+   * Test WorkflowPromptEnhancedEventData edge cases
+   ************************************************************/
+  it(`does not return a Failure if the input WorkflowPromptEnhancedEventData is valid`, () => {
+    const mockEventData = buildTestInputData()
+    const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+    expect(Result.isFailure(result)).toBe(false)
+  })
+
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData is undefined`, () => {
+    const mockEventData = undefined as unknown as WorkflowPromptEnhancedEventData
+    const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData is null`, () => {
+    const mockEventData = null as unknown as WorkflowPromptEnhancedEventData
+    const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test WorkflowPromptEnhancedEventData.workflowId edge cases
+   ************************************************************/
+  describe(`Test WorkflowPromptEnhancedEventData.workflowId`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.workflowId is undefined`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.workflowId = undefined as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    /***
-     * Test WorkflowPromptEnhancedEventData.workflowId
-     */
-    describe('Test WorkflowPromptEnhancedEventData.workflowId', () => {
-      it('throws if WorkflowPromptEnhancedEventData.workflowId is undefined', () => {
-        const testData = buildTestInputData()
-        testData.workflowId = undefined as unknown as string
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
-
-      it('throws if WorkflowPromptEnhancedEventData.workflowId is an empty string', () => {
-        const testData = buildTestInputData()
-        testData.workflowId = ''
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
-
-      it('throws if WorkflowPromptEnhancedEventData.workflowId is not a string', () => {
-        const testData = buildTestInputData()
-        testData.workflowId = 12345 as unknown as string
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.workflowId is null`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.workflowId = null as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    /***
-     * Test WorkflowPromptEnhancedEventData.objectKey
-     */
-    describe('Test WorkflowPromptEnhancedEventData.objectKey', () => {
-      it('throws if WorkflowPromptEnhancedEventData.objectKey is undefined', () => {
-        const testData = buildTestInputData()
-        testData.objectKey = undefined as unknown as string
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
-
-      it('throws if WorkflowPromptEnhancedEventData.objectKey is an empty string', () => {
-        const testData = buildTestInputData()
-        testData.objectKey = ''
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.workflowId is empty`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.workflowId = ''
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    /***
-     * Test WorkflowPromptEnhancedEventData.round
-     */
-    describe('Test WorkflowPromptEnhancedEventData.agentId', () => {
-      it('throws if WorkflowPromptEnhancedEventData.agentId is undefined', () => {
-        const testData = buildTestInputData()
-        testData.agentId = undefined as unknown as string
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
-
-      it('throws if WorkflowPromptEnhancedEventData.agentId is an empty string', () => {
-        const testData = buildTestInputData()
-        testData.agentId = ''
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.workflowId is blank`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.workflowId = '      '
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    /***
-     * Test WorkflowPromptEnhancedEventData.round
-     */
-    describe('Test WorkflowPromptEnhancedEventData.round', () => {
-      it('throws if WorkflowPromptEnhancedEventData.round is undefined', () => {
-        const testData = buildTestInputData()
-        testData.round = undefined as unknown as number
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
-
-      it('throws if WorkflowPromptEnhancedEventData.round is not a number', () => {
-        const testData = buildTestInputData()
-        testData.round = 'one' as unknown as number
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
-
-      it('throws if WorkflowPromptEnhancedEventData.round is not an integer', () => {
-        const testData = buildTestInputData()
-        testData.round = 1.5 as unknown as number
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
-
-      it('throws if WorkflowPromptEnhancedEventData.round is less than 0', () => {
-        const testData = buildTestInputData()
-        testData.round = -1 as unknown as number
-        const testingFunc = () => WorkflowPromptEnhancedEventDefinition.parseValidate(testData)
-        expect(testingFunc).toThrow(z.ZodError)
-      })
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.workflowId length < 6`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.workflowId = '12345'
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
   })
 
-  /***
-   * Test generateIdempotencyKey
-   */
-  describe('Test generateIdempotencyKey', () => {
-    it('generates a deterministic key based on the workflowId', () => {
-      const testData = buildTestInputData()
-      const expectedKey = `workflowId:${testData.workflowId}:objectKey:${testData.objectKey}`
-      const generatedKey = WorkflowPromptEnhancedEventDefinition.generateIdempotencyKey(testData)
-      expect(generatedKey).toBe(expectedKey)
+  /*
+   *
+   *
+   ************************************************************
+   * Test WorkflowPromptEnhancedEventData.objectKey edge cases
+   ************************************************************/
+  describe(`Test WorkflowPromptEnhancedEventData.objectKey`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.objectKey is undefined`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.objectKey = undefined as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.objectKey is null`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.objectKey = null as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.objectKey is empty`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.objectKey = ''
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.objectKey is blank`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.objectKey = '      '
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.objectKey length < 6`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.objectKey = '12345'
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test WorkflowPromptEnhancedEventData.agentId edge cases
+   ************************************************************/
+  describe(`Test WorkflowPromptEnhancedEventData.agentId`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.agentId is undefined`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.agentId = undefined as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.agentId is null`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.agentId = null as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.agentId is empty`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.agentId = ''
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.agentId is blank`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.agentId = '      '
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.agentId length < 6`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.agentId = '12345'
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test WorkflowPromptEnhancedEventData.round edge cases
+   ************************************************************/
+  describe(`Test WorkflowPromptEnhancedEventData.round`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.round is undefined`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.round = undefined as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.round is null`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.round = null as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.round is less than 0`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.round = -1
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.round is not an integer`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.round = 1.5
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test expected results
+   ************************************************************/
+  it(`returns the expected Success<WorkflowPromptEnhancedEvent> if the execution path is
+      successful`, () => {
+    const mockEventData = buildTestInputData()
+    const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+    const expectedIdempotencyKey = `workflowId:${mockEventData.workflowId}:objectKey:${mockEventData.objectKey}`
+
+    // We build the expected object shape for a deep comparison
+    const expectedEvent: WorkflowPromptEnhancedEvent = {
+      idempotencyKey: expectedIdempotencyKey,
+      eventName: EventStoreEventName.WORKFLOW_PROMPT_ENHANCED,
+      eventData: {
+        workflowId: mockEventData.workflowId,
+        objectKey: mockEventData.objectKey,
+        agentId: mockEventData.agentId,
+        round: mockEventData.round,
+      },
+      createdAt: mockDate,
+      fromData: undefined as never, // Trick to match the static method for toStrictEqual
+    }
+    Object.setPrototypeOf(expectedEvent, WorkflowPromptEnhancedEvent.prototype)
+
+    const expectedResult = Result.makeSuccess(expectedEvent)
+
+    expect(Result.isSuccess(result)).toBe(true)
+    expect(result).toStrictEqual(expectedResult)
   })
 })

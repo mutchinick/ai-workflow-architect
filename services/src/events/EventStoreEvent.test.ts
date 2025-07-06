@@ -59,6 +59,25 @@ describe('Test EventStoreEvent', () => {
    * Test EventStoreEvent.fromData
    */
   describe('Test EventStoreEvent.fromData', () => {
+    it('returns a non-transient Failure of kind InvalidArgumentsError if the event name is invalid', () => {
+      const eventName = 'mockEventName' as EventStoreEventName
+      const eventData = buildFromDataInput()
+
+      const parseValidateSpy = jest.spyOn(WorkflowStartedEventDefinition, 'parseValidate')
+      const generateIdempotencyKeySpy = jest
+        .spyOn(WorkflowStartedEventDefinition, 'generateIdempotencyKey')
+        .mockReturnValue(`mockKey:${eventData.workflowId}`)
+
+      const eventResult = EventStoreEvent.fromData(eventName, eventData)
+
+      expect(parseValidateSpy).toHaveBeenCalledTimes(0)
+      expect(generateIdempotencyKeySpy).toHaveBeenCalledTimes(0)
+
+      expect(Result.isFailure(eventResult)).toBe(true)
+      expect(Result.isFailureOfKind(eventResult, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(eventResult)).toBe(false)
+    })
+
     it('creates a valid event and calls the correct definition methods', () => {
       const eventName = EventStoreEventName.WORKFLOW_STARTED
       const eventData = buildFromDataInput()
@@ -69,7 +88,6 @@ describe('Test EventStoreEvent', () => {
         .mockReturnValue(`mockKey:${eventData.workflowId}`)
 
       const eventResult = EventStoreEvent.fromData(eventName, eventData)
-      const event = Result.getSuccessValueOrThrow(eventResult)
 
       // Verify the spies were called correctly
       expect(parseValidateSpy).toHaveBeenCalledTimes(1)
@@ -77,12 +95,15 @@ describe('Test EventStoreEvent', () => {
       expect(generateIdempotencyKeySpy).toHaveBeenCalledTimes(1)
       expect(generateIdempotencyKeySpy).toHaveBeenCalledWith(eventData)
 
-      // Verify the created event instance has the correct properties
-      expect(event).toBeInstanceOf(EventStoreEvent)
-      expect(event.eventName).toBe(eventName)
-      expect(event.eventData).toStrictEqual(eventData)
-      expect(event.idempotencyKey).toBe(`mockKey:${eventData.workflowId}`)
-      expect(event.createdAt).toBeDefined()
+      expect(Result.isSuccess(eventResult)).toBe(true)
+      if (Result.isSuccess(eventResult)) {
+        const event = eventResult.value
+        expect(event).toBeInstanceOf(EventStoreEvent)
+        expect(event.eventName).toBe(eventName)
+        expect(event.eventData).toStrictEqual(eventData)
+        expect(event.idempotencyKey).toBe(`mockKey:${eventData.workflowId}`)
+        expect(event.createdAt).toBeDefined()
+      }
     })
   })
 
@@ -104,7 +125,6 @@ describe('Test EventStoreEvent', () => {
         .mockReturnValue(`mockKey:${eventData.workflowId}`)
 
       const eventResult = EventStoreEvent.fromEventBridge(incomingEvent)
-      const event = Result.getSuccessValueOrThrow(eventResult)
 
       // Verify external mocks and internal stubs
       expect(unmarshall).toHaveBeenCalledTimes(1)
@@ -112,10 +132,15 @@ describe('Test EventStoreEvent', () => {
       expect(parseValidateSpy).toHaveBeenCalledWith(eventData)
       expect(generateIdempotencyKeySpy).toHaveBeenCalledWith(eventData)
 
-      // Verify the final event object is correct
-      expect(event.eventName).toBe(eventName)
-      expect(event.eventData).toStrictEqual(eventData)
-      expect(event.idempotencyKey).toBe(`mockKey:${eventData.workflowId}`)
+      expect(Result.isSuccess(eventResult)).toBe(true)
+      if (Result.isSuccess(eventResult)) {
+        const event = eventResult.value
+        expect(event).toBeInstanceOf(EventStoreEvent)
+        expect(event.eventName).toBe(eventName)
+        expect(event.eventData).toStrictEqual(eventData)
+        expect(event.idempotencyKey).toBe(`mockKey:${eventData.workflowId}`)
+        expect(event.createdAt).toBeDefined()
+      }
     })
   })
 

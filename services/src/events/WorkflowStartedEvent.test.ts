@@ -162,6 +162,7 @@ describe(`Inventory Service RestockSkuApi WorkflowStartedEvent tests`, () => {
       successful`, () => {
     const mockWorkflowStartedEventData = buildTestInputData()
     const result = WorkflowStartedEvent.fromData(mockWorkflowStartedEventData)
+
     const expectedIdempotencyKey = `workflow:${mockWorkflowStartedEventData.workflowId}`
     const expectedEvent: WorkflowStartedEvent = {
       idempotencyKey: expectedIdempotencyKey,
@@ -174,6 +175,7 @@ describe(`Inventory Service RestockSkuApi WorkflowStartedEvent tests`, () => {
       fromData: undefined as never,
     }
     Object.setPrototypeOf(expectedEvent, WorkflowStartedEvent.prototype)
+
     const expectedResult = Result.makeSuccess(expectedEvent)
     expect(Result.isSuccess(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)

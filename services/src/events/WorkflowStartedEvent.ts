@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { Failure, Result, Success } from './errors/Result'
 import { EventStoreEventBase } from './EventStoreEventBase'
+import { EventStoreEventName } from './EventStoreEventName'
 
 /**
  *
@@ -10,13 +11,17 @@ const schema = z.object({
   started: z.literal(true),
 })
 
+/**
+ *
+ */
 export type WorkflowStartedEventData = z.infer<typeof schema>
 
 /**
  *
  */
 export class WorkflowStartedEvent extends EventStoreEventBase {
-  public static readonly eventName = 'WORKFLOW_STARTED'
+  public static readonly eventName = EventStoreEventName.WORKFLOW_STARTED
+
   /**
    *
    */

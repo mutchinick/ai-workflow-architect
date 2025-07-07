@@ -1,41 +1,39 @@
 import { unmarshall } from '@aws-sdk/util-dynamodb'
-import { Result } from './errors/Result'
+import { Result, Success } from './errors/Result'
 import { EventStoreEventBase } from './EventStoreEventBase'
 import { EventClassMap, EventStoreEventBuilder, IncomingEventBridgeEvent } from './EventStoreEventBuilder'
 import { EventStoreEventName } from './EventStoreEventName'
 
-// --- Mocks & Stubs ---
-
-// 1. Mock the external AWS dependency
 jest.mock('@aws-sdk/util-dynamodb', () => ({
   unmarshall: jest.fn(),
 }))
 
-// 2. Create mock Event Classes that conform to the required contracts
-class MockWorkflowCreatedEvent extends EventStoreEventBase {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_CREATED
-  constructor() {
-    super(MockWorkflowCreatedEvent.eventName, {}, 'mock-idempotency-key', new Date().toISOString())
+const MOCK_SOME_EVENT = 'MOCK_SOME_EVENT' as EventStoreEventName
+class MockSomeEvent extends EventStoreEventBase {
+  public static readonly eventName = MOCK_SOME_EVENT
+  private constructor(data: Record<string, unknown>, idempotencyKey: string) {
+    super(MockSomeEvent.eventName, data, idempotencyKey, new Date().toISOString())
   }
-  // The static factory method is the key part of the contract
-  static fromData = jest.fn()
+  static fromData(data: Record<string, unknown>): Success<MockSomeEvent> {
+    return Result.makeSuccess(new MockSomeEvent(data, 'mockIdempotencyKey'))
+  }
 }
 
-class MockAgentsDeployedEvent extends EventStoreEventBase {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED
-  constructor() {
-    super(MockAgentsDeployedEvent.eventName, {}, 'mock-idempotency-key', new Date().toISOString())
+const MOCK_OTHER_EVENT = 'MOCK_OTHER_EVENT' as EventStoreEventName
+class MockOtherEvent extends EventStoreEventBase {
+  public static readonly eventName = MOCK_OTHER_EVENT
+  private constructor(data: Record<string, unknown>, idempotencyKey: string) {
+    super(MockOtherEvent.eventName, data, idempotencyKey, new Date().toISOString())
   }
-  static fromData = jest.fn()
+  static fromData(data: Record<string, unknown>): Success<MockOtherEvent> {
+    return Result.makeSuccess(new MockOtherEvent(data, 'mockIdempotencyKey'))
+  }
 }
 
-// 3. Create the dependency map that will be injected into the builder
 const mockEventClassMap: EventClassMap = {
-  [EventStoreEventName.WORKFLOW_CREATED]: MockWorkflowCreatedEvent as unknown as EventStoreEventBase,
-  [EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED]: MockAgentsDeployedEvent as unknown as EventStoreEventBase,
+  [MOCK_SOME_EVENT]: MockSomeEvent as unknown as EventStoreEventBase,
+  [MOCK_OTHER_EVENT]: MockOtherEvent as unknown as EventStoreEventBase,
 }
-
-// --- Test Data Builders ---
 
 function buildEventBridgeInput(): IncomingEventBridgeEvent {
   return {
@@ -128,13 +126,13 @@ describe('Test EventStoreEventBuilder', () => {
       const mockIncomingEvent = buildEventBridgeInput()
       const mockEventData = { workflowId: 'wf-123' }
       ;(unmarshall as jest.Mock).mockReturnValue({
-        eventName: EventStoreEventName.WORKFLOW_CREATED,
+        eventName: MOCK_OTHER_EVENT,
         eventData: mockEventData,
       })
 
       // Configure the mock class's fromData to return a specific Failure
       const expectedFailure = Result.makeFailure('SomeSpecificError' as never, new Error(), false)
-      MockWorkflowCreatedEvent.fromData.mockReturnValue(expectedFailure)
+      jest.spyOn(MockOtherEvent, 'fromData').mockReturnValueOnce(expectedFailure as never)
 
       const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
 
@@ -152,33 +150,30 @@ describe('Test EventStoreEventBuilder', () => {
   it(`returns the expected Success<EventStoreEventBase> if the execution path is
       successful`, () => {
     const mockIncomingEvent = buildEventBridgeInput()
-    const mockEventData = { workflowId: 'wf-123' }
+    const mockEventData = { workflowId: 'mockWorkflowId' }
     ;(unmarshall as jest.Mock).mockReturnValue({
-      eventName: EventStoreEventName.WORKFLOW_CREATED,
+      eventName: MOCK_SOME_EVENT,
       eventData: mockEventData,
     })
 
-    // Configure the mock class's fromData to return a successful instance
-    const mockEventInstance = new MockWorkflowCreatedEvent()
-    const expectedSuccess = Result.makeSuccess(mockEventInstance)
-    MockWorkflowCreatedEvent.fromData.mockReturnValue(expectedSuccess)
+    const spy = jest.spyOn(MockSomeEvent, 'fromData')
 
-    const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
-
-    // Verify the correct dependencies were called
+    const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
     expect(unmarshall).toHaveBeenCalledWith(mockIncomingEvent.detail.dynamodb.NewImage)
-    expect(MockWorkflowCreatedEvent.fromData).toHaveBeenCalledWith(mockEventData)
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledWith(mockEventData)
 
     // Verify the final result is the expected Success object
-    expect(Result.isSuccess(result)).toBe(true)
-    expect(result).toStrictEqual(expectedSuccess)
-    if (Result.isSuccess(result)) {
-      const event = result.value
-      expect(event).toBeInstanceOf(MockWorkflowCreatedEvent)
-      if (event instanceof MockWorkflowCreatedEvent) {
+    const expectedEvent = MockSomeEvent.fromData(mockEventData)
+    expect(Result.isSuccess(eventResult)).toBe(true)
+    expect(eventResult).toStrictEqual(expectedEvent)
+    if (Result.isSuccess(eventResult)) {
+      const event = eventResult.value
+      expect(event).toBeInstanceOf(MockSomeEvent)
+      if (event instanceof MockSomeEvent) {
         expect(event.eventName).toBe(EventStoreEventName.WORKFLOW_CREATED)
-        expect(event.eventData).toEqual(mockEventData)
-        expect(event.idempotencyKey).toBe('mock-idempotency-key')
+        expect(event.eventData).toStrictEqual(mockEventData)
+        expect(event.idempotencyKey).toBe('mockIdempotencyKey')
       }
     }
   })

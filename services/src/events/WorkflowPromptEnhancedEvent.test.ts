@@ -270,6 +270,16 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptEnhancedEventData.round is not a number`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.round = '2' as never
+      const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
   })
 
   /*
@@ -282,9 +292,8 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
       successful`, () => {
     const mockEventData = buildTestInputData()
     const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
-    const expectedIdempotencyKey = `workflowId:${mockEventData.workflowId}:objectKey:${mockEventData.objectKey}`
 
-    // We build the expected object shape for a deep comparison
+    const expectedIdempotencyKey = `workflowId:${mockEventData.workflowId}:objectKey:${mockEventData.objectKey}`
     const expectedEvent: WorkflowPromptEnhancedEvent = {
       idempotencyKey: expectedIdempotencyKey,
       eventName: EventStoreEventName.WORKFLOW_PROMPT_ENHANCED,
@@ -300,7 +309,6 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
     Object.setPrototypeOf(expectedEvent, WorkflowPromptEnhancedEvent.prototype)
 
     const expectedResult = Result.makeSuccess(expectedEvent)
-
     expect(Result.isSuccess(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
   })

@@ -80,6 +80,16 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptCompletedEventData.workflowId is empty`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.workflowId = ''
+      const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
       WorkflowPromptCompletedEventData.workflowId is blank`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.workflowId = '      '
@@ -128,6 +138,16 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      WorkflowPromptCompletedEventData.objectKey is empty`, () => {
+      const mockEventData = buildTestInputData()
+      mockEventData.objectKey = ''
+      const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
       WorkflowPromptCompletedEventData.objectKey is blank`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.objectKey = '      '
@@ -158,8 +178,8 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       successful`, () => {
     const mockEventData = buildTestInputData()
     const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
-    const expectedIdempotencyKey = `workflowId:${mockEventData.workflowId}:objectKey:${mockEventData.objectKey}`
 
+    const expectedIdempotencyKey = `workflowId:${mockEventData.workflowId}:objectKey:${mockEventData.objectKey}`
     const expectedEvent: WorkflowPromptCompletedEvent = {
       idempotencyKey: expectedIdempotencyKey,
       eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED,
@@ -173,7 +193,6 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
     Object.setPrototypeOf(expectedEvent, WorkflowPromptCompletedEvent.prototype)
 
     const expectedResult = Result.makeSuccess(expectedEvent)
-
     expect(Result.isSuccess(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
   })

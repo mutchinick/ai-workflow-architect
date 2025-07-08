@@ -304,7 +304,6 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
         round: mockEventData.round,
       },
       createdAt: mockDate,
-      fromData: undefined as never, // Trick to match the static method for toStrictEqual
     }
     Object.setPrototypeOf(expectedEvent, WorkflowPromptEnhancedEvent.prototype)
 

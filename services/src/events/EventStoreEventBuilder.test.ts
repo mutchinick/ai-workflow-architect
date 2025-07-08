@@ -31,8 +31,8 @@ class MockOtherEvent extends EventStoreEventBase {
 }
 
 const mockEventClassMap: EventClassMap = {
-  [MOCK_SOME_EVENT]: MockSomeEvent as unknown as EventStoreEventBase,
-  [MOCK_OTHER_EVENT]: MockOtherEvent as unknown as EventStoreEventBase,
+  [MOCK_SOME_EVENT]: MockSomeEvent,
+  [MOCK_OTHER_EVENT]: MockOtherEvent,
 }
 
 function buildEventBridgeInput(): IncomingEventBridgeEvent {

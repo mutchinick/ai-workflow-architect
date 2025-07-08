@@ -24,9 +24,17 @@ export abstract class EventStoreEventBase {
     this.eventData = eventData
     this.createdAt = createdAt
   }
+}
 
-  /**
-   *
-   */
-  fromData: (data: Record<string, unknown>) => Success<EventStoreEventBase> | Failure<FailureKind>
+/**
+ *
+ */
+export interface EventStoreEventConstructor {
+  fromData(data: Record<string, unknown>): Success<EventStoreEventBase> | Failure<FailureKind>
+
+  reconstitute(
+    data: Record<string, unknown>,
+    idempotencyKey: string,
+    createdAt: string,
+  ): Success<EventStoreEventBase> | Failure<FailureKind>
 }

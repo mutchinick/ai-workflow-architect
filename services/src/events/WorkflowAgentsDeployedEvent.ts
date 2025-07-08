@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { Failure, Result, Success } from './errors/Result'
-import { EventStoreEventBase } from './EventStoreEventBase'
+import { EventStoreEventBase, EventStoreEventConstructor } from './EventStoreEventBase'
 import { EventStoreEventName } from './EventStoreEventName'
 
 /**
@@ -25,8 +25,8 @@ export class WorkflowAgentsDeployedEvent extends EventStoreEventBase {
   /**
    *
    */
-  constructor(eventData: WorkflowAgentsDeployedEventData, idempotencyKey: string) {
-    super(WorkflowAgentsDeployedEvent.eventName, eventData, idempotencyKey, new Date().toISOString())
+  private constructor(eventData: WorkflowAgentsDeployedEventData, idempotencyKey: string, createdAt: string) {
+    super(WorkflowAgentsDeployedEvent.eventName, eventData, idempotencyKey, createdAt)
   }
 
   /**
@@ -40,7 +40,29 @@ export class WorkflowAgentsDeployedEvent extends EventStoreEventBase {
     try {
       const validData = this.parseValidate(data)
       const idempotencyKey = this.generateIdempotencyKey(validData)
-      const event = new WorkflowAgentsDeployedEvent(validData, idempotencyKey)
+      const event = new WorkflowAgentsDeployedEvent(validData, idempotencyKey, new Date().toISOString())
+      const eventResult = Result.makeSuccess(event)
+      console.info(`${logCtx} exit success:`, { eventResult, data })
+      return eventResult
+    } catch (error) {
+      const failure = Result.makeFailure('InvalidArgumentsError', error, false)
+      console.error(`${logCtx} exit failure:`, { failure, data })
+      return failure
+    }
+  }
+
+  /**
+   *
+   */
+  static reconstitute(
+    data: WorkflowAgentsDeployedEventData,
+    idempotencyKey: string,
+    createdAt: string,
+  ): Success<WorkflowAgentsDeployedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'WorkflowAgentsDeployedEvent.reconstitute'
+    try {
+      const validData = this.parseValidate(data)
+      const event = new WorkflowAgentsDeployedEvent(validData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, data })
       return eventResult
@@ -65,3 +87,10 @@ export class WorkflowAgentsDeployedEvent extends EventStoreEventBase {
     return `workflowId:${data.workflowId}:objectKey:${data.objectKey}`
   }
 }
+
+/**
+ * This check ensures the class adheres to the static contract defined
+ * by EventStoreEventConstructor. It will cause a compile-time error if
+ * fromData or reconstitute are missing or have the wrong signature.
+ */
+const _ConstructorCheck: EventStoreEventConstructor = WorkflowAgentsDeployedEvent

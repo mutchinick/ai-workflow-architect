@@ -23,14 +23,14 @@ export class WorkflowStartedEvent extends EventStoreEventBase {
   public static readonly eventName = EventStoreEventName.WORKFLOW_STARTED
 
   /**
-   * Private constructor to enforce the use of factory methods.
+   *
    */
   private constructor(eventData: WorkflowStartedEventData, idempotencyKey: string, createdAt: string) {
     super(WorkflowStartedEvent.eventName, eventData, idempotencyKey, createdAt)
   }
 
   /**
-   * Factory for creating a BRAND NEW event.
+   *
    */
   static fromData(data: WorkflowStartedEventData): Success<WorkflowStartedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowStartedEvent.fromData'
@@ -51,7 +51,7 @@ export class WorkflowStartedEvent extends EventStoreEventBase {
   }
 
   /**
-   * Factory for RE-CREATING an event from stored data (e.g., from EventBridge).
+   *
    */
   static reconstitute(
     data: WorkflowStartedEventData,

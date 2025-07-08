@@ -35,19 +35,21 @@ export class WorkflowStartedEvent extends EventStoreEventBase {
   /**
    *
    */
-  static fromData(data: WorkflowStartedEventData): Success<WorkflowStartedEvent> | Failure<'InvalidArgumentsError'> {
+  static fromData(
+    eventData: WorkflowStartedEventData,
+  ): Success<WorkflowStartedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowStartedEvent.fromData'
 
     try {
-      const validData = dataSchema.parse(data)
+      const validData = dataSchema.parse(eventData)
       const idempotencyKey = this.generateIdempotencyKey(validData)
       const event = new WorkflowStartedEvent(validData, idempotencyKey, new Date().toISOString())
       const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, data })
+      console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, data })
+      console.error(`${logCtx} exit failure:`, { failure, eventData })
       return failure
     }
   }
@@ -55,8 +57,8 @@ export class WorkflowStartedEvent extends EventStoreEventBase {
   /**
    *
    */
-  private static generateIdempotencyKey(data: WorkflowStartedEventData): string {
-    return `workflow:${data.workflowId}`
+  private static generateIdempotencyKey(eventData: WorkflowStartedEventData): string {
+    return `workflow:${eventData.workflowId}`
   }
 
   /**
@@ -72,11 +74,11 @@ export class WorkflowStartedEvent extends EventStoreEventBase {
       const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
       const event = new WorkflowStartedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, data: eventData })
+      console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, data: eventData })
+      console.error(`${logCtx} exit failure:`, { failure, eventData })
       return failure
     }
   }

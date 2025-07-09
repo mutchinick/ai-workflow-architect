@@ -7,7 +7,7 @@ jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 const mockDate = new Date().toISOString()
 const mockWorkflowId = 'mockWorkflowId'
 const mockStarted = true
-const mockIdempotencyKey = `workflow:${mockWorkflowId}`
+const mockIdempotencyKey = `workflowId:${mockWorkflowId}`
 
 function buildTestInputData(): WorkflowStartedEventData {
   return {
@@ -17,7 +17,7 @@ function buildTestInputData(): WorkflowStartedEventData {
 }
 
 function buildReconstituteInput(): {
-  data: {
+  eventData: {
     workflowId: string
     started: true
   }
@@ -25,7 +25,7 @@ function buildReconstituteInput(): {
   createdAt: string
 } {
   return {
-    data: {
+    eventData: {
       workflowId: mockWorkflowId,
       started: mockStarted,
     },
@@ -42,7 +42,16 @@ describe(`Test WorkflowStartedEvent`, () => {
    * Test WorkflowStartedEvent.fromData
    ************************************************************/
   describe(`Test WorkflowStartedEvent.fromData`, () => {
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData is undefined`, () => {
+    it(`does not return a Failure if WorkflowStartedEventData is valid`, () => {
+      const testInput = buildTestInputData()
+      const result = WorkflowStartedEvent.fromData(testInput)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData is undefined`, () => {
       const testInput = undefined as never
       const result = WorkflowStartedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
@@ -50,7 +59,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData is null`, () => {
       const testInput = null as never
       const result = WorkflowStartedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
@@ -64,7 +74,8 @@ describe(`Test WorkflowStartedEvent`, () => {
      ************************************************************
      * Test WorkflowStartedEventData.workflowId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.workflowId is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.workflowId is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = undefined as never
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -73,7 +84,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.workflowId is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.workflowId is null`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = null as never
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -82,7 +94,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.workflowId is empty`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.workflowId is empty`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = ''
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -91,7 +104,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.workflowId is blank`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.workflowId is blank`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = '      '
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -100,7 +114,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.workflowId has length < 6`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.workflowId has length < 6`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = '12345'
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -115,7 +130,8 @@ describe(`Test WorkflowStartedEvent`, () => {
      ************************************************************
      * Test WorkflowStartedEventData.started edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.started is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.started is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.started = undefined as never
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -124,7 +140,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.started is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.started is null`, () => {
       const testInput = buildTestInputData()
       testInput.started = null as never
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -133,7 +150,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.started is false`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.started is false`, () => {
       const testInput = buildTestInputData()
       testInput.started = false as never
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -142,7 +160,8 @@ describe(`Test WorkflowStartedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEventData.started is not a boolean`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEventData.started is not a boolean`, () => {
       const testInput = buildTestInputData()
       testInput.started = 'true' as never
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -158,11 +177,11 @@ describe(`Test WorkflowStartedEvent`, () => {
      * Test expected results for the "Happy Path"
      ************************************************************/
     it(`returns the expected Success<WorkflowStartedEvent> if the execution path is
-      successful`, () => {
+        successful`, () => {
       const mockWorkflowStartedEventData = buildTestInputData()
       const result = WorkflowStartedEvent.fromData(mockWorkflowStartedEventData)
 
-      const expectedIdempotencyKey = `workflow:${mockWorkflowStartedEventData.workflowId}`
+      const expectedIdempotencyKey = `workflowId:${mockWorkflowStartedEventData.workflowId}`
       const expectedEvent: WorkflowStartedEvent = {
         idempotencyKey: expectedIdempotencyKey,
         eventName: EventStoreEventName.WORKFLOW_STARTED,
@@ -173,8 +192,8 @@ describe(`Test WorkflowStartedEvent`, () => {
         createdAt: mockDate,
       }
       Object.setPrototypeOf(expectedEvent, WorkflowStartedEvent.prototype)
-
       const expectedResult = Result.makeSuccess(expectedEvent)
+
       expect(Result.isSuccess(result)).toBe(true)
       expect(result).toStrictEqual(expectedResult)
     })
@@ -187,25 +206,45 @@ describe(`Test WorkflowStartedEvent`, () => {
    * Test WorkflowStartedEvent.reconstitute
    ************************************************************/
   describe(`Test WorkflowStartedEvent.reconstitute`, () => {
+    it(`does not return a Failure if WorkflowStartedEvent is valid`, () => {
+      const testInput = buildReconstituteInput()
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
+      expect(Result.isFailure(result)).toBe(false)
+    })
+
     /*
      *
      *
      ************************************************************
      * Test WorkflowStartedEvent.idempotencyKey edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.idempotencyKey is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.idempotencyKey is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = undefined as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.idempotencyKey is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.idempotencyKey is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = null as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -217,19 +256,29 @@ describe(`Test WorkflowStartedEvent`, () => {
      ************************************************************
      * Test WorkflowStartedEvent.createdAt edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.createdAt is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.createdAt is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = undefined as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.createdAt is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.createdAt is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = null as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -241,19 +290,29 @@ describe(`Test WorkflowStartedEvent`, () => {
      ************************************************************
      * Test WorkflowStartedEvent.eventData edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData is undefined`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data = undefined as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData = undefined as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData is null`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data = null as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData = null as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -265,46 +324,71 @@ describe(`Test WorkflowStartedEvent`, () => {
      ************************************************************
      * Test WorkflowStartedEvent.eventData.workflowId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.workflowId is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.workflowId is undefined`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.workflowId = undefined as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.workflowId = undefined as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.workflowId is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.workflowId is null`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.workflowId = null as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.workflowId = null as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.workflowId is empty`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.workflowId is empty`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.workflowId = ''
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.workflowId = ''
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.workflowId is blank`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.workflowId is blank`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.workflowId = '      '
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.workflowId = '      '
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.workflowId has length < 6`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.workflowId has length < 6`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.workflowId = '12345'
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.workflowId = '12345'
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -316,37 +400,57 @@ describe(`Test WorkflowStartedEvent`, () => {
      ************************************************************
      * Test WorkflowStartedEvent.eventData.started edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.started is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.started is undefined`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.started = undefined as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.started = undefined as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.started is null`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.started is null`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.started = null as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.started = null as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.started is false`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.started is false`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.started = false as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.started = false as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if WorkflowStartedEvent.eventData.started is not a boolean`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+        WorkflowStartedEvent.eventData.started is not a boolean`, () => {
       const testInput = buildReconstituteInput()
-      testInput.data.started = 'true' as never
-      const result = WorkflowStartedEvent.reconstitute(testInput.data, testInput.idempotencyKey, testInput.createdAt)
+      testInput.eventData.started = 'true' as never
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -358,22 +462,27 @@ describe(`Test WorkflowStartedEvent`, () => {
      ************************************************************
      * Test expected results for the "Happy Path"
      ************************************************************/
-    it(`returns the expected Success<WorkflowStartedEvent> if the execution path is successful`, () => {
-      const { data, idempotencyKey, createdAt } = buildReconstituteInput()
-      const result = WorkflowStartedEvent.reconstitute(data, idempotencyKey, createdAt)
+    it(`returns the expected Success<WorkflowStartedEvent> if the execution path is
+        successful`, () => {
+      const testInput = buildReconstituteInput()
+      const result = WorkflowStartedEvent.reconstitute(
+        testInput.eventData,
+        testInput.idempotencyKey,
+        testInput.createdAt,
+      )
 
       const expectedEvent: WorkflowStartedEvent = {
-        idempotencyKey,
+        idempotencyKey: testInput.idempotencyKey,
         eventName: EventStoreEventName.WORKFLOW_STARTED,
         eventData: {
-          workflowId: data.workflowId,
-          started: data.started,
+          workflowId: testInput.eventData.workflowId,
+          started: testInput.eventData.started,
         },
-        createdAt,
+        createdAt: testInput.createdAt,
       }
       Object.setPrototypeOf(expectedEvent, WorkflowStartedEvent.prototype)
-
       const expectedResult = Result.makeSuccess(expectedEvent)
+
       expect(Result.isSuccess(result)).toBe(true)
       expect(result).toStrictEqual(expectedResult)
     })

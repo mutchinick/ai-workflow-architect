@@ -58,7 +58,7 @@ export class WorkflowStartedEvent extends EventStoreEventBase {
    *
    */
   private static generateIdempotencyKey(eventData: WorkflowStartedEventData): string {
-    return `workflow:${eventData.workflowId}`
+    return `workflowId:${eventData.workflowId}`
   }
 
   /**

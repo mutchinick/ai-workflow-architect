@@ -71,7 +71,7 @@ export class WorkflowAgentsDeployedEvent extends EventStoreEventBase {
   ): Success<WorkflowAgentsDeployedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowAgentsDeployedEvent.reconstitute'
     try {
-      const validEvent = eventSchema.parse(eventData)
+      const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
       const event = new WorkflowAgentsDeployedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })

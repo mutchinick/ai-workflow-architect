@@ -4,6 +4,7 @@
   "scripts": {
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json}'",
     "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,json}'",
+    "format:test-names": "ts-node scripts/format-test-names.ts 'src/**/*.{spec,test}.ts'",
     "lint": "eslint .",
     "test": "jest",
     "test:coverage": "jest --silent --coverage --verbose",
@@ -28,6 +29,7 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^3.6.2",
     "ts-jest": "^29.2.5",
+    "ts-morph": "^26.0.0",
     "ts-node": "^10.9.2",
     "typescript": "~5.6.3",
     "typescript-eslint": "^8.35.0",

@@ -4,7 +4,8 @@
   "scripts": {
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json}'",
     "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,json}'",
-    "lint": "eslint . --ext '**/*.js,.jsx,.ts,.tsx' --ignore-pattern node_modules/",
+    "format:test-names": "ts-node scripts/format-test-names.ts 'src/**/*.{spec,test}.ts'",
+    "lint": "eslint .",
     "test": "jest",
     "test:coverage": "jest --silent --coverage --verbose",
     "test:build": "run-s format:check lint test:coverage build",
@@ -14,6 +15,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",
+    "@types/aws-lambda": "^8.10.150",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
@@ -27,9 +29,15 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^3.6.2",
     "ts-jest": "^29.2.5",
+    "ts-morph": "^26.0.0",
     "ts-node": "^10.9.2",
     "typescript": "~5.6.3",
     "typescript-eslint": "^8.35.0",
     "zod": "^3.25.71"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.840.0",
+    "@aws-sdk/lib-dynamodb": "^3.840.0",
+    "@aws-sdk/util-dynamodb": "^3.840.0"
   }
 }

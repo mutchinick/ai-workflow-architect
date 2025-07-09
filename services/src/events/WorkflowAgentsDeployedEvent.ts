@@ -6,15 +6,18 @@ import { EventStoreEventName } from './EventStoreEventName'
 /**
  *
  */
-const schema = z.object({
+const dataSchema = z.object({
   workflowId: z.string().trim().min(6),
   objectKey: z.string().trim().min(6),
 })
 
-/**
- *
- */
-export type WorkflowAgentsDeployedEventData = z.infer<typeof schema>
+export type WorkflowAgentsDeployedEventData = z.infer<typeof dataSchema>
+
+const eventSchema = z.object({
+  eventData: dataSchema,
+  idempotencyKey: z.string().trim().min(6),
+  createdAt: z.string().datetime(),
+})
 
 /**
  *
@@ -33,58 +36,51 @@ export class WorkflowAgentsDeployedEvent extends EventStoreEventBase {
    *
    */
   static fromData(
-    data: WorkflowAgentsDeployedEventData,
+    eventData: WorkflowAgentsDeployedEventData,
   ): Success<WorkflowAgentsDeployedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowAgentsDeployedEvent.fromData'
 
     try {
-      const validData = this.parseValidate(data)
+      const validData = dataSchema.parse(eventData)
       const idempotencyKey = this.generateIdempotencyKey(validData)
       const event = new WorkflowAgentsDeployedEvent(validData, idempotencyKey, new Date().toISOString())
       const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, data })
+      console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, data })
+      console.error(`${logCtx} exit failure:`, { failure, eventData })
       return failure
     }
+  }
+
+  /**
+   *
+   */
+  private static generateIdempotencyKey(eventData: WorkflowAgentsDeployedEventData): string {
+    return `workflowId:${eventData.workflowId}:objectKey:${eventData.objectKey}`
   }
 
   /**
    *
    */
   static reconstitute(
-    data: WorkflowAgentsDeployedEventData,
+    eventData: WorkflowAgentsDeployedEventData,
     idempotencyKey: string,
     createdAt: string,
   ): Success<WorkflowAgentsDeployedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowAgentsDeployedEvent.reconstitute'
     try {
-      const validData = this.parseValidate(data)
-      const event = new WorkflowAgentsDeployedEvent(validData, idempotencyKey, createdAt)
+      const validEvent = eventSchema.parse(eventData)
+      const event = new WorkflowAgentsDeployedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, data })
+      console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, data })
+      console.error(`${logCtx} exit failure:`, { failure, eventData })
       return failure
     }
-  }
-
-  /**
-   *
-   */
-  private static parseValidate(data: unknown): WorkflowAgentsDeployedEventData {
-    return schema.parse(data)
-  }
-
-  /**
-   *
-   */
-  private static generateIdempotencyKey(data: WorkflowAgentsDeployedEventData): string {
-    return `workflowId:${data.workflowId}:objectKey:${data.objectKey}`
   }
 }
 

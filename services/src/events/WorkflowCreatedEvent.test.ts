@@ -301,9 +301,8 @@ describe(`Test WorkflowCreatedEvent`, () => {
       const testInput = buildTestInputData()
       const result = WorkflowCreatedEvent.fromData(testInput)
 
-      const expectedIdempotencyKey = `workflowId:${testInput.workflowId}:objectKey:${testInput.objectKey}`
       const expectedEvent: WorkflowCreatedEvent = {
-        idempotencyKey: expectedIdempotencyKey,
+        idempotencyKey: mockIdempotencyKey,
         eventName: EventStoreEventName.WORKFLOW_CREATED,
         eventData: {
           workflowId: testInput.workflowId,
@@ -737,9 +736,8 @@ describe(`Test WorkflowCreatedEvent`, () => {
         testInput.createdAt,
       )
 
-      const expectedIdempotencyKey = `workflowId:${testInput.eventData.workflowId}:objectKey:${testInput.eventData.objectKey}`
       const expectedEvent: WorkflowCreatedEvent = {
-        idempotencyKey: expectedIdempotencyKey,
+        idempotencyKey: mockIdempotencyKey,
         eventName: EventStoreEventName.WORKFLOW_CREATED,
         eventData: {
           workflowId: testInput.eventData.workflowId,

@@ -197,10 +197,9 @@ describe(`Test WorkflowAgentsDeployedEvent`, () => {
         is successful`, () => {
       const mockEventData = buildTestInputData()
       const result = WorkflowAgentsDeployedEvent.fromData(mockEventData)
-      const expectedIdempotencyKey = `workflowId:${mockEventData.workflowId}:objectKey:${mockEventData.objectKey}`
 
       const expectedEvent: WorkflowAgentsDeployedEvent = {
-        idempotencyKey: expectedIdempotencyKey,
+        idempotencyKey: mockIdempotencyKey,
         eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED,
         eventData: {
           workflowId: mockEventData.workflowId,
@@ -508,9 +507,8 @@ describe(`Test WorkflowAgentsDeployedEvent`, () => {
         testInput.createdAt,
       )
 
-      const expectedIdempotencyKey = `workflowId:${testInput.eventData.workflowId}:objectKey:${testInput.eventData.objectKey}`
       const expectedEvent: WorkflowAgentsDeployedEvent = {
-        idempotencyKey: expectedIdempotencyKey,
+        idempotencyKey: mockIdempotencyKey,
         eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED,
         eventData: {
           workflowId: testInput.eventData.workflowId,

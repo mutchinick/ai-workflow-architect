@@ -96,7 +96,8 @@ describe('Test EventStoreEventBuilder', () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if no matching event is found in eventClassMap`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if no matching
+        event is found in eventClassMap`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
       mockIncomingEvent.detail.dynamodb.NewImage['eventName']['S'] = 'UNKNOWN_EVENT'
       const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
@@ -157,7 +158,7 @@ describe('Test EventStoreEventBuilder', () => {
     expect(eventResult).toStrictEqual(expectedResult)
   })
 
-  it(`returns the expected Success<EventStoreEventBase> where the event is an instance 
+  it(`returns the expected Success<EventStoreEventBase> where the event is an instance
       of the correct event class if the execution path is successful`, () => {
     const mockIncomingEvent = buildEventBridgeInput()
     const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)

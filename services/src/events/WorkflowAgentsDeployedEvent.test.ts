@@ -1,5 +1,5 @@
-import { Result } from './errors/Result'
-import { EventStoreEventName } from './EventStoreEventName'
+import { Result } from '../event-store/errors/Result'
+import { EventStoreEventName } from '../event-store/EventStoreEventName'
 import { WorkflowAgentsDeployedEvent, WorkflowAgentsDeployedEventData } from './WorkflowAgentsDeployedEvent'
 
 jest.useFakeTimers().setSystemTime(new Date('2025-09-10T15:45:00Z'))

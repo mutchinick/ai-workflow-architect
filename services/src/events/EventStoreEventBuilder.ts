@@ -1,7 +1,6 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventBridgeEvent } from 'aws-lambda'
-import { TypeUtilsMutable } from '../shared/TypeUtils'
 import { FailureKind } from './errors/FailureKind'
 import { Failure, Result, Success } from './errors/Result'
 import { EventStoreEventBase, EventStoreEventConstructor } from './EventStoreEventBase'
@@ -51,15 +50,15 @@ export class EventStoreEventBuilder {
       const unmarshalledEvent = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEventBase
       const eventName = unmarshalledEvent.eventName
       const EventClass = eventClassMap[eventName as keyof EventClassMap] as EventStoreEventConstructor
-      const eventResult = EventClass.fromData(unmarshalledEvent.eventData)
+      const eventResult = EventClass.reconstitute(
+        unmarshalledEvent.eventData,
+        unmarshalledEvent.idempotencyKey,
+        unmarshalledEvent.createdAt,
+      )
       if (Result.isFailure(eventResult)) {
         console.error(`${logCtx} exit failure:`, { eventResult, incomingEvent })
         return eventResult
       }
-
-      // FIXME: Ugly hack, will replace with reconstitute method later
-      ;(eventResult.value as TypeUtilsMutable<EventStoreEventBase>).createdAt = unmarshalledEvent.createdAt
-      ;(eventResult.value as TypeUtilsMutable<EventStoreEventBase>).idempotencyKey = unmarshalledEvent.idempotencyKey
 
       console.info(`${logCtx} exit success:`, { eventResult, incomingEvent })
       return eventResult

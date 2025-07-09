@@ -1,12 +1,12 @@
-import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { Result, Success } from './errors/Result'
 import { EventStoreEventBase } from './EventStoreEventBase'
 import { EventClassMap, EventStoreEventBuilder, IncomingEventBridgeEvent } from './EventStoreEventBuilder'
 import { EventStoreEventName } from './EventStoreEventName'
 
-jest.mock('@aws-sdk/util-dynamodb', () => ({
-  unmarshall: jest.fn(),
-}))
+const mockWorkflowId = 'mockWorkflowId'
+const mockEventData = { workflowId: mockWorkflowId }
+const mockIdempotencyKey = 'mockIdempotencyKey'
+const mockCreatedAt = new Date().toISOString()
 
 /**
  *
@@ -17,9 +17,6 @@ class MockSomeEvent extends EventStoreEventBase {
   private constructor(data: Record<string, unknown>, idempotencyKey: string, createdAt: string) {
     super(MockSomeEvent.eventName, data, idempotencyKey, createdAt)
   }
-  static fromData(data: Record<string, unknown>): Success<MockSomeEvent> {
-    return Result.makeSuccess(new MockSomeEvent(data, 'mockIdempotencyKey', new Date().toISOString()))
-  }
   static reconstitute(
     data: Record<string, unknown>,
     idempotencyKey: string,
@@ -28,28 +25,8 @@ class MockSomeEvent extends EventStoreEventBase {
     return Result.makeSuccess(new MockSomeEvent(data, idempotencyKey, createdAt))
   }
 }
-
-const MOCK_OTHER_EVENT = 'MOCK_OTHER_EVENT' as EventStoreEventName
-class MockOtherEvent extends EventStoreEventBase {
-  public static readonly eventName = MOCK_SOME_EVENT
-  private constructor(data: Record<string, unknown>, idempotencyKey: string, createdAt: string) {
-    super(MockSomeEvent.eventName, data, idempotencyKey, createdAt)
-  }
-  static fromData(data: Record<string, unknown>): Success<MockSomeEvent> {
-    return Result.makeSuccess(new MockOtherEvent(data, 'mockIdempotencyKey', new Date().toISOString()))
-  }
-  static reconstitute(
-    data: Record<string, unknown>,
-    idempotencyKey: string,
-    createdAt: string,
-  ): Success<MockSomeEvent> {
-    return Result.makeSuccess(new MockOtherEvent(data, idempotencyKey, createdAt))
-  }
-}
-
 const mockEventClassMap: EventClassMap = {
   [MOCK_SOME_EVENT]: MockSomeEvent,
-  [MOCK_OTHER_EVENT]: MockOtherEvent,
 }
 
 /**
@@ -72,7 +49,12 @@ function buildEventBridgeInput(): IncomingEventBridgeEvent {
       eventVersion: '1.1',
       awsRegion: 'us-east-1',
       dynamodb: {
-        NewImage: {} as never,
+        NewImage: {
+          eventName: { S: MOCK_SOME_EVENT },
+          eventData: { M: { workflowId: { S: mockWorkflowId } } },
+          idempotencyKey: { S: mockIdempotencyKey },
+          createdAt: { S: mockCreatedAt },
+        },
       },
     },
   }
@@ -103,68 +85,53 @@ describe('Test EventStoreEventBuilder', () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if unmarshall
-        throws`, () => {
-      const mockIncomingEvent = buildEventBridgeInput()
-      ;(unmarshall as jest.Mock).mockImplementation(() => {
-        throw new Error('Unmarshall failed')
-      })
-
-      const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the
-        unmarshalled event does not have an eventName`, () => {
+        EventBrideEvent event does not have an eventName`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
-      // Simulate unmarshall returning an object without an eventName
-      ;(unmarshall as jest.Mock).mockReturnValue({ eventData: { some: 'data' } })
-
+      mockIncomingEvent.detail.dynamodb.NewImage['eventName']['S'] = undefined as unknown as string
       const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the eventName
-        is not found in the eventClassMap`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if no matching event is found in eventClassMap`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
-      // Simulate unmarshall returning an object with an unknown eventName
-      ;(unmarshall as jest.Mock).mockReturnValue({
-        eventName: 'SOME_UNKNOWN_EVENT',
-        eventData: { some: 'data' },
-      })
-
+      mockIncomingEvent.detail.dynamodb.NewImage['eventName']['S'] = 'UNKNOWN_EVENT'
       const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns the Failure produced by the specific event class's reconstitute method`, () => {
+    it(`returns the same Failure if Event.reconstitute returns a failure`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
-      const mockEventData = { workflowId: 'mockWorkflowId' }
-      const mockIdempotencyKey = 'mockIdempotencyKey'
-      const mockCreatedAt = new Date().toISOString()
-
-      ;(unmarshall as jest.Mock).mockReturnValue({
-        eventName: MOCK_OTHER_EVENT,
-        eventData: mockEventData,
-        idempotencyKey: mockIdempotencyKey,
-        createdAt: mockCreatedAt,
-      })
-
-      // Configure the mock class's reconstitute to return a specific Failure
-      const expectedFailure = Result.makeFailure('SomeSpecificError' as never, new Error(), false)
-      jest.spyOn(MockOtherEvent, 'reconstitute').mockReturnValueOnce(expectedFailure as never)
-
+      const message = 'SomeSpecificErrorMessage'
+      const expectedFailure = Result.makeFailure('SomeSpecificError' as never, message, false)
+      jest.spyOn(MockSomeEvent, 'reconstitute').mockReturnValueOnce(expectedFailure as never)
       const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
-
-      // Assert that the builder passed through the failure correctly
       expect(result).toStrictEqual(expectedFailure)
     })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test internal logic
+   ************************************************************/
+  it(`calls the matching Event.reconstitute a single time`, () => {
+    const mockIncomingEvent = buildEventBridgeInput()
+    const spy = jest.spyOn(MockSomeEvent, 'reconstitute')
+    EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
+    expect(spy).toHaveBeenCalledTimes(1)
+  })
+
+  it(`calls the matching Event.reconstitute with the expected input`, () => {
+    const mockIncomingEvent = buildEventBridgeInput()
+    const spy = jest.spyOn(MockSomeEvent, 'reconstitute')
+    EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
+    expect(spy).toHaveBeenCalledWith(mockEventData, mockIdempotencyKey, mockCreatedAt)
   })
 
   /*
@@ -176,36 +143,25 @@ describe('Test EventStoreEventBuilder', () => {
   it(`returns the expected Success<EventStoreEventBase> if the execution path is
       successful`, () => {
     const mockIncomingEvent = buildEventBridgeInput()
-    const mockEventData = { workflowId: 'mockWorkflowId' }
-    const mockIdempotencyKey = 'mockIdempotencyKey'
-    const mockCreatedAt = new Date().toISOString()
-
-    ;(unmarshall as jest.Mock).mockReturnValue({
-      eventName: MOCK_SOME_EVENT,
+    const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
+    const expectedEvent: MockSomeEvent = {
+      eventName: MockSomeEvent.eventName,
       eventData: mockEventData,
       idempotencyKey: mockIdempotencyKey,
       createdAt: mockCreatedAt,
-    })
-
-    const spy = jest.spyOn(MockSomeEvent, 'reconstitute')
-
-    const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
-    expect(unmarshall).toHaveBeenCalledWith(mockIncomingEvent.detail.dynamodb.NewImage)
-    expect(spy).toHaveBeenCalledTimes(1)
-    expect(spy).toHaveBeenCalledWith(mockEventData, mockIdempotencyKey, mockCreatedAt)
-
-    // Verify the final result is the expected Success object
-    const expectedEvent = MockSomeEvent.reconstitute(mockEventData, mockIdempotencyKey, mockCreatedAt)
-    expect(Result.isSuccess(eventResult)).toBe(true)
-    expect(eventResult).toStrictEqual(expectedEvent)
-    if (Result.isSuccess(eventResult)) {
-      const event = eventResult.value
-      expect(event).toBeInstanceOf(MockSomeEvent)
-      if (event instanceof MockSomeEvent) {
-        expect(event.eventName).toBe(MOCK_SOME_EVENT)
-        expect(event.eventData).toStrictEqual(mockEventData)
-        expect(event.idempotencyKey).toBe('mockIdempotencyKey')
-      }
     }
+    Object.setPrototypeOf(expectedEvent, MockSomeEvent.prototype)
+    const expectedResult = Result.makeSuccess(expectedEvent)
+    expect(Result.isSuccess(eventResult)).toBe(true)
+    expect(eventResult).toStrictEqual(expectedResult)
+  })
+
+  it(`returns the expected Success<EventStoreEventBase> where the event is an instance 
+      of the correct event class if the execution path is successful`, () => {
+    const mockIncomingEvent = buildEventBridgeInput()
+    const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
+    expect(Result.isSuccess(eventResult)).toBe(true)
+    const event = Result.getSuccessValueOrThrow(eventResult)
+    expect(event).toBeInstanceOf(MockSomeEvent)
   })
 })

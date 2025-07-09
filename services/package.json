@@ -5,7 +5,7 @@
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json}'",
     "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,json}'",
     "format:test-names": "ts-node scripts/format-test-names.ts 'src/**/*.{spec,test}.ts'",
-    "lint": "eslint . --ext '**/*.js,.jsx,.ts,.tsx' --ignore-pattern node_modules/",
+    "lint": "eslint .",
     "test": "jest",
     "test:coverage": "jest --silent --coverage --verbose",
     "test:build": "run-s format:check lint test:coverage build",

@@ -1,5 +1,6 @@
 import { FailureKind } from './errors/FailureKind'
 import { Failure, Success } from './errors/Result'
+import { EventStoreEventData } from './EventStoreEventData'
 
 /**
  *
@@ -7,18 +8,13 @@ import { Failure, Success } from './errors/Result'
 export abstract class EventStoreEventBase {
   public readonly idempotencyKey: string
   public readonly eventName: string
-  public readonly eventData: Record<string, unknown>
+  public readonly eventData: EventStoreEventData
   public readonly createdAt: string
 
   /**
    *
    */
-  protected constructor(
-    eventName: string,
-    eventData: Record<string, unknown>,
-    idempotencyKey: string,
-    createdAt: string,
-  ) {
+  protected constructor(eventName: string, eventData: EventStoreEventData, idempotencyKey: string, createdAt: string) {
     this.idempotencyKey = idempotencyKey
     this.eventName = eventName
     this.eventData = eventData
@@ -30,10 +26,10 @@ export abstract class EventStoreEventBase {
  *
  */
 export interface EventStoreEventConstructor {
-  fromData(data: Record<string, unknown>): Success<EventStoreEventBase> | Failure<FailureKind>
+  fromData(eventData: EventStoreEventData): Success<EventStoreEventBase> | Failure<FailureKind>
 
   reconstitute(
-    data: Record<string, unknown>,
+    eventData: EventStoreEventData,
     idempotencyKey: string,
     createdAt: string,
   ): Success<EventStoreEventBase> | Failure<FailureKind>

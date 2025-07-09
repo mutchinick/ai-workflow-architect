@@ -1,6 +1,7 @@
 import { Result, Success } from './errors/Result'
 import { EventStoreEventBase } from './EventStoreEventBase'
 import { EventClassMap, EventStoreEventBuilder, IncomingEventBridgeEvent } from './EventStoreEventBuilder'
+import { EventStoreEventData } from './EventStoreEventData'
 import { EventStoreEventName } from './EventStoreEventName'
 
 const mockWorkflowId = 'mockWorkflowId'
@@ -14,15 +15,15 @@ const mockCreatedAt = new Date().toISOString()
 const MOCK_SOME_EVENT = 'MOCK_SOME_EVENT' as EventStoreEventName
 class MockSomeEvent extends EventStoreEventBase {
   public static readonly eventName = MOCK_SOME_EVENT
-  private constructor(data: Record<string, unknown>, idempotencyKey: string, createdAt: string) {
-    super(MockSomeEvent.eventName, data, idempotencyKey, createdAt)
+  private constructor(eventData: EventStoreEventData, idempotencyKey: string, createdAt: string) {
+    super(MockSomeEvent.eventName, eventData, idempotencyKey, createdAt)
   }
   static reconstitute(
-    data: Record<string, unknown>,
+    eventData: EventStoreEventData,
     idempotencyKey: string,
     createdAt: string,
   ): Success<MockSomeEvent> {
-    return Result.makeSuccess(new MockSomeEvent(data, idempotencyKey, createdAt))
+    return Result.makeSuccess(new MockSomeEvent(eventData, idempotencyKey, createdAt))
   }
 }
 const mockEventClassMap: EventClassMap = {

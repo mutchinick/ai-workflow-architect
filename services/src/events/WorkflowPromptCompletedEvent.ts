@@ -71,7 +71,7 @@ export class WorkflowPromptCompletedEvent extends EventStoreEventBase {
   ): Success<WorkflowPromptCompletedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowPromptCompletedEvent.reconstitute'
     try {
-      const validEvent = eventSchema.parse(eventData)
+      const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
       const event = new WorkflowPromptCompletedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })

@@ -64,7 +64,7 @@ function buildEventBridgeInput(): IncomingEventBridgeEvent {
 /***
  * Test EventStoreEventBuilder
  */
-describe('Test EventStoreEventBuilder', () => {
+describe(`Test EventStoreEventBuilder`, () => {
   // Clear all mock history before each test for isolation
   beforeEach(() => {
     jest.clearAllMocks()
@@ -76,7 +76,7 @@ describe('Test EventStoreEventBuilder', () => {
    ************************************************************
    * Test EventStoreEventBuilder.fromEventBridge edge cases
    ************************************************************/
-  describe('Test EventStoreEventBuilder.fromEventBridge', () => {
+  describe(`Test EventStoreEventBuilder.fromEventBridge`, () => {
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input event
         payload is undefined`, () => {
       const mockIncomingEvent = undefined as unknown as IncomingEventBridgeEvent

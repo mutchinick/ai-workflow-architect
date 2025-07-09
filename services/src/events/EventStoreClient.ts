@@ -84,7 +84,7 @@ export class EventStoreClient implements IEventStoreClient {
     // Perhaps we can prevent all errors by validating the arguments, but PutCommand
     // is an external dependency and we don't know what happens internally, so we try-catch
     try {
-      const tableName = process.env.EVENT_STORE_TABLE_NAME!
+      const tableName = process.env.EVENT_STORE_TABLE_NAME
 
       const { eventName, eventData, createdAt, idempotencyKey } = event
 

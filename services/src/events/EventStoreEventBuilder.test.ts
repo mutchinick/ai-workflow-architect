@@ -74,8 +74,8 @@ describe('Test EventStoreEventBuilder', () => {
    * Test EventStoreEventBuilder.fromEventBridge edge cases
    ************************************************************/
   describe('Test EventStoreEventBuilder.fromEventBridge', () => {
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      event payload is undefined`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input event
+        payload is undefined`, () => {
       const mockIncomingEvent = undefined as unknown as IncomingEventBridgeEvent
       const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
       expect(Result.isFailure(result)).toBe(true)
@@ -83,7 +83,8 @@ describe('Test EventStoreEventBuilder', () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if unmarshall throws`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if unmarshall
+        throws`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
       ;(unmarshall as jest.Mock).mockImplementation(() => {
         throw new Error('Unmarshall failed')
@@ -95,8 +96,8 @@ describe('Test EventStoreEventBuilder', () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the unmarshalled
-      event does not have an eventName`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the
+        unmarshalled event does not have an eventName`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
       // Simulate unmarshall returning an object without an eventName
       ;(unmarshall as jest.Mock).mockReturnValue({ eventData: { some: 'data' } })
@@ -108,7 +109,7 @@ describe('Test EventStoreEventBuilder', () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the eventName
-      is not found in the eventClassMap`, () => {
+        is not found in the eventClassMap`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
       // Simulate unmarshall returning an object with an unknown eventName
       ;(unmarshall as jest.Mock).mockReturnValue({

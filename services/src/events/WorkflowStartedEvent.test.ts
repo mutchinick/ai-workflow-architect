@@ -7,7 +7,7 @@ jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 const mockDate = new Date().toISOString()
 const mockWorkflowId = 'mockWorkflowId'
 const mockStarted = true
-const mockIdempotencyKey = `workflowId:${mockWorkflowId}`
+const mockIdempotencyKey = `workflowId:${mockWorkflowId}:${mockStarted}`
 
 function buildTestInputData(): WorkflowStartedEventData {
   return {
@@ -45,9 +45,7 @@ describe(`Test WorkflowStartedEvent`, () => {
     it(`does not return a Failure if WorkflowStartedEventData is valid`, () => {
       const testInput = buildTestInputData()
       const result = WorkflowStartedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
+      expect(Result.isFailure(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if
@@ -174,16 +172,15 @@ describe(`Test WorkflowStartedEvent`, () => {
      *
      *
      ************************************************************
-     * Test expected results for the "Happy Path"
+     * Test expected results
      ************************************************************/
     it(`returns the expected Success<WorkflowStartedEvent> if the execution path is
         successful`, () => {
       const mockWorkflowStartedEventData = buildTestInputData()
       const result = WorkflowStartedEvent.fromData(mockWorkflowStartedEventData)
 
-      const expectedIdempotencyKey = `workflowId:${mockWorkflowStartedEventData.workflowId}`
       const expectedEvent: WorkflowStartedEvent = {
-        idempotencyKey: expectedIdempotencyKey,
+        idempotencyKey: mockIdempotencyKey,
         eventName: EventStoreEventName.WORKFLOW_STARTED,
         eventData: {
           workflowId: mockWorkflowStartedEventData.workflowId,
@@ -460,7 +457,7 @@ describe(`Test WorkflowStartedEvent`, () => {
      *
      *
      ************************************************************
-     * Test expected results for the "Happy Path"
+     * Test expected results
      ************************************************************/
     it(`returns the expected Success<WorkflowStartedEvent> if the execution path is
         successful`, () => {

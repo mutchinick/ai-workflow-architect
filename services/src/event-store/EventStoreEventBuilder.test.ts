@@ -1,4 +1,4 @@
-import { Result, Success } from './errors/Result'
+import { Result, Success } from '../errors/Result'
 import { EventStoreEventBase } from './EventStoreEventBase'
 import { EventClassMap, EventStoreEventBuilder, IncomingEventBridgeEvent } from './EventStoreEventBuilder'
 import { EventStoreEventData } from './EventStoreEventData'

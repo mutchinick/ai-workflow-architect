@@ -1,5 +1,5 @@
-import { FailureKind } from './errors/FailureKind'
-import { Failure, Success } from './errors/Result'
+import { FailureKind } from '../errors/FailureKind'
+import { Failure, Success } from '../errors/Result'
 import { EventStoreEventData } from './EventStoreEventData'
 
 /**

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { Failure, Result, Success } from '../event-store/errors/Result'
+import { Failure, Result, Success } from '../errors/Result'
 import { EventStoreEventBase, EventStoreEventConstructor } from '../event-store/EventStoreEventBase'
 import { EventStoreEventName } from '../event-store/EventStoreEventName'
 

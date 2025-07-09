@@ -1,4 +1,4 @@
-import { Result } from '../event-store/errors/Result'
+import { Result } from '../errors/Result'
 import { EventStoreEventName } from '../event-store/EventStoreEventName'
 import { WorkflowContinuedEvent, WorkflowContinuedEventData } from './WorkflowContinuedEvent'
 

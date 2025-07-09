@@ -1,8 +1,8 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventBridgeEvent } from 'aws-lambda'
-import { FailureKind } from './errors/FailureKind'
-import { Failure, Result, Success } from './errors/Result'
+import { FailureKind } from '../errors/FailureKind'
+import { Failure, Result, Success } from '../errors/Result'
 import { EventStoreEventBase, EventStoreEventConstructor } from './EventStoreEventBase'
 import { EventStoreEventName } from './EventStoreEventName'
 

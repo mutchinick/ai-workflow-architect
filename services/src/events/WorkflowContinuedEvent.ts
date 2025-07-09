@@ -6,15 +6,18 @@ import { EventStoreEventName } from './EventStoreEventName'
 /**
  *
  */
-const schema = z.object({
+const dataSchema = z.object({
   workflowId: z.string().trim().min(6),
   continued: z.literal(true),
 })
 
-/**
- *
- */
-export type WorkflowContinuedEventData = z.infer<typeof schema>
+export type WorkflowContinuedEventData = z.infer<typeof dataSchema>
+
+const eventSchema = z.object({
+  eventData: dataSchema,
+  idempotencyKey: z.string().trim().min(6),
+  createdAt: z.string().datetime(),
+})
 
 /**
  *
@@ -33,58 +36,51 @@ export class WorkflowContinuedEvent extends EventStoreEventBase {
    *
    */
   static fromData(
-    data: WorkflowContinuedEventData,
+    eventData: WorkflowContinuedEventData,
   ): Success<WorkflowContinuedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowContinuedEvent.fromData'
 
     try {
-      const validData = this.parseValidate(data)
+      const validData = dataSchema.parse(eventData)
       const idempotencyKey = this.generateIdempotencyKey(validData)
       const event = new WorkflowContinuedEvent(validData, idempotencyKey, new Date().toISOString())
       const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, data })
+      console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, data })
+      console.error(`${logCtx} exit failure:`, { failure, eventData })
       return failure
     }
+  }
+
+  /**
+   *
+   */
+  private static generateIdempotencyKey(eventData: WorkflowContinuedEventData): string {
+    return `workflowId:${eventData.workflowId}:continued:${eventData.continued}`
   }
 
   /**
    *
    */
   static reconstitute(
-    data: WorkflowContinuedEventData,
+    eventData: WorkflowContinuedEventData,
     idempotencyKey: string,
     createdAt: string,
   ): Success<WorkflowContinuedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowContinuedEvent.reconstitute'
     try {
-      const validData = this.parseValidate(data)
-      const event = new WorkflowContinuedEvent(validData, idempotencyKey, createdAt)
+      const validEvent = eventSchema.parse(eventData)
+      const event = new WorkflowContinuedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, data })
+      console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, data })
+      console.error(`${logCtx} exit failure:`, { failure, eventData })
       return failure
     }
-  }
-
-  /**
-   *
-   */
-  private static parseValidate(data: unknown): WorkflowContinuedEventData {
-    return schema.parse(data)
-  }
-
-  /**
-   *
-   */
-  private static generateIdempotencyKey(data: WorkflowContinuedEventData): string {
-    return `workflowId:${data.workflowId}:continued:${data.continued}`
   }
 }
 

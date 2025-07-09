@@ -1,6 +1,6 @@
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
-import { Failure, Result, Success } from './errors/Result'
+import { Failure, Result, Success } from '../errors/Result'
 import { EventStoreEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
 

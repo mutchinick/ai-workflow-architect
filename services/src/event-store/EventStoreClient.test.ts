@@ -1,7 +1,7 @@
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
+import { Result } from '../errors/Result'
 import { TypeUtilsMutable } from '../shared/TypeUtils'
-import { Result } from './errors/Result'
 import { EventStoreClient } from './EventStoreClient'
 import { EventStoreEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'

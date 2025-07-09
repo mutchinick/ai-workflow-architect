@@ -1,15 +1,15 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventBridgeEvent } from 'aws-lambda'
+import { Failure, Result, Success } from '../errors/Result'
+import { WorkflowAgentsDeployedEventDefinition } from '../events/WorkflowAgentsDeployedEvent'
+import { WorkflowContinuedEventDefinition } from '../events/WorkflowContinuedEvent'
+import { WorkflowCreatedEventDefinition } from '../events/WorkflowCreatedEvent'
+import { WorkflowPromptCompletedEventDefinition } from '../events/WorkflowPromptCompletedEvent'
+import { WorkflowPromptEnhancedEventDefinition } from '../events/WorkflowPromptEnhancedEvent'
+import { WorkflowStartedEventDefinition } from '../events/WorkflowStartedEvent'
 import { EventStoreEventDefinition } from './EventStoreEventDefinition'
 import { EventStoreEventName } from './EventStoreEventName'
-import { WorkflowAgentsDeployedEventDefinition } from './WorkflowAgentsDeployedEvent'
-import { WorkflowContinuedEventDefinition } from './WorkflowContinuedEvent'
-import { WorkflowCreatedEventDefinition } from './WorkflowCreatedEvent'
-import { WorkflowPromptCompletedEventDefinition } from './WorkflowPromptCompletedEvent'
-import { WorkflowPromptEnhancedEventDefinition } from './WorkflowPromptEnhancedEvent'
-import { WorkflowStartedEventDefinition } from './WorkflowStartedEvent'
-import { Failure, Result, Success } from './errors/Result'
 
 /**
  *

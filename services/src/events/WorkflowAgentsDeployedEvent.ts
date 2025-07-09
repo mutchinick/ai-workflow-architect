@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import type { EventStoreEventDefinition } from './EventStoreEventDefinition'
-import { EventStoreEventName } from './EventStoreEventName'
+import type { EventStoreEventDefinition } from '../event-store/EventStoreEventDefinition'
+import { EventStoreEventName } from '../event-store/EventStoreEventName'
 
 export const schema = z.object({
   workflowId: z.string().min(1),

@@ -1,8 +1,8 @@
 import { unmarshall } from '@aws-sdk/util-dynamodb'
+import { Result } from '../errors/Result'
+import { WorkflowStartedEventData, WorkflowStartedEventDefinition } from '../events/WorkflowStartedEvent'
 import { EventStoreEvent, IncomingEventBridgeEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
-import { WorkflowStartedEventData, WorkflowStartedEventDefinition } from './WorkflowStartedEvent'
-import { Result } from './errors/Result'
 
 /**
  * Mock AWS DynamoDB unmarshall function

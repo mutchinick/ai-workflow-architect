@@ -49,7 +49,7 @@ describe(`Test WorkflowAgentsDeployedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEventData
+     * Test WorkflowAgentsDeployedEventData edge cases
      ************************************************************/
     it(`does not return a Failure if WorkflowAgentsDeployedEventData is valid`, () => {
       const mockEventData = buildTestInputData()

@@ -56,6 +56,12 @@ describe(`Test WorkflowCreatedEvent`, () => {
    * Test WorkflowCreatedEvent.fromData
    ************************************************************/
   describe(`Test WorkflowCreatedEvent.fromData`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowCreatedEventData edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowCreatedEventData is valid`, () => {
       const testInput = buildTestInputData()
       const result = WorkflowCreatedEvent.fromData(testInput)
@@ -319,9 +325,15 @@ describe(`Test WorkflowCreatedEvent`, () => {
    *
    *
    ************************************************************
-   * Test WorkflowCreatedEvent.reconstitute edge cases
+   * Test WorkflowCreatedEvent.reconstitute
    ************************************************************/
   describe(`Test WorkflowCreatedEvent.reconstitute`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowCreatedEvent edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowCreatedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = WorkflowCreatedEvent.reconstitute(

@@ -42,6 +42,12 @@ describe(`Test WorkflowStartedEvent`, () => {
    * Test WorkflowStartedEvent.fromData
    ************************************************************/
   describe(`Test WorkflowStartedEvent.fromData`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowStartedEventData edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowStartedEventData is valid`, () => {
       const testInput = buildTestInputData()
       const result = WorkflowStartedEvent.fromData(testInput)
@@ -203,6 +209,12 @@ describe(`Test WorkflowStartedEvent`, () => {
    * Test WorkflowStartedEvent.reconstitute
    ************************************************************/
   describe(`Test WorkflowStartedEvent.reconstitute`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowStartedEvent edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowStartedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = WorkflowStartedEvent.reconstitute(

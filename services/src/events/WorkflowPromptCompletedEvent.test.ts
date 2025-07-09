@@ -42,9 +42,15 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
    *
    *
    ************************************************************
-   * Test WorkflowPromptCompletedEvent.fromData edge cases
+   * Test WorkflowPromptCompletedEvent.fromData
    ************************************************************/
   describe(`Test WorkflowPromptCompletedEvent.fromData edge cases`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowPromptCompletedEventData edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowPromptCompletedEventData is valid`, () => {
       const mockEventData = buildTestInputData()
       const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
@@ -214,9 +220,15 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
    *
    *
    ************************************************************
-   * Test WorkflowPromptCompletedEvent.reconstitute edge cases
+   * Test WorkflowPromptCompletedEvent.reconstitute
    ************************************************************/
   describe(`Test WorkflowPromptCompletedEvent.reconstitute`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowPromptCompletedEvent edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowPromptCompletedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = WorkflowPromptCompletedEvent.reconstitute(

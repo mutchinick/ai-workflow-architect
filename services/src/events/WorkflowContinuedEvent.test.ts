@@ -42,6 +42,12 @@ describe(`Test WorkflowContinuedEvent`, () => {
    * Test WorkflowContinuedEvent.fromData
    ************************************************************/
   describe(`Test WorkflowContinuedEvent.fromData`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowContinuedEventData edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowContinuedEventData is valid`, () => {
       const testInput = buildTestInputData()
       const result = WorkflowContinuedEvent.fromData(testInput)
@@ -203,6 +209,12 @@ describe(`Test WorkflowContinuedEvent`, () => {
    * Test WorkflowContinuedEvent.reconstitute
    ************************************************************/
   describe(`Test WorkflowContinuedEvent.reconstitute`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowContinuedEvent edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowContinuedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = WorkflowContinuedEvent.reconstitute(

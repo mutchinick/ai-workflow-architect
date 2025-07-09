@@ -47,9 +47,15 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
    *
    *
    ************************************************************
-   * Test WorkflowPromptEnhancedEvent.fromData edge cases
+   * Test WorkflowPromptEnhancedEvent.fromData
    ************************************************************/
   describe(`Test WorkflowPromptEnhancedEvent.fromData`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowPromptEnhancedEventData edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowPromptEnhancedEventData is valid`, () => {
       const mockEventData = buildTestInputData()
       const result = WorkflowPromptEnhancedEvent.fromData(mockEventData)
@@ -333,9 +339,15 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
    *
    *
    ************************************************************
-   * Test WorkflowPromptEnhancedEvent.reconstitute edge cases
+   * Test WorkflowPromptEnhancedEvent.reconstitute
    ************************************************************/
   describe(`Test WorkflowPromptEnhancedEvent.reconstitute`, () => {
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowPromptEnhancedEvent edge cases
+     ************************************************************/
     it(`does not return a Failure if WorkflowPromptEnhancedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = WorkflowPromptEnhancedEvent.reconstitute(

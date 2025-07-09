@@ -71,7 +71,7 @@ export class WorkflowContinuedEvent extends EventStoreEventBase {
   ): Success<WorkflowContinuedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowContinuedEvent.reconstitute'
     try {
-      const validEvent = eventSchema.parse(eventData)
+      const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
       const event = new WorkflowContinuedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })

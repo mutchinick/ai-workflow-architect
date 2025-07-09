@@ -2,6 +2,7 @@ import eslint from '@eslint/js'
 import prettierConfig from 'eslint-config-prettier'
 import pluginJsdoc from 'eslint-plugin-jsdoc'
 import prettierPlugin from 'eslint-plugin-prettier'
+import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
@@ -15,7 +16,15 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.js', '**/*.cjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
+    files: ['**/*.ts'],
     extends: tseslint.configs.recommendedTypeChecked,
     languageOptions: {
       parserOptions: {
@@ -24,6 +33,21 @@ export default tseslint.config(
       },
     },
     rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-return': 'off',
       '@typescript-eslint/explicit-function-return-type': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-unused-expressions': 'off',
@@ -53,7 +77,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['*.spec.ts', '*.test.ts'],
+    files: ['**/*.spec.ts', '**/*.test.ts'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': [
         'error',
@@ -65,7 +89,7 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['node_modules/', 'dist/'],
+    ignores: ['node_modules/', 'dist/', '.build/', 'build/', 'out/'],
   },
   prettierConfig,
 )

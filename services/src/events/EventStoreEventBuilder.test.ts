@@ -8,25 +8,42 @@ jest.mock('@aws-sdk/util-dynamodb', () => ({
   unmarshall: jest.fn(),
 }))
 
+/**
+ *
+ */
 const MOCK_SOME_EVENT = 'MOCK_SOME_EVENT' as EventStoreEventName
 class MockSomeEvent extends EventStoreEventBase {
   public static readonly eventName = MOCK_SOME_EVENT
-  private constructor(data: Record<string, unknown>, idempotencyKey: string) {
-    super(MockSomeEvent.eventName, data, idempotencyKey, new Date().toISOString())
+  private constructor(data: Record<string, unknown>, idempotencyKey: string, createdAt: string) {
+    super(MockSomeEvent.eventName, data, idempotencyKey, createdAt)
   }
   static fromData(data: Record<string, unknown>): Success<MockSomeEvent> {
-    return Result.makeSuccess(new MockSomeEvent(data, 'mockIdempotencyKey'))
+    return Result.makeSuccess(new MockSomeEvent(data, 'mockIdempotencyKey', new Date().toISOString()))
+  }
+  static reconstitute(
+    data: Record<string, unknown>,
+    idempotencyKey: string,
+    createdAt: string,
+  ): Success<MockSomeEvent> {
+    return Result.makeSuccess(new MockSomeEvent(data, idempotencyKey, createdAt))
   }
 }
 
 const MOCK_OTHER_EVENT = 'MOCK_OTHER_EVENT' as EventStoreEventName
 class MockOtherEvent extends EventStoreEventBase {
-  public static readonly eventName = MOCK_OTHER_EVENT
-  private constructor(data: Record<string, unknown>, idempotencyKey: string) {
-    super(MockOtherEvent.eventName, data, idempotencyKey, new Date().toISOString())
+  public static readonly eventName = MOCK_SOME_EVENT
+  private constructor(data: Record<string, unknown>, idempotencyKey: string, createdAt: string) {
+    super(MockSomeEvent.eventName, data, idempotencyKey, createdAt)
   }
-  static fromData(data: Record<string, unknown>): Success<MockOtherEvent> {
-    return Result.makeSuccess(new MockOtherEvent(data, 'mockIdempotencyKey'))
+  static fromData(data: Record<string, unknown>): Success<MockSomeEvent> {
+    return Result.makeSuccess(new MockOtherEvent(data, 'mockIdempotencyKey', new Date().toISOString()))
+  }
+  static reconstitute(
+    data: Record<string, unknown>,
+    idempotencyKey: string,
+    createdAt: string,
+  ): Success<MockSomeEvent> {
+    return Result.makeSuccess(new MockOtherEvent(data, idempotencyKey, createdAt))
   }
 }
 
@@ -35,6 +52,9 @@ const mockEventClassMap: EventClassMap = {
   [MOCK_OTHER_EVENT]: MockOtherEvent,
 }
 
+/**
+ *
+ */
 function buildEventBridgeInput(): IncomingEventBridgeEvent {
   return {
     version: '0',
@@ -123,17 +143,22 @@ describe('Test EventStoreEventBuilder', () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns the Failure produced by the specific event class's fromData method`, () => {
+    it(`returns the Failure produced by the specific event class's reconstitute method`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
-      const mockEventData = { workflowId: 'wf-123' }
+      const mockEventData = { workflowId: 'mockWorkflowId' }
+      const mockIdempotencyKey = 'mockIdempotencyKey'
+      const mockCreatedAt = new Date().toISOString()
+
       ;(unmarshall as jest.Mock).mockReturnValue({
         eventName: MOCK_OTHER_EVENT,
         eventData: mockEventData,
+        idempotencyKey: mockIdempotencyKey,
+        createdAt: mockCreatedAt,
       })
 
-      // Configure the mock class's fromData to return a specific Failure
+      // Configure the mock class's reconstitute to return a specific Failure
       const expectedFailure = Result.makeFailure('SomeSpecificError' as never, new Error(), false)
-      jest.spyOn(MockOtherEvent, 'fromData').mockReturnValueOnce(expectedFailure as never)
+      jest.spyOn(MockOtherEvent, 'reconstitute').mockReturnValueOnce(expectedFailure as never)
 
       const result = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
 
@@ -152,27 +177,32 @@ describe('Test EventStoreEventBuilder', () => {
       successful`, () => {
     const mockIncomingEvent = buildEventBridgeInput()
     const mockEventData = { workflowId: 'mockWorkflowId' }
+    const mockIdempotencyKey = 'mockIdempotencyKey'
+    const mockCreatedAt = new Date().toISOString()
+
     ;(unmarshall as jest.Mock).mockReturnValue({
       eventName: MOCK_SOME_EVENT,
       eventData: mockEventData,
+      idempotencyKey: mockIdempotencyKey,
+      createdAt: mockCreatedAt,
     })
 
-    const spy = jest.spyOn(MockSomeEvent, 'fromData')
+    const spy = jest.spyOn(MockSomeEvent, 'reconstitute')
 
     const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
     expect(unmarshall).toHaveBeenCalledWith(mockIncomingEvent.detail.dynamodb.NewImage)
     expect(spy).toHaveBeenCalledTimes(1)
-    expect(spy).toHaveBeenCalledWith(mockEventData)
+    expect(spy).toHaveBeenCalledWith(mockEventData, mockIdempotencyKey, mockCreatedAt)
 
     // Verify the final result is the expected Success object
-    const expectedEvent = MockSomeEvent.fromData(mockEventData)
+    const expectedEvent = MockSomeEvent.reconstitute(mockEventData, mockIdempotencyKey, mockCreatedAt)
     expect(Result.isSuccess(eventResult)).toBe(true)
     expect(eventResult).toStrictEqual(expectedEvent)
     if (Result.isSuccess(eventResult)) {
       const event = eventResult.value
       expect(event).toBeInstanceOf(MockSomeEvent)
       if (event instanceof MockSomeEvent) {
-        expect(event.eventName).toBe(EventStoreEventName.WORKFLOW_CREATED)
+        expect(event.eventName).toBe(MOCK_SOME_EVENT)
         expect(event.eventData).toStrictEqual(mockEventData)
         expect(event.idempotencyKey).toBe('mockIdempotencyKey')
       }

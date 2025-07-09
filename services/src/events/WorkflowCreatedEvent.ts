@@ -8,9 +8,9 @@ import { EventStoreEventName } from './EventStoreEventName'
  */
 const dataSchema = z.object({
   workflowId: z.string().trim().min(6),
+  objectKey: z.string().trim().min(6),
   promptEnhancementRounds: z.number().int().min(1).max(10),
   responseEnhancementRounds: z.number().int().min(1).max(10),
-  objectKey: z.string().trim().min(6),
 })
 
 export type WorkflowCreatedEventData = z.infer<typeof dataSchema>
@@ -73,7 +73,7 @@ export class WorkflowCreatedEvent extends EventStoreEventBase {
   ): Success<WorkflowCreatedEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'WorkflowCreatedEvent.reconstitute'
     try {
-      const validEvent = eventSchema.parse(eventData)
+      const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
       const event = new WorkflowCreatedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })

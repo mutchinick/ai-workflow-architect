@@ -8,12 +8,12 @@ function buildTestInputData(): WorkflowStartedEventData {
   }
 }
 
-describe('Test WorkflowStartedEvent', () => {
+describe(`Test WorkflowStartedEvent`, () => {
   /***
    * Test parseValidate
    */
-  describe('Test parseValidate', () => {
-    it('correctly parses and returns a completely valid data object', () => {
+  describe(`Test parseValidate`, () => {
+    it(`correctly parses and returns a completely valid data object`, () => {
       const testData = buildTestInputData()
       const parsedData = WorkflowStartedEventDefinition.parseValidate(testData)
       expect(parsedData).toStrictEqual(testData)
@@ -22,15 +22,15 @@ describe('Test WorkflowStartedEvent', () => {
     /***
      * Test WorkflowStartedEventData.workflowId
      */
-    describe('Test WorkflowStartedEventData.workflowId', () => {
-      it('throws if WorkflowStartedEventData.workflowId is undefined', () => {
+    describe(`Test WorkflowStartedEventData.workflowId`, () => {
+      it(`throws if WorkflowStartedEventData.workflowId is undefined`, () => {
         const testData = buildTestInputData()
         testData.workflowId = undefined as unknown as string
         const testingFunc = () => WorkflowStartedEventDefinition.parseValidate(testData)
         expect(testingFunc).toThrow(z.ZodError)
       })
 
-      it('throws if WorkflowStartedEventData.workflowId is an empty string', () => {
+      it(`throws if WorkflowStartedEventData.workflowId is an empty string`, () => {
         const testData = buildTestInputData()
         testData.workflowId = ''
         const testingFunc = () => WorkflowStartedEventDefinition.parseValidate(testData)
@@ -41,15 +41,15 @@ describe('Test WorkflowStartedEvent', () => {
     /***
      * Test WorkflowStartedEventData.started
      */
-    describe('Test WorkflowStartedEventData.started', () => {
-      it('throws if WorkflowStartedEventData.started is undefined', () => {
+    describe(`Test WorkflowStartedEventData.started`, () => {
+      it(`throws if WorkflowStartedEventData.started is undefined`, () => {
         const testData = buildTestInputData()
         testData.started = undefined as unknown as true
         const testingFunc = () => WorkflowStartedEventDefinition.parseValidate(testData)
         expect(testingFunc).toThrow(z.ZodError)
       })
 
-      it('throws if WorkflowStartedEventData.started is false', () => {
+      it(`throws if WorkflowStartedEventData.started is false`, () => {
         const testData = buildTestInputData()
         testData.started = false as unknown as true
         const testingFunc = () => WorkflowStartedEventDefinition.parseValidate(testData)
@@ -61,8 +61,8 @@ describe('Test WorkflowStartedEvent', () => {
   /***
    * Test generateIdempotencyKey
    */
-  describe('Test generateIdempotencyKey', () => {
-    it('generates a deterministic key based on workflowId and objectKey', () => {
+  describe(`Test generateIdempotencyKey`, () => {
+    it(`generates a deterministic key based on workflowId and objectKey`, () => {
       const testData = buildTestInputData()
       const expectedKey = `workflowId:${testData.workflowId}:started:${testData.started}`
       const generatedKey = WorkflowStartedEventDefinition.generateIdempotencyKey(testData)

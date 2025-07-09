@@ -50,7 +50,7 @@ function buildEventBridgeInput(): IncomingEventBridgeEvent {
 /***
  * Test EventStoreEvent
  */
-describe('Test EventStoreEvent', () => {
+describe(`Test EventStoreEvent`, () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -58,8 +58,9 @@ describe('Test EventStoreEvent', () => {
   /***
    * Test EventStoreEvent.fromData
    */
-  describe('Test EventStoreEvent.fromData', () => {
-    it('returns a non-transient Failure of kind InvalidArgumentsError if the event name is invalid', () => {
+  describe(`Test EventStoreEvent.fromData`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the event name
+        is invalid`, () => {
       const eventName = 'mockEventName' as EventStoreEventName
       const eventData = buildFromDataInput()
 
@@ -78,7 +79,7 @@ describe('Test EventStoreEvent', () => {
       expect(Result.isFailureTransient(eventResult)).toBe(false)
     })
 
-    it('creates a valid event and calls the correct definition methods', () => {
+    it(`creates a valid event and calls the correct definition methods`, () => {
       const eventName = EventStoreEventName.WORKFLOW_STARTED
       const eventData = buildFromDataInput()
 
@@ -110,8 +111,8 @@ describe('Test EventStoreEvent', () => {
   /***
    * Test EventStoreEvent.fromEventBridge
    */
-  describe('Test EventStoreEvent.fromEventBridge', () => {
-    it('creates a valid event from a DynamoDB stream payload', () => {
+  describe(`Test EventStoreEvent.fromEventBridge`, () => {
+    it(`creates a valid event from a DynamoDB stream payload`, () => {
       const eventName = EventStoreEventName.WORKFLOW_STARTED
       const eventData = buildFromDataInput()
       const incomingEvent = buildEventBridgeInput()
@@ -147,8 +148,8 @@ describe('Test EventStoreEvent', () => {
   /***
    * Test EventStoreEvent.isOfType
    */
-  describe('Test EventStoreEvent.isOfType', () => {
-    it('returns true and narrows type for the correct event name', () => {
+  describe(`Test EventStoreEvent.isOfType`, () => {
+    it(`returns true and narrows type for the correct event name`, () => {
       const eventData = buildFromDataInput()
       const eventResult = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
       const event = Result.getSuccessValueOrThrow(eventResult)
@@ -158,7 +159,7 @@ describe('Test EventStoreEvent', () => {
       }
     })
 
-    it('returns false for an incorrect event name', () => {
+    it(`returns false for an incorrect event name`, () => {
       const eventData = buildFromDataInput()
       const eventResult = EventStoreEvent.fromData(EventStoreEventName.WORKFLOW_STARTED, eventData)
       const event = Result.getSuccessValueOrThrow(eventResult)

@@ -5,7 +5,7 @@ import { EventStoreEventData } from './EventStoreEventData'
 /**
  *
  */
-export abstract class EventStoreEventBase {
+export abstract class EventStoreEvent {
   public readonly idempotencyKey: string
   public readonly eventName: string
   public readonly eventData: EventStoreEventData
@@ -26,11 +26,11 @@ export abstract class EventStoreEventBase {
  *
  */
 export interface EventStoreEventConstructor {
-  fromData(eventData: EventStoreEventData): Success<EventStoreEventBase> | Failure<FailureKind>
+  fromData(eventData: EventStoreEventData): Success<EventStoreEvent> | Failure<FailureKind>
 
   reconstitute(
     eventData: EventStoreEventData,
     idempotencyKey: string,
     createdAt: string,
-  ): Success<EventStoreEventBase> | Failure<FailureKind>
+  ): Success<EventStoreEvent> | Failure<FailureKind>
 }

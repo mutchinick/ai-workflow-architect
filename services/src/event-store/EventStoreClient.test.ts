@@ -3,7 +3,7 @@ import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 import { TypeUtilsMutable } from '../shared/TypeUtils'
 import { Result } from '../errors/Result'
 import { EventStoreClient } from './EventStoreClient'
-import { EventStoreEventBase } from './EventStoreEventBase'
+import { EventStoreEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
 
 const mockEventStoreTableName = 'mockEventStoreTableName'
@@ -12,7 +12,7 @@ process.env.EVENT_STORE_TABLE_NAME = mockEventStoreTableName
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
-function buildMockEventStoreEvent(): EventStoreEventBase {
+function buildMockEventStoreEvent(): EventStoreEvent {
   const mockClass = {
     eventName: 'mockEventName' as unknown as EventStoreEventName,
     idempotencyKey: 'mockIdempotencyKey',
@@ -23,8 +23,8 @@ function buildMockEventStoreEvent(): EventStoreEventBase {
     },
     createdAt: new Date().toISOString(),
   }
-  Object.setPrototypeOf(mockClass, EventStoreEventBase.prototype)
-  return mockClass as unknown as EventStoreEventBase
+  Object.setPrototypeOf(mockClass, EventStoreEvent.prototype)
+  return mockClass as unknown as EventStoreEvent
 }
 
 const mockEventStoreEvent = buildMockEventStoreEvent()
@@ -70,17 +70,17 @@ describe(`Events EventStoreClient tests`, () => {
    *
    *
    ************************************************************
-   * Test EventStoreEventBase edge cases
+   * Test EventStoreEvent edge cases
    ************************************************************/
-  it(`does not return a Failure if the input EventStoreEventBase is valid`, async () => {
+  it(`does not return a Failure if the input EventStoreEvent is valid`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
-    const result = await eventStoreClient.publish(mockEventStoreEvent as unknown as EventStoreEventBase)
+    const result = await eventStoreClient.publish(mockEventStoreEvent as unknown as EventStoreEvent)
     expect(Result.isFailure(result)).toBe(false)
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      EventStoreEventBase is undefined`, async () => {
+      EventStoreEvent is undefined`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
     const mockTestEvent = undefined as never
@@ -91,7 +91,7 @@ describe(`Events EventStoreClient tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      EventStoreEventBase is null`, async () => {
+      EventStoreEvent is null`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
     const mockTestEvent = null as never
@@ -102,7 +102,7 @@ describe(`Events EventStoreClient tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      EventStoreEventBase is not an instance of the class`, async () => {
+      EventStoreEvent is not an instance of the class`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
     const { idempotencyKey, eventName, eventData, createdAt } = mockEventStoreEvent
@@ -116,14 +116,14 @@ describe(`Events EventStoreClient tests`, () => {
    *
    *
    ************************************************************
-   * Test EventStoreEventBase.eventData edge cases
+   * Test EventStoreEvent.eventData edge cases
    ************************************************************/
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      EventStoreEventBase.eventData is undefined`, async () => {
+      EventStoreEvent.eventData is undefined`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
     const mockTestEvent = buildMockEventStoreEvent()
-    ;(mockTestEvent.eventData as TypeUtilsMutable<EventStoreEventBase>) = undefined as never
+    ;(mockTestEvent.eventData as TypeUtilsMutable<EventStoreEvent>) = undefined as never
     const result = await eventStoreClient.publish(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -131,11 +131,11 @@ describe(`Events EventStoreClient tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      EventStoreEventBase.eventData is null`, async () => {
+      EventStoreEvent.eventData is null`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
     const mockTestEvent = buildMockEventStoreEvent()
-    ;(mockTestEvent.eventData as TypeUtilsMutable<EventStoreEventBase>) = null as never
+    ;(mockTestEvent.eventData as TypeUtilsMutable<EventStoreEvent>) = null as never
     const result = await eventStoreClient.publish(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)

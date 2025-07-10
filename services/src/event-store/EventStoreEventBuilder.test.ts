@@ -1,5 +1,5 @@
 import { Result, Success } from '../errors/Result'
-import { EventStoreEventBase } from './EventStoreEventBase'
+import { EventStoreEvent } from './EventStoreEvent'
 import { EventClassMap, EventStoreEventBuilder, IncomingEventBridgeEvent } from './EventStoreEventBuilder'
 import { EventStoreEventData } from './EventStoreEventData'
 import { EventStoreEventName } from './EventStoreEventName'
@@ -13,7 +13,7 @@ const mockCreatedAt = new Date().toISOString()
  *
  */
 const MOCK_SOME_EVENT = 'MOCK_SOME_EVENT' as EventStoreEventName
-class MockSomeEvent extends EventStoreEventBase {
+class MockSomeEvent extends EventStoreEvent {
   public static readonly eventName = MOCK_SOME_EVENT
   private constructor(eventData: EventStoreEventData, idempotencyKey: string, createdAt: string) {
     super(MockSomeEvent.eventName, eventData, idempotencyKey, createdAt)
@@ -142,7 +142,7 @@ describe(`Test EventStoreEventBuilder`, () => {
    ************************************************************
    * Test expected results
    ************************************************************/
-  it(`returns the expected Success<EventStoreEventBase> if the execution path is
+  it(`returns the expected Success<EventStoreEvent> if the execution path is
       successful`, () => {
     const mockIncomingEvent = buildEventBridgeInput()
     const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
@@ -158,8 +158,8 @@ describe(`Test EventStoreEventBuilder`, () => {
     expect(eventResult).toStrictEqual(expectedResult)
   })
 
-  it(`returns the expected Success<EventStoreEventBase> where the event is an instance
-      of the correct event class if the execution path is successful`, () => {
+  it(`returns the expected Success<EventStoreEvent> where the event is an instance of
+      the correct event class if the execution path is successful`, () => {
     const mockIncomingEvent = buildEventBridgeInput()
     const eventResult = EventStoreEventBuilder.fromEventBridge(mockEventClassMap, mockIncomingEvent)
     expect(Result.isSuccess(eventResult)).toBe(true)

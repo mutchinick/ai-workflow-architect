@@ -1,11 +1,11 @@
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 import { Failure, Result, Success } from '../errors/Result'
-import { EventStoreEventBase } from './EventStoreEventBase'
+import { EventStoreEvent } from './EventStoreEvent'
 
 export interface IEventStoreClient {
   publish: (
-    event: EventStoreEventBase,
+    event: EventStoreEvent,
   ) => Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   >
@@ -24,7 +24,7 @@ export class EventStoreClient implements IEventStoreClient {
    *
    */
   public async publish(
-    event: EventStoreEventBase,
+    event: EventStoreEvent,
   ): Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   > {
@@ -55,10 +55,10 @@ export class EventStoreClient implements IEventStoreClient {
   /**
    *
    */
-  private validateInput(event: EventStoreEventBase): Success<void> | Failure<'InvalidArgumentsError'> {
+  private validateInput(event: EventStoreEvent): Success<void> | Failure<'InvalidArgumentsError'> {
     const logContext = 'EventStoreClient.validateInput'
 
-    if (event instanceof EventStoreEventBase === false) {
+    if (event instanceof EventStoreEvent === false) {
       const message = `Expected EventStoreEvent but got ${event}`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
       console.error(`${logContext} exit failure:`, { failure, event })
@@ -78,7 +78,7 @@ export class EventStoreClient implements IEventStoreClient {
   /**
    *
    */
-  private buildDdbCommand(event: EventStoreEventBase): Success<PutCommand> | Failure<'InvalidArgumentsError'> {
+  private buildDdbCommand(event: EventStoreEvent): Success<PutCommand> | Failure<'InvalidArgumentsError'> {
     const logContext = 'EventStoreClient.buildDdbCommand'
 
     // Perhaps we can prevent all errors by validating the arguments, but PutCommand

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { Failure, Result, Success } from '../errors/Result'
-import { EventStoreEventBase, EventStoreEventConstructor } from '../event-store/EventStoreEventBase'
+import { EventStoreEvent, EventStoreEventConstructor } from '../event-store/EventStoreEvent'
 import { EventStoreEventName } from '../event-store/EventStoreEventName'
 
 /**
@@ -22,7 +22,7 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowPromptCompletedEvent extends EventStoreEventBase {
+export class WorkflowPromptCompletedEvent extends EventStoreEvent {
   public static readonly eventName = EventStoreEventName.WORKFLOW_PROMPT_COMPLETED
 
   /**

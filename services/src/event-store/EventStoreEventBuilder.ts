@@ -3,7 +3,7 @@ import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventBridgeEvent } from 'aws-lambda'
 import { FailureKind } from '../errors/FailureKind'
 import { Failure, Result, Success } from '../errors/Result'
-import { EventStoreEventBase, EventStoreEventConstructor } from './EventStoreEventBase'
+import { EventStoreEvent, EventStoreEventConstructor } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
 
 /**
@@ -42,12 +42,12 @@ export class EventStoreEventBuilder {
   public static fromEventBridge(
     eventClassMap: EventClassMap,
     incomingEvent: IncomingEventBridgeEvent,
-  ): Success<EventStoreEventBase> | Failure<FailureKind> {
+  ): Success<EventStoreEvent> | Failure<FailureKind> {
     const logCtx = 'EventStoreEvent.fromEventBridge'
 
     try {
       const eventDetail = incomingEvent.detail
-      const unmarshalledEvent = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEventBase
+      const unmarshalledEvent = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEvent
       const eventName = unmarshalledEvent.eventName
       const EventClass = eventClassMap[eventName as keyof EventClassMap] as EventStoreEventConstructor
       const eventResult = EventClass.reconstitute(

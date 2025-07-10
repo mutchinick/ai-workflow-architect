@@ -2,11 +2,10 @@ import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 import { Failure, Result, Success } from '../errors/Result'
 import { EventStoreEvent } from './EventStoreEvent'
-import { EventStoreEventName } from './EventStoreEventName'
 
 export interface IEventStoreClient {
-  publish: <T extends EventStoreEventName>(
-    event: EventStoreEvent<T>,
+  publish: (
+    event: EventStoreEvent,
   ) => Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   >
@@ -24,8 +23,8 @@ export class EventStoreClient implements IEventStoreClient {
   /**
    *
    */
-  public async publish<T extends EventStoreEventName>(
-    event: EventStoreEvent<T>,
+  public async publish(
+    event: EventStoreEvent,
   ): Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   > {
@@ -56,9 +55,7 @@ export class EventStoreClient implements IEventStoreClient {
   /**
    *
    */
-  private validateInput<T extends EventStoreEventName>(
-    event: EventStoreEvent<T>,
-  ): Success<void> | Failure<'InvalidArgumentsError'> {
+  private validateInput(event: EventStoreEvent): Success<void> | Failure<'InvalidArgumentsError'> {
     const logContext = 'EventStoreClient.validateInput'
 
     if (event instanceof EventStoreEvent === false) {
@@ -81,15 +78,13 @@ export class EventStoreClient implements IEventStoreClient {
   /**
    *
    */
-  private buildDdbCommand<T extends EventStoreEventName>(
-    event: EventStoreEvent<T>,
-  ): Success<PutCommand> | Failure<'InvalidArgumentsError'> {
+  private buildDdbCommand(event: EventStoreEvent): Success<PutCommand> | Failure<'InvalidArgumentsError'> {
     const logContext = 'EventStoreClient.buildDdbCommand'
 
     // Perhaps we can prevent all errors by validating the arguments, but PutCommand
     // is an external dependency and we don't know what happens internally, so we try-catch
     try {
-      const tableName = process.env.EVENT_STORE_TABLE_NAME!
+      const tableName = process.env.EVENT_STORE_TABLE_NAME
 
       const { eventName, eventData, createdAt, idempotencyKey } = event
 
@@ -142,9 +137,8 @@ export class EventStoreClient implements IEventStoreClient {
     } catch (error) {
       console.error(`${logContext} error caught:`, { error, ddbCommand })
 
-      // When possible multiple transaction errors:
-      // Prioritize tagging the "Duplication Errors", because if we get one, this means that the operation
-      // has already executed successfully, thus we don't care about other possible transaction errors
+      // If the error is a ConditionalCheckFailedException, it means the item already exists
+      // and we can treat it as a duplicate event error.
       if (error instanceof ConditionalCheckFailedException) {
         const duplicationFailure = Result.makeFailure('DuplicateEventError', error, false)
         console.error(`${logContext} exit failure:`, { duplicationFailure, ddbCommand })

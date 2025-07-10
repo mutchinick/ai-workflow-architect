@@ -1,126 +1,36 @@
-import { AttributeValue } from '@aws-sdk/client-dynamodb'
-import { unmarshall } from '@aws-sdk/util-dynamodb'
-import { EventBridgeEvent } from 'aws-lambda'
-import { Failure, Result, Success } from '../errors/Result'
-import { WorkflowAgentsDeployedEventDefinition } from '../events/WorkflowAgentsDeployedEvent'
-import { WorkflowContinuedEventDefinition } from '../events/WorkflowContinuedEvent'
-import { WorkflowCreatedEventDefinition } from '../events/WorkflowCreatedEvent'
-import { WorkflowPromptCompletedEventDefinition } from '../events/WorkflowPromptCompletedEvent'
-import { WorkflowPromptEnhancedEventDefinition } from '../events/WorkflowPromptEnhancedEvent'
-import { WorkflowStartedEventDefinition } from '../events/WorkflowStartedEvent'
-import { EventStoreEventDefinition } from './EventStoreEventDefinition'
-import { EventStoreEventName } from './EventStoreEventName'
+import { FailureKind } from '../errors/FailureKind'
+import { Failure, Success } from '../errors/Result'
+import { EventStoreEventData } from './EventStoreEventData'
 
 /**
  *
  */
-type EventDetail = {
-  eventName: 'INSERT'
-  eventSource: 'aws:dynamodb'
-  eventID: string
-  eventVersion: string
-  awsRegion: string
-  dynamodb: {
-    NewImage: Record<string, AttributeValue>
-  }
-}
-
-export type IncomingEventBridgeEvent = EventBridgeEvent<string, EventDetail>
-
-/**
- *
- */
-const eventDefinitions = {
-  [EventStoreEventName.WORKFLOW_STARTED]: WorkflowStartedEventDefinition,
-  [EventStoreEventName.WORKFLOW_CONTINUED]: WorkflowContinuedEventDefinition,
-  [EventStoreEventName.WORKFLOW_CREATED]: WorkflowCreatedEventDefinition,
-  [EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED]: WorkflowAgentsDeployedEventDefinition,
-  [EventStoreEventName.WORKFLOW_PROMPT_ENHANCED]: WorkflowPromptEnhancedEventDefinition,
-  [EventStoreEventName.WORKFLOW_PROMPT_COMPLETED]: WorkflowPromptCompletedEventDefinition,
-}
-
-type DataType<T> = T extends EventStoreEventDefinition<infer D> ? D : never
-
-export type EventDataMap = {
-  [K in EventStoreEventName]: DataType<(typeof eventDefinitions)[K]>
-}
-
-/**
- *
- */
-export class EventStoreEvent<TEventName extends EventStoreEventName> {
+export abstract class EventStoreEvent {
   public readonly idempotencyKey: string
-  public readonly eventName: TEventName
-  public readonly eventData: EventDataMap[TEventName]
+  public readonly eventName: string
+  public readonly eventData: EventStoreEventData
   public readonly createdAt: string
 
   /**
    *
    */
-  private constructor(idempotencyKey: string, eventName: TEventName, validatedData: EventDataMap[TEventName]) {
+  protected constructor(eventName: string, eventData: EventStoreEventData, idempotencyKey: string, createdAt: string) {
     this.idempotencyKey = idempotencyKey
     this.eventName = eventName
-    this.eventData = validatedData
-    this.createdAt = new Date().toISOString()
+    this.eventData = eventData
+    this.createdAt = createdAt
   }
+}
 
-  /**
-   *
-   */
-  public static fromData<T extends EventStoreEventName>(
-    eventName: T,
-    eventData: EventDataMap[T],
-  ): Success<EventStoreEvent<T>> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'EventStoreEvent.fromData'
+/**
+ *
+ */
+export interface EventStoreEventConstructor {
+  fromData(eventData: EventStoreEventData): Success<EventStoreEvent> | Failure<FailureKind>
 
-    try {
-      const definition = eventDefinitions[eventName]
-      const validatedData = definition.parseValidate(eventData) as EventDataMap[T]
-      const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
-      const event = new EventStoreEvent(idempotencyKey, eventName, validatedData)
-      const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, eventName, eventData })
-      return eventResult
-    } catch (error) {
-      const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, eventName, eventData })
-      return failure
-    }
-  }
-
-  /**
-   *
-   */
-  public static fromEventBridge<T extends EventStoreEventName>(
-    incomingEvent: IncomingEventBridgeEvent,
-  ): Success<EventStoreEvent<T>> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'EventStoreEvent.fromEventBridge'
-
-    try {
-      const eventDetail = incomingEvent.detail
-      const incomingEventPayload = unmarshall(eventDetail.dynamodb.NewImage) as EventStoreEvent<T>
-      const eventName = incomingEventPayload.eventName
-      const definition = eventDefinitions[eventName]
-      const validatedData = definition.parseValidate(incomingEventPayload.eventData) as EventDataMap[T]
-      const idempotencyKey = definition.generateIdempotencyKey(validatedData as never)
-      const event = new EventStoreEvent(idempotencyKey, eventName, validatedData)
-      const eventResult = Result.makeSuccess(event)
-      console.info(`${logCtx} exit success:`, { eventResult, incomingEvent })
-      return eventResult
-    } catch (error) {
-      const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, incomingEvent })
-      return failure
-    }
-  }
-
-  /**
-   *
-   */
-  public static isOfType<T extends EventStoreEventName>(
-    event: EventStoreEvent<T>,
-    eventName: T,
-  ): this is EventStoreEvent<T> {
-    return event.eventName === eventName
-  }
+  reconstitute(
+    eventData: EventStoreEventData,
+    idempotencyKey: string,
+    createdAt: string,
+  ): Success<EventStoreEvent> | Failure<FailureKind>
 }

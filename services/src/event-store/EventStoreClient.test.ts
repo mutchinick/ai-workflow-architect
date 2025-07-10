@@ -1,7 +1,7 @@
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
-import { Result } from '../errors/Result'
 import { TypeUtilsMutable } from '../shared/TypeUtils'
+import { Result } from '../errors/Result'
 import { EventStoreClient } from './EventStoreClient'
 import { EventStoreEvent } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
@@ -12,7 +12,7 @@ process.env.EVENT_STORE_TABLE_NAME = mockEventStoreTableName
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
-function buildMockEventStoreEvent(): TypeUtilsMutable<EventStoreEvent<EventStoreEventName>> {
+function buildMockEventStoreEvent(): EventStoreEvent {
   const mockClass = {
     eventName: 'mockEventName' as unknown as EventStoreEventName,
     idempotencyKey: 'mockIdempotencyKey',
@@ -24,7 +24,7 @@ function buildMockEventStoreEvent(): TypeUtilsMutable<EventStoreEvent<EventStore
     createdAt: new Date().toISOString(),
   }
   Object.setPrototypeOf(mockClass, EventStoreEvent.prototype)
-  return mockClass as unknown as EventStoreEvent<EventStoreEventName>
+  return mockClass as unknown as EventStoreEvent
 }
 
 const mockEventStoreEvent = buildMockEventStoreEvent()
@@ -75,9 +75,7 @@ describe(`Events EventStoreClient tests`, () => {
   it(`does not return a Failure if the input EventStoreEvent is valid`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
-    const result = await eventStoreClient.publish(
-      mockEventStoreEvent as unknown as EventStoreEvent<EventStoreEventName>,
-    )
+    const result = await eventStoreClient.publish(mockEventStoreEvent as unknown as EventStoreEvent)
     expect(Result.isFailure(result)).toBe(false)
   })
 
@@ -107,8 +105,8 @@ describe(`Events EventStoreClient tests`, () => {
       EventStoreEvent is not an instance of the class`, async () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
-    const mockTestEvent = { ...mockEventStoreEvent }
-    const result = await eventStoreClient.publish(mockTestEvent)
+    const { idempotencyKey, eventName, eventData, createdAt } = mockEventStoreEvent
+    const result = await eventStoreClient.publish({ idempotencyKey, eventName, eventData, createdAt } as never)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
@@ -125,7 +123,7 @@ describe(`Events EventStoreClient tests`, () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
     const mockTestEvent = buildMockEventStoreEvent()
-    mockTestEvent.eventData = undefined as never
+    ;(mockTestEvent.eventData as TypeUtilsMutable<EventStoreEvent>) = undefined as never
     const result = await eventStoreClient.publish(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -137,7 +135,7 @@ describe(`Events EventStoreClient tests`, () => {
     const mockDdbDocClient = buildMockDdbDocClient_resolves()
     const eventStoreClient = new EventStoreClient(mockDdbDocClient)
     const mockTestEvent = buildMockEventStoreEvent()
-    mockTestEvent.eventData = null as never
+    ;(mockTestEvent.eventData as TypeUtilsMutable<EventStoreEvent>) = null as never
     const result = await eventStoreClient.publish(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)

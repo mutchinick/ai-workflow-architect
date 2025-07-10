@@ -8,10 +8,10 @@
     "lint": "eslint .",
     "test": "jest",
     "test:coverage": "jest --silent --coverage --verbose",
-    "test:build": "run-s format:check lint test:coverage build",
     "watch": "tsc -w",
     "build": "tsc --build -v -f",
-    "build:lint": "run-s format:check lint build"
+    "build:lint": "run-s format:check lint build",
+    "build:test": "run-s format:check lint test:coverage build"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",

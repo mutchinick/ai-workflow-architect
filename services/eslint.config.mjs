@@ -42,6 +42,7 @@ export default tseslint.config(
           argsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/no-base-to-string': 'off',
       '@typescript-eslint/restrict-template-expressions': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',

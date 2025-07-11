@@ -22,7 +22,7 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowPromptCompletedEvent extends EventStoreEvent {
+export class WorkflowPromptCompletedEvent extends EventStoreEvent<WorkflowPromptCompletedEventData> {
   public static readonly eventName = EventStoreEventName.WORKFLOW_PROMPT_COMPLETED
 
   /**

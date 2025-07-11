@@ -24,7 +24,7 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowCreatedEvent extends EventStoreEvent {
+export class WorkflowCreatedEvent extends EventStoreEvent<WorkflowCreatedEventData> {
   public static readonly eventName = EventStoreEventName.WORKFLOW_CREATED
 
   /**

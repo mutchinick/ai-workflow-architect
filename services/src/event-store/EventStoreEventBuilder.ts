@@ -55,6 +55,7 @@ export class EventStoreEventBuilder {
         unmarshalledEvent.idempotencyKey,
         unmarshalledEvent.createdAt,
       )
+
       if (Result.isFailure(eventResult)) {
         console.error(`${logCtx} exit failure:`, { eventResult, incomingEvent })
         return eventResult

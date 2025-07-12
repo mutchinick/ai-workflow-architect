@@ -187,7 +187,7 @@ describe(`Test WorkflowStartedEvent`, () => {
 
       const expectedEvent: WorkflowStartedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_STARTED,
+        eventName: EventStoreEventName.WORKFLOW_STARTED_EVENT,
         eventData: {
           workflowId: mockWorkflowStartedEventData.workflowId,
           started: mockWorkflowStartedEventData.started,
@@ -482,7 +482,7 @@ describe(`Test WorkflowStartedEvent`, () => {
 
       const expectedEvent: WorkflowStartedEvent = {
         idempotencyKey: testInput.idempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_STARTED,
+        eventName: EventStoreEventName.WORKFLOW_STARTED_EVENT,
         eventData: {
           workflowId: testInput.eventData.workflowId,
           started: testInput.eventData.started,

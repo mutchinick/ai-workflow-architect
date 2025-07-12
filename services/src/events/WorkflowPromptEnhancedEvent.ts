@@ -25,7 +25,7 @@ const eventSchema = z.object({
  *
  */
 export class WorkflowPromptEnhancedEvent extends EventStoreEvent<WorkflowPromptEnhancedEventData> {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_PROMPT_ENHANCED
+  public static readonly eventName = EventStoreEventName.WORKFLOW_PROMPT_ENHANCED_EVENT
 
   /**
    *

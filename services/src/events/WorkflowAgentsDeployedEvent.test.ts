@@ -200,7 +200,7 @@ describe(`Test WorkflowAgentsDeployedEvent`, () => {
 
       const expectedEvent: WorkflowAgentsDeployedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED,
+        eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
         eventData: {
           workflowId: mockEventData.workflowId,
           objectKey: mockEventData.objectKey,
@@ -509,7 +509,7 @@ describe(`Test WorkflowAgentsDeployedEvent`, () => {
 
       const expectedEvent: WorkflowAgentsDeployedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED,
+        eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
         eventData: {
           workflowId: testInput.eventData.workflowId,
           objectKey: testInput.eventData.objectKey,

@@ -23,7 +23,7 @@ const eventSchema = z.object({
  *
  */
 export class WorkflowStartedEvent extends EventStoreEvent<WorkflowStartedEventData> {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_STARTED
+  public static readonly eventName = EventStoreEventName.WORKFLOW_STARTED_EVENT
 
   /**
    *

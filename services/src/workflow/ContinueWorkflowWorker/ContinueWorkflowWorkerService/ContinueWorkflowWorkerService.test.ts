@@ -17,7 +17,7 @@ const mockStarted = true
 function buildMockIncomingWorkflowStartedEvent(): TypeUtilsMutable<WorkflowStartedEvent> {
   const mockClass: WorkflowStartedEvent = {
     idempotencyKey: mockIdempotencyKey,
-    eventName: EventStoreEventName.WORKFLOW_STARTED,
+    eventName: EventStoreEventName.WORKFLOW_STARTED_EVENT,
     eventData: {
       workflowId: mockWorkflowId,
       started: mockStarted,

@@ -303,7 +303,7 @@ describe(`Test WorkflowCreatedEvent`, () => {
 
       const expectedEvent: WorkflowCreatedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_CREATED,
+        eventName: EventStoreEventName.WORKFLOW_CREATED_EVENT,
         eventData: {
           workflowId: testInput.workflowId,
           promptEnhancementRounds: testInput.promptEnhancementRounds,
@@ -738,7 +738,7 @@ describe(`Test WorkflowCreatedEvent`, () => {
 
       const expectedEvent: WorkflowCreatedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_CREATED,
+        eventName: EventStoreEventName.WORKFLOW_CREATED_EVENT,
         eventData: {
           workflowId: testInput.eventData.workflowId,
           objectKey: testInput.eventData.objectKey,

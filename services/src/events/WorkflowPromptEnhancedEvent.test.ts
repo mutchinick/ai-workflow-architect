@@ -317,7 +317,7 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
 
       const expectedEvent: WorkflowPromptEnhancedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_PROMPT_ENHANCED,
+        eventName: EventStoreEventName.WORKFLOW_PROMPT_ENHANCED_EVENT,
         eventData: {
           workflowId: mockEventData.workflowId,
           objectKey: mockEventData.objectKey,
@@ -780,7 +780,7 @@ describe(`Test WorkflowPromptEnhancedEvent`, () => {
 
       const expectedEvent: WorkflowPromptEnhancedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_PROMPT_ENHANCED,
+        eventName: EventStoreEventName.WORKFLOW_PROMPT_ENHANCED_EVENT,
         eventData: {
           workflowId: testInput.eventData.workflowId,
           objectKey: testInput.eventData.objectKey,

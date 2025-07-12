@@ -200,7 +200,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
 
       const expectedEvent: WorkflowPromptCompletedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED,
+        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED_EVENT,
         eventData: {
           workflowId: mockEventData.workflowId,
           objectKey: mockEventData.objectKey,
@@ -509,7 +509,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
 
       const expectedEvent: WorkflowPromptCompletedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED,
+        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED_EVENT,
         eventData: {
           workflowId: testInput.eventData.workflowId,
           objectKey: testInput.eventData.objectKey,

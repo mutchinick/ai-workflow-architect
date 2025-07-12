@@ -14,7 +14,7 @@ export interface IContinueWorkflowWorkerController {
 }
 
 const validEventsMap: EventClassMap = {
-  [EventStoreEventName.WORKFLOW_STARTED]: WorkflowStartedEvent,
+  [EventStoreEventName.WORKFLOW_STARTED_EVENT]: WorkflowStartedEvent,
 }
 
 /**

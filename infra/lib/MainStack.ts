@@ -6,6 +6,7 @@ import { Construct } from 'constructs'
 import { DynamoDbConstruct } from './common/DynamoDbConstruct'
 import { EventBusConstruct } from './common/EventBusConstruct'
 import { S3BucketConstruct } from './common/S3BucketConstruct'
+import { TemplateServiceMainConstruct } from './template-service/TemplateServiceMainConstruct'
 
 export interface IMainStackProps extends cdk.StackProps {
   config: {
@@ -26,6 +27,12 @@ export class MainStack extends cdk.Stack {
     // Common
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { dynamoDbTable, eventBus, bucket } = this.createCommon(id)
+
+    // TemplateService
+    new TemplateServiceMainConstruct(this, `${id}-TemplateService`, {
+      dynamoDbTable,
+      eventBus,
+    })
   }
 
   /**

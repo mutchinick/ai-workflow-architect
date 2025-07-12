@@ -114,60 +114,21 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
   const envFilesConfig = [
     // API tests .env files (used by Rest Client files)
     {
-      envFilePath: '../_restclient/orders/.env',
+      envFilePath: '../_restclient/template-service/.env',
       envVariables: [
         {
-          cdkOutputName: `${outputPrefix}OrdersApiHttpApiUrl`,
-          envVarName: 'ORDERS_API_BASE_URL',
+          cdkOutputName: `${outputPrefix}TemplateServiceApiHttpApiUrl`,
+          envVarName: 'TEMPLATE_SERVICE_API_BASE_URL',
         },
       ],
     },
-    {
-      envFilePath: '../_restclient/testing/.env',
-      envVariables: [
-        {
-          cdkOutputName: `${outputPrefix}TestingApiHttpApiUrl`,
-          envVarName: 'TESTING_API_BASE_URL',
-        },
-      ],
-    },
-    {
-      envFilePath: '../_restclient/inventory/.env',
-      envVariables: [
-        {
-          cdkOutputName: `${outputPrefix}InventoryApiHttpApiUrl`,
-          envVarName: 'INVENTORY_API_BASE_URL',
-        },
-      ],
-    },
-    {
-      envFilePath: '../_restclient/payments/.env',
-      envVariables: [
-        {
-          cdkOutputName: `${outputPrefix}PaymentsApiHttpApiUrl`,
-          envVarName: 'PAYMENTS_API_BASE_URL',
-        },
-      ],
-    },
-    // Services .env file (used by init-database script)
+    // Services .env file (used by services)
     {
       envFilePath: '../services/.env',
       envVariables: [
         {
-          cdkOutputName: `${outputPrefix}InventoryApiHttpApiUrl`,
-          envVarName: 'INVENTORY_API_BASE_URL',
-        },
-        {
-          cdkOutputName: `${outputPrefix}OrdersApiHttpApiUrl`,
-          envVarName: 'ORDERS_API_BASE_URL',
-        },
-        {
-          cdkOutputName: `${outputPrefix}PaymentsApiHttpApiUrl`,
-          envVarName: 'PAYMENTS_API_BASE_URL',
-        },
-        {
-          cdkOutputName: `${outputPrefix}TestingApiHttpApiUrl`,
-          envVarName: 'TESTING_API_BASE_URL',
+          cdkOutputName: `${outputPrefix}TemplateServiceApiHttpApiUrl`,
+          envVarName: 'TEMPLATE_SERVICE_API_BASE_URL',
         },
       ],
     },

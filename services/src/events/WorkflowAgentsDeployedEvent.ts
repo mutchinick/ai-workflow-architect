@@ -22,8 +22,8 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowAgentsDeployedEvent extends EventStoreEvent {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED
+export class WorkflowAgentsDeployedEvent extends EventStoreEvent<WorkflowAgentsDeployedEventData> {
+  public static readonly eventName = EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT
 
   /**
    *

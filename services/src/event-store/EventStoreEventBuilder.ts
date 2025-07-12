@@ -43,7 +43,7 @@ export class EventStoreEventBuilder {
     eventClassMap: EventClassMap,
     incomingEvent: IncomingEventBridgeEvent,
   ): Success<EventStoreEvent> | Failure<FailureKind> {
-    const logCtx = 'EventStoreEvent.fromEventBridge'
+    const logCtx = 'EventStoreEventBuilder.fromEventBridge'
 
     try {
       const eventDetail = incomingEvent.detail
@@ -55,6 +55,7 @@ export class EventStoreEventBuilder {
         unmarshalledEvent.idempotencyKey,
         unmarshalledEvent.createdAt,
       )
+
       if (Result.isFailure(eventResult)) {
         console.error(`${logCtx} exit failure:`, { eventResult, incomingEvent })
         return eventResult

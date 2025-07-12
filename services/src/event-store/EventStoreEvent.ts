@@ -5,16 +5,16 @@ import { EventStoreEventData } from './EventStoreEventData'
 /**
  *
  */
-export abstract class EventStoreEvent {
+export abstract class EventStoreEvent<TEventStoreData extends EventStoreEventData = EventStoreEventData> {
   public readonly idempotencyKey: string
   public readonly eventName: string
-  public readonly eventData: EventStoreEventData
+  public readonly eventData: TEventStoreData
   public readonly createdAt: string
 
   /**
    *
    */
-  protected constructor(eventName: string, eventData: EventStoreEventData, idempotencyKey: string, createdAt: string) {
+  protected constructor(eventName: string, eventData: TEventStoreData, idempotencyKey: string, createdAt: string) {
     this.idempotencyKey = idempotencyKey
     this.eventName = eventName
     this.eventData = eventData

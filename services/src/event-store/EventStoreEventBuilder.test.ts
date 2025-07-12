@@ -106,7 +106,7 @@ describe(`Test EventStoreEventBuilder`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns the same Failure if Event.reconstitute returns a failure`, () => {
+    it(`propagates the Failure if Event.reconstitute returns a failure`, () => {
       const mockIncomingEvent = buildEventBridgeInput()
       const message = 'SomeSpecificErrorMessage'
       const expectedFailure = Result.makeFailure('SomeSpecificError' as never, message, false)

@@ -1,0 +1,38 @@
+@baseUrl = {{$dotenv TEMPLATE_SERVICE_API_BASE_URL}}
+
+### JOB_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/template-service/createJob
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "jobId": "ABC-1234"
+}
+
+### JOB_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/template-service/createJob
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "jobId": "XYZ-5678"
+}
+
+### RANDOM
+### JOB_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/template-service/createJob
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "jobId": "JOB-{{$randomInt 1000 9999}}"
+}
+
+### CORS QUERY
+### OPTIONS ###
+OPTIONS {{baseUrl}}/api/v1/template-service/createJob
+Origin: https://localhost
+Access-Control-Request-Method: POST

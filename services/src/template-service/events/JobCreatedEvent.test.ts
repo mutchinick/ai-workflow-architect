@@ -48,13 +48,13 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEventData edge cases
      ************************************************************/
-    it(`does not return a Failure if JobCreatedEventData is valid`, () => {
+    it(`does not return a Failure if the input JobCreatedEventData is valid`, () => {
       const testInput = buildTestInputData()
       const result = JobCreatedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData is undefined`, () => {
       const testInput = undefined as never
       const result = JobCreatedEvent.fromData(testInput)
@@ -63,7 +63,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData is null`, () => {
       const testInput = null as never
       const result = JobCreatedEvent.fromData(testInput)
@@ -78,7 +78,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEventData.jobId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.jobId is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = undefined as never
@@ -88,7 +88,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.jobId is null`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = null as never
@@ -98,7 +98,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.jobId is empty`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = ''
@@ -108,7 +108,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.jobId is blank`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = '      '
@@ -118,7 +118,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.jobId length < 6`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = '12345'
@@ -134,7 +134,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEventData.created edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.created is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.created = undefined as never
@@ -144,7 +144,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.created is null`, () => {
       const testInput = buildTestInputData()
       testInput.created = null as never
@@ -154,7 +154,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.created is false`, () => {
       const testInput = buildTestInputData()
       testInput.created = false as never
@@ -164,7 +164,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEventData.created is not a boolean`, () => {
       const testInput = buildTestInputData()
       testInput.created = 'true' as never
@@ -215,7 +215,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEvent edge cases
      ************************************************************/
-    it(`does not return a Failure if JobCreatedEvent is valid`, () => {
+    it(`does not return a Failure if the input JobCreatedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = JobCreatedEvent.reconstitute(testInput.eventData, testInput.idempotencyKey, testInput.createdAt)
       expect(Result.isFailure(result)).toBe(false)
@@ -227,7 +227,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEvent.idempotencyKey edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.idempotencyKey is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = undefined as never
@@ -237,7 +237,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.idempotencyKey is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = null as never
@@ -253,7 +253,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEvent.createdAt edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.createdAt is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = undefined as never
@@ -263,7 +263,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.createdAt is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = null as never
@@ -279,7 +279,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEvent.eventData edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = undefined as never
@@ -289,7 +289,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = null as never
@@ -305,7 +305,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEvent.eventData.jobId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.jobId is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = undefined as never
@@ -315,7 +315,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.jobId is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = null as never
@@ -325,7 +325,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.jobId is empty`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = ''
@@ -335,7 +335,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.jobId is blank`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = '      '
@@ -345,7 +345,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.jobId length < 6`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = '12345'
@@ -361,7 +361,7 @@ describe(`Test JobCreatedEvent`, () => {
      ************************************************************
      * Test JobCreatedEvent.eventData.created edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.created is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.created = undefined as never
@@ -371,7 +371,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.created is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.created = null as never
@@ -381,7 +381,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.created is false`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.created = false as never
@@ -391,7 +391,7 @@ describe(`Test JobCreatedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         JobCreatedEvent.eventData.created is not a boolean`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.created = 'true' as never

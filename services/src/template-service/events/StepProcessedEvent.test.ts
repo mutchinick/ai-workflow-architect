@@ -48,13 +48,13 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEventData edge cases
      ************************************************************/
-    it(`does not return a Failure if StepProcessedEventData is valid`, () => {
+    it(`does not return a Failure if the input StepProcessedEventData is valid`, () => {
       const testInput = buildTestInputData()
       const result = StepProcessedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData is undefined`, () => {
       const testInput = undefined as never
       const result = StepProcessedEvent.fromData(testInput)
@@ -63,7 +63,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData is null`, () => {
       const testInput = null as never
       const result = StepProcessedEvent.fromData(testInput)
@@ -78,7 +78,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEventData.jobId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.jobId is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = undefined as never
@@ -88,7 +88,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.jobId is null`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = null as never
@@ -98,7 +98,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.jobId is empty`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = ''
@@ -108,7 +108,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.jobId is blank`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = '      '
@@ -118,7 +118,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.jobId length < 6`, () => {
       const testInput = buildTestInputData()
       testInput.jobId = '12345'
@@ -134,7 +134,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEventData.processed edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.processed is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.processed = undefined as never
@@ -144,7 +144,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.processed is null`, () => {
       const testInput = buildTestInputData()
       testInput.processed = null as never
@@ -154,7 +154,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.processed is false`, () => {
       const testInput = buildTestInputData()
       testInput.processed = false as never
@@ -164,7 +164,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEventData.processed is not a boolean`, () => {
       const testInput = buildTestInputData()
       testInput.processed = 'true' as never
@@ -215,7 +215,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEvent edge cases
      ************************************************************/
-    it(`does not return a Failure if StepProcessedEvent is valid`, () => {
+    it(`does not return a Failure if the input StepProcessedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = StepProcessedEvent.reconstitute(testInput.eventData, testInput.idempotencyKey, testInput.createdAt)
       expect(Result.isFailure(result)).toBe(false)
@@ -227,7 +227,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEvent.idempotencyKey edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.idempotencyKey is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = undefined as never
@@ -237,7 +237,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.idempotencyKey is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = null as never
@@ -253,7 +253,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEvent.createdAt edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.createdAt is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = undefined as never
@@ -263,7 +263,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.createdAt is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = null as never
@@ -279,7 +279,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEvent.eventData edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = undefined as never
@@ -289,7 +289,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = null as never
@@ -305,7 +305,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEvent.eventData.jobId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.jobId is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = undefined as never
@@ -315,7 +315,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.jobId is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = null as never
@@ -325,7 +325,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.jobId is empty`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = ''
@@ -335,7 +335,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.jobId is blank`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = '      '
@@ -345,7 +345,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.jobId length < 6`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.jobId = '12345'
@@ -361,7 +361,7 @@ describe(`Test StepProcessedEvent`, () => {
      ************************************************************
      * Test StepProcessedEvent.eventData.processed edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.processed is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.processed = undefined as never
@@ -371,7 +371,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.processed is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.processed = null as never
@@ -381,7 +381,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.processed is false`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.processed = false as never
@@ -391,7 +391,7 @@ describe(`Test StepProcessedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         StepProcessedEvent.eventData.processed is not a boolean`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.processed = 'true' as never

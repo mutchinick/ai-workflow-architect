@@ -1,17 +1,17 @@
 import { z } from 'zod'
-import { Failure, Result, Success } from '../errors/Result'
-import { EventStoreEvent, EventStoreEventConstructor } from '../event-store/EventStoreEvent'
-import { EventStoreEventName } from '../event-store/EventStoreEventName'
+import { Failure, Result, Success } from '../../errors/Result'
+import { EventStoreEvent, EventStoreEventConstructor } from '../../event-store/EventStoreEvent'
+import { EventStoreEventName } from '../../event-store/EventStoreEventName'
 
 /**
  *
  */
 const dataSchema = z.object({
-  workflowId: z.string().trim().min(6),
-  continued: z.literal(true),
+  jobId: z.string().trim().min(6),
+  processed: z.literal(true),
 })
 
-export type WorkflowContinuedEventData = z.infer<typeof dataSchema>
+export type StepProcessedEventData = z.infer<typeof dataSchema>
 
 const eventSchema = z.object({
   eventData: dataSchema,
@@ -22,28 +22,26 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowContinuedEvent extends EventStoreEvent {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_CONTINUED
+export class StepProcessedEvent extends EventStoreEvent<StepProcessedEventData> {
+  public static readonly eventName = EventStoreEventName.STEP_PROCESSED_EVENT
 
   /**
    *
    */
-  private constructor(eventData: WorkflowContinuedEventData, idempotencyKey: string, createdAt: string) {
-    super(WorkflowContinuedEvent.eventName, eventData, idempotencyKey, createdAt)
+  private constructor(eventData: StepProcessedEventData, idempotencyKey: string, createdAt: string) {
+    super(StepProcessedEvent.eventName, eventData, idempotencyKey, createdAt)
   }
 
   /**
    *
    */
-  static fromData(
-    eventData: WorkflowContinuedEventData,
-  ): Success<WorkflowContinuedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowContinuedEvent.fromData'
+  static fromData(eventData: StepProcessedEventData): Success<StepProcessedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'StepProcessedEvent.fromData'
 
     try {
       const validData = dataSchema.parse(eventData)
       const idempotencyKey = this.generateIdempotencyKey(validData)
-      const event = new WorkflowContinuedEvent(validData, idempotencyKey, new Date().toISOString())
+      const event = new StepProcessedEvent(validData, idempotencyKey, new Date().toISOString())
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -57,22 +55,23 @@ export class WorkflowContinuedEvent extends EventStoreEvent {
   /**
    *
    */
-  private static generateIdempotencyKey(eventData: WorkflowContinuedEventData): string {
-    return `workflowId:${eventData.workflowId}:continued:${eventData.continued}`
+  private static generateIdempotencyKey(eventData: StepProcessedEventData): string {
+    return `jobId:${eventData.jobId}:processed:${eventData.processed}`
   }
 
   /**
    *
    */
   static reconstitute(
-    eventData: WorkflowContinuedEventData,
+    eventData: StepProcessedEventData,
     idempotencyKey: string,
     createdAt: string,
-  ): Success<WorkflowContinuedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowContinuedEvent.reconstitute'
+  ): Success<StepProcessedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'StepProcessedEvent.reconstitute'
+
     try {
       const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
-      const event = new WorkflowContinuedEvent(validEvent.eventData, idempotencyKey, createdAt)
+      const event = new StepProcessedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -89,4 +88,4 @@ export class WorkflowContinuedEvent extends EventStoreEvent {
  * by EventStoreEventConstructor. It will cause a compile-time error if
  * fromData or reconstitute are missing or have the wrong signature.
  */
-const _ConstructorCheck: EventStoreEventConstructor = WorkflowContinuedEvent
+const _ConstructorCheck: EventStoreEventConstructor = StepProcessedEvent

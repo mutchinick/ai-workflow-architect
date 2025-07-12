@@ -1,17 +1,17 @@
 import { z } from 'zod'
-import { Failure, Result, Success } from '../errors/Result'
-import { EventStoreEvent, EventStoreEventConstructor } from '../event-store/EventStoreEvent'
-import { EventStoreEventName } from '../event-store/EventStoreEventName'
+import { Failure, Result, Success } from '../../errors/Result'
+import { EventStoreEvent, EventStoreEventConstructor } from '../../event-store/EventStoreEvent'
+import { EventStoreEventName } from '../../event-store/EventStoreEventName'
 
 /**
  *
  */
 const dataSchema = z.object({
-  workflowId: z.string().trim().min(6),
-  started: z.literal(true),
+  jobId: z.string().trim().min(6),
+  created: z.literal(true),
 })
 
-export type WorkflowStartedEventData = z.infer<typeof dataSchema>
+export type JobCreatedEventData = z.infer<typeof dataSchema>
 
 const eventSchema = z.object({
   eventData: dataSchema,
@@ -22,28 +22,26 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowStartedEvent extends EventStoreEvent {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_STARTED
+export class JobCreatedEvent extends EventStoreEvent<JobCreatedEventData> {
+  public static readonly eventName = EventStoreEventName.JOB_CREATED_EVENT
 
   /**
    *
    */
-  private constructor(eventData: WorkflowStartedEventData, idempotencyKey: string, createdAt: string) {
-    super(WorkflowStartedEvent.eventName, eventData, idempotencyKey, createdAt)
+  private constructor(eventData: JobCreatedEventData, idempotencyKey: string, createdAt: string) {
+    super(JobCreatedEvent.eventName, eventData, idempotencyKey, createdAt)
   }
 
   /**
    *
    */
-  static fromData(
-    eventData: WorkflowStartedEventData,
-  ): Success<WorkflowStartedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowStartedEvent.fromData'
+  static fromData(eventData: JobCreatedEventData): Success<JobCreatedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'JobCreatedEvent.fromData'
 
     try {
       const validData = dataSchema.parse(eventData)
       const idempotencyKey = this.generateIdempotencyKey(validData)
-      const event = new WorkflowStartedEvent(validData, idempotencyKey, new Date().toISOString())
+      const event = new JobCreatedEvent(validData, idempotencyKey, new Date().toISOString())
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -57,22 +55,23 @@ export class WorkflowStartedEvent extends EventStoreEvent {
   /**
    *
    */
-  private static generateIdempotencyKey(eventData: WorkflowStartedEventData): string {
-    return `workflowId:${eventData.workflowId}:${eventData.started}`
+  private static generateIdempotencyKey(eventData: JobCreatedEventData): string {
+    return `jobId:${eventData.jobId}:created:${eventData.created}`
   }
 
   /**
    *
    */
   static reconstitute(
-    eventData: WorkflowStartedEventData,
+    eventData: JobCreatedEventData,
     idempotencyKey: string,
     createdAt: string,
-  ): Success<WorkflowStartedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowStartedEvent.reconstitute'
+  ): Success<JobCreatedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'JobCreatedEvent.reconstitute'
+
     try {
       const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
-      const event = new WorkflowStartedEvent(validEvent.eventData, idempotencyKey, createdAt)
+      const event = new JobCreatedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -89,4 +88,4 @@ export class WorkflowStartedEvent extends EventStoreEvent {
  * by EventStoreEventConstructor. It will cause a compile-time error if
  * fromData or reconstitute are missing or have the wrong signature.
  */
-const _ConstructorCheck: EventStoreEventConstructor = WorkflowStartedEvent
+const _ConstructorCheck: EventStoreEventConstructor = JobCreatedEvent

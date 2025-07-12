@@ -28,26 +28,26 @@ export class EventStoreClient implements IEventStoreClient {
   ): Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   > {
-    const logContext = 'EventStoreClient.raiseSkuRestockedEvent'
-    console.info(`${logContext} init:`)
+    const logCtx = 'EventStoreClient.publish'
+    console.info(`${logCtx} init:`)
 
     const inputValidationResult = this.validateInput(event)
     if (Result.isFailure(inputValidationResult)) {
-      console.error(`${logContext} exit failure:`, { inputValidationResult, event })
+      console.error(`${logCtx} exit failure:`, { inputValidationResult, event })
       return inputValidationResult
     }
 
     const buildCommandResult = this.buildDdbCommand(event)
     if (Result.isFailure(buildCommandResult)) {
-      console.error(`${logContext} exit failure:`, { buildCommandResult, event })
+      console.error(`${logCtx} exit failure:`, { buildCommandResult, event })
       return buildCommandResult
     }
 
     const ddbCommand = buildCommandResult.value
     const sendCommandResult = await this.sendDdbCommand(ddbCommand)
     Result.isFailure(sendCommandResult)
-      ? console.error(`${logContext} exit failure:`, { sendCommandResult, event })
-      : console.info(`${logContext} exit success:`, { sendCommandResult, event })
+      ? console.error(`${logCtx} exit failure:`, { sendCommandResult, event })
+      : console.info(`${logCtx} exit success:`, { sendCommandResult, event })
 
     return sendCommandResult
   }
@@ -56,19 +56,19 @@ export class EventStoreClient implements IEventStoreClient {
    *
    */
   private validateInput(event: EventStoreEvent): Success<void> | Failure<'InvalidArgumentsError'> {
-    const logContext = 'EventStoreClient.validateInput'
+    const logCtx = 'EventStoreClient.validateInput'
 
     if (event instanceof EventStoreEvent === false) {
       const message = `Expected EventStoreEvent but got ${event}`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
-      console.error(`${logContext} exit failure:`, { failure, event })
+      console.error(`${logCtx} exit failure:`, { failure, event })
       return failure
     }
 
     if (event.eventData == null) {
       const message = `Expected EventStoreEvent.eventData but got ${event.eventData}`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
-      console.error(`${logContext} exit failure:`, { failure, event })
+      console.error(`${logCtx} exit failure:`, { failure, event })
       return failure
     }
 
@@ -79,7 +79,7 @@ export class EventStoreClient implements IEventStoreClient {
    *
    */
   private buildDdbCommand(event: EventStoreEvent): Success<PutCommand> | Failure<'InvalidArgumentsError'> {
-    const logContext = 'EventStoreClient.buildDdbCommand'
+    const logCtx = 'EventStoreClient.buildDdbCommand'
 
     // Perhaps we can prevent all errors by validating the arguments, but PutCommand
     // is an external dependency and we don't know what happens internally, so we try-catch
@@ -113,9 +113,9 @@ export class EventStoreClient implements IEventStoreClient {
       })
       return Result.makeSuccess(ddbCommand)
     } catch (error) {
-      console.error(`${logContext} error caught:`, { error, event })
+      console.error(`${logCtx} error caught:`, { error, event })
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logContext} exit failure:`, { failure, event })
+      console.error(`${logCtx} exit failure:`, { failure, event })
       return failure
     }
   }
@@ -126,27 +126,27 @@ export class EventStoreClient implements IEventStoreClient {
   private async sendDdbCommand(
     ddbCommand: PutCommand,
   ): Promise<Success<void> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>> {
-    const logContext = 'EventStoreClient.sendDdbCommand'
-    console.info(`${logContext} init:`)
+    const logCtx = 'EventStoreClient.sendDdbCommand'
+    console.info(`${logCtx} init:`)
 
     try {
       await this.ddbDocClient.send(ddbCommand)
       const sendCommandResult = Result.makeSuccess()
-      console.info(`${logContext} exit success:`, { sendCommandResult, ddbCommand })
+      console.info(`${logCtx} exit success:`, { sendCommandResult, ddbCommand })
       return sendCommandResult
     } catch (error) {
-      console.error(`${logContext} error caught:`, { error, ddbCommand })
+      console.error(`${logCtx} error caught:`, { error, ddbCommand })
 
       // If the error is a ConditionalCheckFailedException, it means the item already exists
       // and we can treat it as a duplicate event error.
       if (error instanceof ConditionalCheckFailedException) {
         const duplicationFailure = Result.makeFailure('DuplicateEventError', error, false)
-        console.error(`${logContext} exit failure:`, { duplicationFailure, ddbCommand })
+        console.error(`${logCtx} exit failure:`, { duplicationFailure, ddbCommand })
         return duplicationFailure
       }
 
       const unrecognizedFailure = Result.makeFailure('UnrecognizedError', error, true)
-      console.error(`${logContext} exit failure:`, { unrecognizedFailure, ddbCommand })
+      console.error(`${logCtx} exit failure:`, { unrecognizedFailure, ddbCommand })
       return unrecognizedFailure
     }
   }

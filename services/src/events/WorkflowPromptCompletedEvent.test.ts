@@ -51,13 +51,13 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEventData edge cases
      ************************************************************/
-    it(`does not return a Failure if WorkflowPromptCompletedEventData is valid`, () => {
+    it(`does not return a Failure if the input WorkflowPromptCompletedEventData is valid`, () => {
       const mockEventData = buildTestInputData()
       const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
       expect(Result.isFailure(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData is undefined`, () => {
       const mockEventData = undefined as unknown as WorkflowPromptCompletedEventData
       const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
@@ -66,7 +66,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData is null`, () => {
       const mockEventData = null as unknown as WorkflowPromptCompletedEventData
       const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
@@ -81,7 +81,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEventData.workflowId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.workflowId is undefined`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.workflowId = undefined as never
@@ -91,7 +91,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.workflowId is null`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.workflowId = null as never
@@ -101,7 +101,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.workflowId is empty`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.workflowId = ''
@@ -111,7 +111,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.workflowId is blank`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.workflowId = '      '
@@ -121,8 +121,8 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
-        WorkflowPromptCompletedEventData.workflowId has length < 6`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowPromptCompletedEventData.workflowId length < 6`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.workflowId = '12345'
       const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
@@ -137,7 +137,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEventData.objectKey edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.objectKey is undefined`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.objectKey = undefined as never
@@ -147,7 +147,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.objectKey is null`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.objectKey = null as never
@@ -157,7 +157,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.objectKey is empty`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.objectKey = ''
@@ -167,7 +167,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEventData.objectKey is blank`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.objectKey = '      '
@@ -177,8 +177,8 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
-        WorkflowPromptCompletedEventData.objectKey has length < 6`, () => {
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowPromptCompletedEventData.objectKey length < 6`, () => {
       const mockEventData = buildTestInputData()
       mockEventData.objectKey = '12345'
       const result = WorkflowPromptCompletedEvent.fromData(mockEventData)
@@ -200,7 +200,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
 
       const expectedEvent: WorkflowPromptCompletedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED,
+        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED_EVENT,
         eventData: {
           workflowId: mockEventData.workflowId,
           objectKey: mockEventData.objectKey,
@@ -228,7 +228,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEvent edge cases
      ************************************************************/
-    it(`does not return a Failure if WorkflowPromptCompletedEvent is valid`, () => {
+    it(`does not return a Failure if the input WorkflowPromptCompletedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
       const result = WorkflowPromptCompletedEvent.reconstitute(
         testInput.eventData,
@@ -244,7 +244,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEvent.idempotencyKey edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.idempotencyKey is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = undefined as never
@@ -258,7 +258,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.idempotencyKey is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = null as never
@@ -278,7 +278,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEvent.createdAt edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.createdAt is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = undefined as never
@@ -292,7 +292,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.createdAt is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = null as never
@@ -312,7 +312,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      * ************************************************************
      * Test WorkflowPromptCompletedEvent.eventData edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = undefined as never
@@ -326,7 +326,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = null as never
@@ -346,7 +346,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEvent.eventData.workflowId edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.workflowId is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = undefined as never
@@ -360,7 +360,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.workflowId is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = null as never
@@ -374,7 +374,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.workflowId is empty`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = ''
@@ -388,7 +388,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.workflowId is blank`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = '      '
@@ -402,7 +402,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.workflowId length < 6`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = '12345'
@@ -422,7 +422,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
      ************************************************************
      * Test WorkflowPromptCompletedEvent.eventData.objectKey edge cases
      ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.objectKey is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = undefined as never
@@ -436,7 +436,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.objectKey is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = null as never
@@ -450,7 +450,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.objectKey is empty`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = ''
@@ -464,7 +464,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.objectKey is blank`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = '      '
@@ -478,7 +478,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
         WorkflowPromptCompletedEvent.eventData.objectKey length < 6`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = '12345'
@@ -509,7 +509,7 @@ describe(`Test WorkflowPromptCompletedEvent`, () => {
 
       const expectedEvent: WorkflowPromptCompletedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED,
+        eventName: EventStoreEventName.WORKFLOW_PROMPT_COMPLETED_EVENT,
         eventData: {
           workflowId: testInput.eventData.workflowId,
           objectKey: testInput.eventData.objectKey,

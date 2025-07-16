@@ -39,13 +39,13 @@ function buildValidWorkflow(): Workflow {
   return workflow
 }
 
-function buildMockS3Client_resolves(): S3Client {
+function buildMockS3Client_resolves(value?: string): S3Client {
   const readWorkflow = buildValidWorkflow()
   const readWorkflowSerialized = JSON.stringify(readWorkflow)
   return {
     send: jest.fn().mockResolvedValue({
       Body: {
-        transformToString: jest.fn().mockResolvedValue(readWorkflowSerialized),
+        transformToString: jest.fn().mockResolvedValue(value ?? readWorkflowSerialized),
       },
     }),
   } as unknown as S3Client
@@ -62,6 +62,10 @@ function buildMockS3Client_throws(error?: unknown): S3Client {
  * ReadWorkflowClient tests
  ************************************************************/
 describe(`Workflow ReadWorkflowClient tests`, () => {
+  beforeEach(() => {
+    process.env.WORKFLOW_BUCKET_NAME = mockBucket
+  })
+
   /*
    *
    ************************************************************
@@ -107,6 +111,16 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the env var process.env.WORKFLOW_BUCKET_NAME is empty`, async () => {
+    const mockS3Client = buildMockS3Client_resolves()
+    const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
+    process.env.WORKFLOW_BUCKET_NAME = ''
+    const result = await readWorkflowClient.read(mockObjectKey)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
   /*
    *
    ************************************************************
@@ -116,6 +130,7 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
     const mockS3Client = buildMockS3Client_resolves()
     const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
     await readWorkflowClient.read(mockObjectKey)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockS3Client.send).toHaveBeenCalledTimes(1)
   })
 
@@ -123,6 +138,7 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
     const mockS3Client = buildMockS3Client_resolves()
     const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
     await readWorkflowClient.read(mockObjectKey)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockS3Client.send).toHaveBeenCalledWith(
       expect.objectContaining({
         input: {
@@ -131,6 +147,24 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
         },
       }),
     )
+  })
+
+  it(`returns a transient Failure of kind WorkflowFileCorruptedError if S3Client.send returns an invalid Workflow file`, async () => {
+    const mockS3Client = buildMockS3Client_resolves('{"invalid": "data"}')
+    const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
+    const result = await readWorkflowClient.read(mockObjectKey)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'WorkflowFileCorruptedError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  it(`returns a transient Failure of kind WorkflowFileCorruptedError if S3Client.send returns and empty string`, async () => {
+    const mockS3Client = buildMockS3Client_resolves('')
+    const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
+    const result = await readWorkflowClient.read(mockObjectKey)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'WorkflowFileCorruptedError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
   })
 
   it(`returns a transient Failure of kind UnrecognizedError if S3Client.send throws an

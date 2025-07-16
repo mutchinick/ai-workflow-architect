@@ -54,6 +54,10 @@ function buildMockS3Client_throws(error?: unknown): S3Client {
  * SaveWorkflowClient tests
  ************************************************************/
 describe(`Workflow SaveWorkflowClient tests`, () => {
+  beforeEach(() => {
+    process.env.WORKFLOW_BUCKET_NAME = mockBucket
+  })
+
   /*
    *
    ************************************************************
@@ -95,6 +99,19 @@ describe(`Workflow SaveWorkflowClient tests`, () => {
     const saveWorkflow = new SaveWorkflowClient(mockS3Client)
     const props = buildMockWorkflowProps()
     const workflow = { ...props } as never
+    const result = await saveWorkflow.save(workflow)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the env var process.env.WORKFLOW_BUCKET_NAME is empty`, async () => {
+    const mockS3Client = buildMockS3Client_resolves()
+    const saveWorkflow = new SaveWorkflowClient(mockS3Client)
+    const props = buildMockWorkflowProps()
+    const workflowResult = Workflow.fromProps(props)
+    const workflow = Result.getSuccessValueOrThrow(workflowResult)
+    process.env.WORKFLOW_BUCKET_NAME = ''
     const result = await saveWorkflow.save(workflow)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -158,6 +175,7 @@ describe(`Workflow SaveWorkflowClient tests`, () => {
     const saveWorkflow = new SaveWorkflowClient(mockS3Client)
     const workflow = buildValidWorkflow()
     await saveWorkflow.save(workflow)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockS3Client.send).toHaveBeenCalledTimes(1)
   })
 
@@ -166,6 +184,7 @@ describe(`Workflow SaveWorkflowClient tests`, () => {
     const saveWorkflow = new SaveWorkflowClient(mockS3Client)
     const workflow = buildValidWorkflow()
     await saveWorkflow.save(workflow)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(mockS3Client.send).toHaveBeenCalledWith(
       expect.objectContaining({
         input: {

@@ -11,15 +11,15 @@ jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
 const mockWorkflowId = 'mockWorkflowId'
 const mockQuery = 'mockQuery'
-const mockPromptEnhanceRounds = 3
-const mockResponseEnhanceRounds = 2
+const mockEnhancePromptRounds = 3
+const mockEnhanceResultRounds = 2
 const mockObjectKey = `workflow-${mockWorkflowId}-${new Date().toISOString()}-created`
 
 function buildMockIncomingRequest(): TypeUtilsMutable<IncomingSendQueryRequest> {
   const mockClass = IncomingSendQueryRequest.fromProps({
     query: mockQuery,
-    promptEnhanceRounds: 3,
-    responseEnhanceRounds: 2,
+    enhancePromptRounds: 3,
+    enhanceResultRounds: 2,
   })
   return Result.getSuccessValueOrThrow(mockClass)
 }
@@ -50,7 +50,7 @@ function buildMockEventStoreClient_fails(
   return { publish: jest.fn().mockResolvedValue(mockFailure) }
 }
 
-describe(`Template Service SendQueryApi SendQueryApiService tests`, () => {
+describe(`Workflow Service SendQueryApi SendQueryApiService tests`, () => {
   /*
    *
    *
@@ -135,8 +135,8 @@ describe(`Template Service SendQueryApi SendQueryApiService tests`, () => {
     const mockWorkflowCreatedEventInput: WorkflowCreatedEventData = {
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
-      promptEnhanceRounds: mockPromptEnhanceRounds,
-      responseEnhanceRounds: mockResponseEnhanceRounds,
+      enhancePromptRounds: mockEnhancePromptRounds,
+      enhanceResultRounds: mockEnhanceResultRounds,
     }
     const expectedWorkflowCreatedEventResult = WorkflowCreatedEvent.fromData(mockWorkflowCreatedEventInput)
     const expectedWorkflowCreatedEvent = Result.getSuccessValueOrThrow(expectedWorkflowCreatedEventResult)
@@ -168,8 +168,8 @@ describe(`Template Service SendQueryApi SendQueryApiService tests`, () => {
     const result = await sendQueryApiService.sendQuery(mockIncomingRequest)
     const expectedOutput: SendQueryApiServiceOutput = {
       query: mockIncomingRequest.query,
-      promptEnhanceRounds: mockIncomingRequest.promptEnhanceRounds,
-      responseEnhanceRounds: mockIncomingRequest.responseEnhanceRounds,
+      enhancePromptRounds: mockIncomingRequest.enhancePromptRounds,
+      enhanceResultRounds: mockIncomingRequest.enhanceResultRounds,
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
     }
@@ -185,8 +185,8 @@ describe(`Template Service SendQueryApi SendQueryApiService tests`, () => {
     const result = await sendQueryApiService.sendQuery(mockIncomingRequest)
     const expectedOutput: SendQueryApiServiceOutput = {
       query: mockIncomingRequest.query,
-      promptEnhanceRounds: mockIncomingRequest.promptEnhanceRounds,
-      responseEnhanceRounds: mockIncomingRequest.responseEnhanceRounds,
+      enhancePromptRounds: mockIncomingRequest.enhancePromptRounds,
+      enhanceResultRounds: mockIncomingRequest.enhanceResultRounds,
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
     }

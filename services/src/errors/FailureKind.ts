@@ -1,1 +1,7 @@
-export type FailureKind = 'UnrecognizedError' | 'InvalidArgumentsError' | 'DuplicateEventError'
+export type FailureKind =
+  | 'UnrecognizedError'
+  | 'InvalidArgumentsError'
+  | 'DuplicateEventError'
+  | 'DuplicateWorkflowError'
+  | 'WorkflowFileNotFoundError'
+  | 'WorkflowFileCorruptedError'

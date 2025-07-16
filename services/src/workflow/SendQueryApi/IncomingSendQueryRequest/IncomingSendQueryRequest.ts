@@ -4,8 +4,8 @@ import { Failure, Result, Success } from '../../../errors/Result'
 // Zod schema
 const propsSchema = z.object({
   query: z.string().trim().min(6),
-  promptEnhanceRounds: z.number().int().min(1).max(10),
-  responseEnhanceRounds: z.number().int().min(1).max(10),
+  enhancePromptRounds: z.number().int().min(1).max(10),
+  enhanceResultRounds: z.number().int().min(1).max(10),
 })
 
 export type IncomingSendQueryRequestProps = z.infer<typeof propsSchema>
@@ -19,8 +19,8 @@ export class IncomingSendQueryRequest implements IncomingSendQueryRequestProps {
    */
   private constructor(
     public readonly query: string,
-    public readonly promptEnhanceRounds: number,
-    public readonly responseEnhanceRounds: number,
+    public readonly enhancePromptRounds: number,
+    public readonly enhanceResultRounds: number,
   ) {}
 
   /**
@@ -38,8 +38,8 @@ export class IncomingSendQueryRequest implements IncomingSendQueryRequestProps {
       return propsResult
     }
 
-    const { query, promptEnhanceRounds, responseEnhanceRounds } = propsResult.value
-    const incomingSendQueryRequest = new IncomingSendQueryRequest(query, promptEnhanceRounds, responseEnhanceRounds)
+    const { query, enhancePromptRounds, enhanceResultRounds } = propsResult.value
+    const incomingSendQueryRequest = new IncomingSendQueryRequest(query, enhancePromptRounds, enhanceResultRounds)
     const incomingSendQueryRequestResult = Result.makeSuccess(incomingSendQueryRequest)
     console.info(`${logCtx} exit success:`, { incomingSendQueryRequestResult })
     return incomingSendQueryRequestResult

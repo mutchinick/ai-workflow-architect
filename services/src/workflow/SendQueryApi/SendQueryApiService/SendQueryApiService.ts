@@ -96,12 +96,12 @@ export class SendQueryApiService implements ISendQueryApiService {
     const logCtx = 'SendQueryApiService.publishWorkflowCreatedEvent'
     console.info(`${logCtx} init:`, { incomingRequest })
 
-    const { promptEnhanceRounds, responseEnhanceRounds } = incomingRequest
+    const { enhancePromptRounds, enhanceResultRounds } = incomingRequest
     const eventData: WorkflowCreatedEventData = {
       workflowId,
       objectKey,
-      promptEnhanceRounds,
-      responseEnhanceRounds,
+      enhancePromptRounds,
+      enhanceResultRounds,
     }
 
     const buildEventResult = WorkflowCreatedEvent.fromData(eventData)

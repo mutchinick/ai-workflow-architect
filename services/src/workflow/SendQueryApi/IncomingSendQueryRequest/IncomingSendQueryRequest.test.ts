@@ -2,19 +2,19 @@ import { Result } from '../../../errors/Result'
 import { IncomingSendQueryRequest, IncomingSendQueryRequestProps } from './IncomingSendQueryRequest'
 
 const mockQuery = 'mockQuery'
-const mockPromptEnhanceRounds = 3
-const mockResponseEnhanceRounds = 2
+const mockEnhancePromptRounds = 3
+const mockEnhanceResultRounds = 2
 
 function buildMockIncomingSendQueryRequestProps(): IncomingSendQueryRequestProps {
   const mockValidRequestProps: IncomingSendQueryRequestProps = {
     query: mockQuery,
-    promptEnhanceRounds: mockPromptEnhanceRounds,
-    responseEnhanceRounds: mockResponseEnhanceRounds,
+    enhancePromptRounds: mockEnhancePromptRounds,
+    enhanceResultRounds: mockEnhanceResultRounds,
   }
   return mockValidRequestProps
 }
 
-describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
+describe(`Workflow Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   /*
    *
    *
@@ -105,12 +105,12 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
    *
    *
    ************************************************************
-   * Test IncomingSendQueryRequestProps.promptEnhanceRounds edge cases
+   * Test IncomingSendQueryRequestProps.enhancePromptRounds edge cases
    ************************************************************/
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.promptEnhanceRounds is undefined`, () => {
+      IncomingSendQueryRequestProps.enhancePromptRounds is undefined`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.promptEnhanceRounds = undefined as never
+    mockIncomingSendQueryRequestProps.enhancePromptRounds = undefined as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -118,9 +118,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.promptEnhanceRounds is null`, () => {
+      IncomingSendQueryRequestProps.enhancePromptRounds is null`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.promptEnhanceRounds = null as never
+    mockIncomingSendQueryRequestProps.enhancePromptRounds = null as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -128,9 +128,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.promptEnhanceRounds is < 1`, () => {
+      IncomingSendQueryRequestProps.enhancePromptRounds is < 1`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.promptEnhanceRounds = 0 as never
+    mockIncomingSendQueryRequestProps.enhancePromptRounds = 0 as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -138,9 +138,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.promptEnhanceRounds is > 10`, () => {
+      IncomingSendQueryRequestProps.enhancePromptRounds is > 10`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.promptEnhanceRounds = 11 as never
+    mockIncomingSendQueryRequestProps.enhancePromptRounds = 11 as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -148,9 +148,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.promptEnhanceRounds is not an integer`, () => {
+      IncomingSendQueryRequestProps.enhancePromptRounds is not an integer`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.promptEnhanceRounds = 3.45 as never
+    mockIncomingSendQueryRequestProps.enhancePromptRounds = 3.45 as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -158,9 +158,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.promptEnhanceRounds is not an number`, () => {
+      IncomingSendQueryRequestProps.enhancePromptRounds is not an number`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.promptEnhanceRounds = '3' as never
+    mockIncomingSendQueryRequestProps.enhancePromptRounds = '3' as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -171,12 +171,12 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
    *
    *
    ************************************************************
-   * Test IncomingSendQueryRequestProps.responseEnhanceRounds edge cases
+   * Test IncomingSendQueryRequestProps.enhanceResultRounds edge cases
    ************************************************************/
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.responseEnhanceRounds is undefined`, () => {
+      IncomingSendQueryRequestProps.enhanceResultRounds is undefined`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.responseEnhanceRounds = undefined as never
+    mockIncomingSendQueryRequestProps.enhanceResultRounds = undefined as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -184,9 +184,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.responseEnhanceRounds is null`, () => {
+      IncomingSendQueryRequestProps.enhanceResultRounds is null`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.responseEnhanceRounds = null as never
+    mockIncomingSendQueryRequestProps.enhanceResultRounds = null as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -194,9 +194,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.responseEnhanceRounds is < 1`, () => {
+      IncomingSendQueryRequestProps.enhanceResultRounds is < 1`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.responseEnhanceRounds = 0 as never
+    mockIncomingSendQueryRequestProps.enhanceResultRounds = 0 as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -204,9 +204,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.responseEnhanceRounds is > 10`, () => {
+      IncomingSendQueryRequestProps.enhanceResultRounds is > 10`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.responseEnhanceRounds = 11 as never
+    mockIncomingSendQueryRequestProps.enhanceResultRounds = 11 as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -214,9 +214,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.responseEnhanceRounds is not an integer`, () => {
+      IncomingSendQueryRequestProps.enhanceResultRounds is not an integer`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.responseEnhanceRounds = 3.45 as never
+    mockIncomingSendQueryRequestProps.enhanceResultRounds = 3.45 as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -224,9 +224,9 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      IncomingSendQueryRequestProps.responseEnhanceRounds is not an number`, () => {
+      IncomingSendQueryRequestProps.enhanceResultRounds is not an number`, () => {
     const mockIncomingSendQueryRequestProps = buildMockIncomingSendQueryRequestProps()
-    mockIncomingSendQueryRequestProps.responseEnhanceRounds = '3' as never
+    mockIncomingSendQueryRequestProps.enhanceResultRounds = '3' as never
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -245,8 +245,8 @@ describe(`Template Service SendQueryApi IncomingSendQueryRequest tests`, () => {
     const result = IncomingSendQueryRequest.fromProps(mockIncomingSendQueryRequestProps)
     const expectedRequest: IncomingSendQueryRequest = {
       query: mockIncomingSendQueryRequestProps.query,
-      promptEnhanceRounds: mockIncomingSendQueryRequestProps.promptEnhanceRounds,
-      responseEnhanceRounds: mockIncomingSendQueryRequestProps.responseEnhanceRounds,
+      enhancePromptRounds: mockIncomingSendQueryRequestProps.enhancePromptRounds,
+      enhanceResultRounds: mockIncomingSendQueryRequestProps.enhanceResultRounds,
     }
     Object.setPrototypeOf(expectedRequest, IncomingSendQueryRequest.prototype)
     const expectedResult = Result.makeSuccess(expectedRequest)

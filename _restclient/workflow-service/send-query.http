@@ -21,7 +21,7 @@ Content-Type: application/json
 {
   "query": "How can I solve a quadratic equation?",
   "enhancePromptRounds": 3,
-  "enhanceResponseRounds": 2
+  "enhanceResultRounds": 2
 }
 
 ### RANDOM
@@ -34,7 +34,7 @@ Content-Type: application/json
 {
   "query": "Can you design a business plan for an ice cream shop? The idea is to grow to 20 stores in 5 years.",
   "enhancePromptRounds": 5,
-  "enhanceResponseRounds": 4
+  "enhanceResultRounds": 4
 }
 
 ### CORS QUERY

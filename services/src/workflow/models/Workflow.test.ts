@@ -770,7 +770,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
    ************************************************************/
   describe(`Test Workflow.getObjectKey`, () => {
     const mockDate = '2025-07-17T01:29:00.000Z'
-    const mockDateSafe = '2025-07-17T01-29-00.000Z'
+    const mockDateSafe = '2025-07-17T01-29-00-000Z'
 
     beforeEach(() => {
       jest.useFakeTimers()
@@ -785,7 +785,8 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = emptyWorkflowScenario.props.workflowId
-      const expectedKey = `workflow-${workflowId}-${mockDateSafe}-created`
+      const baseKey = `workflow-${workflowId}/workflow-${workflowId}-${mockDateSafe}`
+      const expectedKey = `${baseKey}-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
 
@@ -793,7 +794,8 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = noStepsExecutedScenario.props.workflowId
-      const expectedKey = `workflow-${workflowId}-${mockDateSafe}-created`
+      const baseKey = `workflow-${workflowId}/workflow-${workflowId}-${mockDateSafe}`
+      const expectedKey = `${baseKey}-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
 
@@ -801,7 +803,8 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = partiallyExecutedScenario.props.workflowId
-      const expectedKey = `workflow-${workflowId}-${mockDateSafe}-enhance-prompt-Alice-round-1-2`
+      const baseKey = `workflow-${workflowId}/workflow-${workflowId}-${mockDateSafe}`
+      const expectedKey = `${baseKey}-enhance-prompt-Alice-round-1-2.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
   })

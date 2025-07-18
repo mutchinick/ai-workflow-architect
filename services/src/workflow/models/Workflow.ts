@@ -119,10 +119,11 @@ export class Workflow implements WorkflowProps {
    *
    */
   getObjectKey(): string {
-    const timestamp = new Date().toISOString().replace(/[:]/g, '-')
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
 
-    const baseKey = `workflow-${this.workflowId}-${timestamp}`
-    const createdKey = `${baseKey}-created`
+    const workflowKey = `workflow-${this.workflowId}`
+    const baseKey = `${workflowKey}/${workflowKey}-${timestamp}`
+    const createdKey = `${baseKey}-created.json`
     if (!this.steps || this.steps.length === 0) {
       return createdKey
     }
@@ -133,7 +134,7 @@ export class Workflow implements WorkflowProps {
     }
 
     const latestExecutedStep = executedSteps[executedSteps.length - 1]
-    const objectKey = `workflow-${this.workflowId}-${timestamp}-${latestExecutedStep.stepId}`
+    const objectKey = `${baseKey}-${latestExecutedStep.stepId}.json`
     return objectKey
   }
 

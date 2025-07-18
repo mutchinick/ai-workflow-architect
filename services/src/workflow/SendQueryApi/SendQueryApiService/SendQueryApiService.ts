@@ -1,14 +1,21 @@
-import KSUID from 'ksuid'
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { TypeUtilsPretty } from '../../../shared/TypeUtils'
 import { WorkflowCreatedEvent, WorkflowCreatedEventData } from '../../events/WorkflowCreatedEvent'
+import { ISaveWorkflowClient } from '../../models/SaveWorkflowClient'
+import { Workflow } from '../../models/Workflow'
 import { IncomingSendQueryRequest } from '../IncomingSendQueryRequest/IncomingSendQueryRequest'
 
 export interface ISendQueryApiService {
   sendQuery: (
     incomingRequest: IncomingSendQueryRequest,
-  ) => Promise<Success<SendQueryApiServiceOutput> | Failure<'InvalidArgumentsError'> | Failure<'UnrecognizedError'>>
+  ) => Promise<
+    | Success<SendQueryApiServiceOutput>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'DuplicateWorkflowError'>
+    | Failure<'DuplicateEventError'>
+    | Failure<'UnrecognizedError'>
+  >
 }
 
 export type SendQueryApiServiceOutput = TypeUtilsPretty<
@@ -22,19 +29,25 @@ export class SendQueryApiService implements ISendQueryApiService {
   /**
    *
    */
-  constructor(private readonly eventStoreClient: IEventStoreClient) {}
+  constructor(
+    private readonly saveWorkflowClient: ISaveWorkflowClient,
+    private readonly eventStoreClient: IEventStoreClient,
+  ) {}
 
   /**
    *
    */
   public async sendQuery(
     incomingRequest: IncomingSendQueryRequest,
-  ): Promise<Success<SendQueryApiServiceOutput> | Failure<'InvalidArgumentsError'> | Failure<'UnrecognizedError'>> {
+  ): Promise<
+    | Success<SendQueryApiServiceOutput>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'DuplicateWorkflowError'>
+    | Failure<'DuplicateEventError'>
+    | Failure<'UnrecognizedError'>
+  > {
     const logCtx = 'SendQueryApiService.sendQuery'
     console.info(`${logCtx} init:`, { incomingRequest })
-
-    const workflowId = KSUID.randomSync().string
-    const objectKey = `workflow-${workflowId}-${new Date().toISOString()}-created`
 
     const inputValidationResult = this.validateInput(incomingRequest)
     if (Result.isFailure(inputValidationResult)) {
@@ -42,6 +55,15 @@ export class SendQueryApiService implements ISendQueryApiService {
       return inputValidationResult
     }
 
+    const createWorkflowResult = await this.createWorkflow(incomingRequest)
+    if (Result.isFailure(createWorkflowResult)) {
+      console.error(`${logCtx} exit failure:`, { createWorkflowResult, incomingRequest })
+      return createWorkflowResult
+    }
+
+    const workflow = createWorkflowResult.value
+    const workflowId = workflow.workflowId
+    const objectKey = workflow.getObjectKey()
     const publishEventResult = await this.publishWorkflowCreatedEvent(incomingRequest, workflowId, objectKey)
     if (Result.isSuccess(publishEventResult)) {
       const serviceOutput: SendQueryApiServiceOutput = { ...incomingRequest, workflowId, objectKey }
@@ -58,7 +80,6 @@ export class SendQueryApiService implements ISendQueryApiService {
         serviceOutputResult,
         incomingRequest,
       })
-
       return serviceOutputResult
     }
 
@@ -81,6 +102,37 @@ export class SendQueryApiService implements ISendQueryApiService {
     }
 
     return Result.makeSuccess()
+  }
+
+  /**
+   *
+   */
+  private async createWorkflow(
+    incomingRequest: IncomingSendQueryRequest,
+  ): Promise<
+    | Success<Workflow>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'DuplicateWorkflowError'>
+    | Failure<'UnrecognizedError'>
+  > {
+    const logCtx = 'SendQueryApiService.publishWorkflowCreatedEvent'
+    console.info(`${logCtx} init:`, { incomingRequest })
+
+    const { query, enhancePromptRounds, enhanceResultRounds } = incomingRequest
+    const workflowResult = Workflow.fromInstructions({ query, enhancePromptRounds, enhanceResultRounds })
+    if (Result.isFailure(workflowResult)) {
+      console.error(`${logCtx} exit failure:`, { workflowResult, incomingRequest })
+      return workflowResult
+    }
+
+    const workflow = workflowResult.value
+    const saveWorkflowResult = await this.saveWorkflowClient.save(workflow)
+    if (Result.isFailure(saveWorkflowResult)) {
+      console.error(`${logCtx} exit failure:`, { saveWorkflowResult, incomingRequest })
+      return saveWorkflowResult
+    }
+
+    return workflowResult
   }
 
   /**

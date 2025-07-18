@@ -1,0 +1,44 @@
+@baseUrl = {{$dotenv WORKFLOW_SERVICE_API_BASE_URL}}
+
+### WORKFLOW_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/workflow-service/sendQuery
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "query": "Who build the pyramids?",
+  "enhancePromptRounds": 2,
+  "enhanceResultRounds": 1
+}
+
+### WORKFLOW_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/workflow-service/sendQuery
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "query": "How can I solve a quadratic equation?",
+  "enhancePromptRounds": 3,
+  "enhanceResponseRounds": 2
+}
+
+### RANDOM
+### WORKFLOW_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/workflow-service/sendQuery
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "query": "Can you design a business plan for an ice cream shop? The idea is to grow to 20 stores in 5 years.",
+  "enhancePromptRounds": 5,
+  "enhanceResponseRounds": 4
+}
+
+### CORS QUERY
+### OPTIONS ###
+OPTIONS {{baseUrl}}/api/v1/workflow-service/sendQuery
+Origin: https://localhost
+Access-Control-Request-Method: POST

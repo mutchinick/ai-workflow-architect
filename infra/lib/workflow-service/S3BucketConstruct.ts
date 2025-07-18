@@ -24,6 +24,8 @@ export class S3BucketConstruct extends Construct {
     const bucket = new Bucket(scope, bucketName, {
       bucketName,
       publicReadAccess: false,
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     })
 
     bucket.applyRemovalPolicy(RemovalPolicy.DESTROY)

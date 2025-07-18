@@ -1,11 +1,11 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda'
 import { Failure, Result, Success } from '../../../errors/Result'
 import { HttpResponse } from '../../../shared/HttpResponse'
-import { ISendQueryApiService } from '../SendQueryApiService/SendQueryApiService'
 import {
   IncomingSendQueryRequest,
   IncomingSendQueryRequestProps,
 } from '../IncomingSendQueryRequest/IncomingSendQueryRequest'
+import { ISendQueryApiService, SendQueryApiServiceOutput } from '../SendQueryApiService/SendQueryApiService'
 
 export interface ISendQueryApiController {
   sendQuery: (apiEvent: APIGatewayProxyEventV2) => Promise<APIGatewayProxyStructuredResultV2>
@@ -51,7 +51,13 @@ export class SendQueryApiController implements ISendQueryApiController {
    */
   private async sendQuerySafe(
     apiEvent: APIGatewayProxyEventV2,
-  ): Promise<Success<IncomingSendQueryRequest> | Failure<'InvalidArgumentsError'> | Failure<'UnrecognizedError'>> {
+  ): Promise<
+    | Success<SendQueryApiServiceOutput>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'DuplicateWorkflowError'>
+    | Failure<'DuplicateEventError'>
+    | Failure<'UnrecognizedError'>
+  > {
     const logCtx = 'SendQueryApiController.sendQuerySafe'
     console.info(`${logCtx} init:`, { apiEvent })
 

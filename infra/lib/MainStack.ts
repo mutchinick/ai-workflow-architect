@@ -7,6 +7,7 @@ import { DynamoDbConstruct } from './common/DynamoDbConstruct'
 import { EventBusConstruct } from './common/EventBusConstruct'
 import { S3BucketConstruct } from './common/S3BucketConstruct'
 import { TemplateServiceMainConstruct } from './template-service/TemplateServiceMainConstruct'
+import { WorkflowServiceMainConstruct } from './workflow-service/WorkflowServiceMainConstruct'
 
 export interface IMainStackProps extends cdk.StackProps {
   config: {
@@ -30,6 +31,12 @@ export class MainStack extends cdk.Stack {
 
     // TemplateService
     new TemplateServiceMainConstruct(this, `${id}-TemplateService`, {
+      dynamoDbTable,
+      eventBus,
+    })
+
+    // WorkflowService
+    new WorkflowServiceMainConstruct(this, `${id}-WorkflowService`, {
       dynamoDbTable,
       eventBus,
     })

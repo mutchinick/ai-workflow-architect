@@ -8,20 +8,20 @@ import { WorkflowStep, workflowStepSchema } from './WorkflowStep'
 /**
  *
  */
-const inputSchema = z.object({
+const instructionsSchema = z.object({
   query: z.string().trim().min(6),
   enhancePromptRounds: z.number().int().min(1).max(10),
   enhanceResultRounds: z.number().int().min(1).max(10),
 })
 
-export type WorkflowInput = TypeUtilsPretty<z.infer<typeof inputSchema>>
+export type WorkflowInstructions = TypeUtilsPretty<z.infer<typeof instructionsSchema>>
 
 /**
  *
  */
 export const workflowPropsSchema = z.object({
   workflowId: z.string().trim().min(6),
-  input: inputSchema,
+  instructions: instructionsSchema,
   steps: z.array(workflowStepSchema),
 })
 
@@ -36,22 +36,24 @@ export class Workflow implements WorkflowProps {
    */
   private constructor(
     public readonly workflowId: string,
-    public readonly input: WorkflowInput,
-    public readonly steps: WorkflowStep[] = [],
+    public readonly instructions: WorkflowInstructions,
+    public readonly steps: WorkflowStep[],
   ) {}
 
   /**
    *
    */
-  public static fromInput(workflowQuery: WorkflowInput): Success<Workflow> | Failure<'InvalidArgumentsError'> {
+  public static fromInstructions(
+    workflowInstructions: WorkflowInstructions,
+  ): Success<Workflow> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'Workflow.fromInput'
-    console.info(`${logCtx} init:`, { workflowQuery })
+    console.info(`${logCtx} init:`, { workflowQuery: workflowInstructions })
 
     const workflowId = KSUID.randomSync().string
 
     const propsResult = this.parseValidateProps({
       workflowId,
-      input: { ...workflowQuery },
+      instructions: { ...workflowInstructions },
       steps: [],
     })
     if (Result.isFailure(propsResult)) {
@@ -59,8 +61,8 @@ export class Workflow implements WorkflowProps {
       return propsResult
     }
 
-    const { input, steps } = propsResult.value
-    const workflow = new Workflow(workflowId, input, steps)
+    const { instructions, steps } = propsResult.value
+    const workflow = new Workflow(workflowId, instructions, steps)
     const workflowResult = Result.makeSuccess(workflow)
     console.info(`${logCtx} exit success:`, { workflowResult })
     return workflowResult
@@ -79,8 +81,8 @@ export class Workflow implements WorkflowProps {
       return propsResult
     }
 
-    const { workflowId, input, steps } = propsResult.value
-    const workflow = new Workflow(workflowId, input, steps)
+    const { workflowId, instructions, steps } = propsResult.value
+    const workflow = new Workflow(workflowId, instructions, steps)
     const workflowResult = Result.makeSuccess(workflow)
     console.info(`${logCtx} exit success:`, { workflowResult })
     return workflowResult
@@ -89,15 +91,15 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  private static parseValidateProps(input: WorkflowProps): Success<WorkflowProps> | Failure<'InvalidArgumentsError'> {
+  private static parseValidateProps(props: WorkflowProps): Success<WorkflowProps> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'Workflow.parseValidateProps'
 
     try {
-      const validInput = workflowPropsSchema.parse(input)
+      const validInput = workflowPropsSchema.parse(props)
       return Result.makeSuccess(validInput)
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, input })
+      console.error(`${logCtx} exit failure:`, { failure, props })
       return failure
     }
   }
@@ -108,7 +110,7 @@ export class Workflow implements WorkflowProps {
   public toJSON(): WorkflowProps {
     return {
       workflowId: this.workflowId,
-      input: this.input,
+      instructions: this.instructions,
       steps: this.steps,
     }
   }
@@ -117,15 +119,17 @@ export class Workflow implements WorkflowProps {
    *
    */
   getObjectKey(): string {
-    const timestamp = new Date().toISOString()
+    const timestamp = new Date().toISOString().replace(/[:]/g, '-')
 
+    const baseKey = `workflow-${this.workflowId}-${timestamp}`
+    const createdKey = `${baseKey}-created`
     if (!this.steps || this.steps.length === 0) {
-      return `workflow-${this.workflowId}-${timestamp}`
+      return createdKey
     }
 
     const executedSteps = this.steps.filter((step) => step.stepStatus === 'completed')
     if (executedSteps.length === 0) {
-      return `workflow-${this.workflowId}-${timestamp}-created`
+      return createdKey
     }
 
     const latestExecutedStep = executedSteps[executedSteps.length - 1]
@@ -154,12 +158,12 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  setAgents(agents: Agent[]): void | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'Workflow.setAgents'
+  deployAgents(agents: Agent[]): Success<void> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'Workflow.deployAgents'
     console.info(`${logCtx} init:`, { agents })
 
     if (this.steps.length > 0) {
-      const message = `Cannot set agents after workflow steps have been initialized`
+      const message = `Cannot deploy agents after workflow steps have been initialized`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
       console.error(`${logCtx} exit failure:`, { failure, agents })
       return failure
@@ -172,31 +176,29 @@ export class Workflow implements WorkflowProps {
       const currentRound = 1
       const deployStep: WorkflowStep = {
         stepId: `deploy-agents-round-${currentRound}-${executionOrder}`,
-        stepName: `Deploy Agents round ${currentRound}`,
         stepStatus: 'completed',
         executionOrder,
         round: 1,
         stepType: 'deploy_agents',
-        prompt: this.input.query, // FIXME: Should be design-deploy agents prompt
+        prompt: this.instructions.query, // FIXME: Value should be design-deploy agents prompt
         agents,
       }
       this.steps.push(deployStep)
     }
 
     // Populate the 'enhance_prompt' steps
-    for (let i = 0; i < this.input.enhancePromptRounds; i++) {
-      executionOrder++
+    for (let i = 0; i < this.instructions.enhancePromptRounds; i++) {
       const currentRound = i + 1
       for (const agent of agents) {
+        executionOrder++
         const step: WorkflowStep = {
           stepId: `enhance-prompt-${agent.name.replace(/\s+/g, '-')}-round-${currentRound}-${executionOrder}`,
           stepStatus: 'pending',
-          stepName: `Enhance prompt with ${agent.name} round ${currentRound}`,
           executionOrder,
           round: currentRound,
           stepType: 'enhance_prompt',
           agent,
-          prompt: i === 0 && this.steps.length === 1 ? this.input.query : '',
+          prompt: i === 0 && this.steps.length === 1 ? this.instructions.query : '',
           result: '',
         }
         this.steps.push(step)
@@ -204,14 +206,13 @@ export class Workflow implements WorkflowProps {
     }
 
     // Populate the 'enhance_result' steps
-    for (let i = 0; i < this.input.enhanceResultRounds; i++) {
-      executionOrder++
+    for (let i = 0; i < this.instructions.enhanceResultRounds; i++) {
       const currentRound = i + 1
       for (const agent of agents) {
+        executionOrder++
         const step: WorkflowStep = {
           stepId: `enhance-result-${agent.name.replace(/\s+/g, '-')}-round-${currentRound}-${executionOrder}`,
           stepStatus: 'pending',
-          stepName: `Enhance result with ${agent.name} round ${currentRound}`,
           executionOrder,
           round: currentRound,
           stepType: 'enhance_result',
@@ -222,5 +223,9 @@ export class Workflow implements WorkflowProps {
         this.steps.push(step)
       }
     }
+
+    const result = Result.makeSuccess()
+    console.info(`${logCtx} exit success:`, { result, agents })
+    return result
   }
 }

@@ -1,17 +1,36 @@
 import KSUID from 'ksuid'
 import { Result } from '../../errors/Result'
-import { Workflow, WorkflowInput, WorkflowProps } from './Workflow'
+import { Workflow, WorkflowInstructions, WorkflowProps } from './Workflow'
+import {
+  multiAgents,
+  multiAgentScenario,
+  preexistingStepsScenario,
+  singleAgent,
+  singleAgentScenario,
+} from './fixtures/deploy-agents-fixtures'
+import {
+  maxRoundsExceededInstructions,
+  shortQueryInstructions,
+  standardValidInstructions,
+  zeroRoundsInstructions,
+} from './fixtures/from-instructions-fixures'
+import {
+  emptyWorkflowScenario,
+  fullyExecutedScenario,
+  initialStepValidScenario,
+  invalidIdScenario,
+  invalidInstructionsScenario,
+  noStepsExecutedScenario,
+  partiallyExecutedScenario,
+} from './fixtures/from-props-fixtures'
 
-jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
-
-// const mockDate = new Date().toISOString()
 const mockWorkflowId = 'mockWorkflowId'
 const mockQuery = 'mockQuery'
 const mockEnhancePromptRounds = 3
 const mockEnhanceResultRounds = 2
 
-function buildMockWorkflowInput(): WorkflowInput {
-  const mockValidWorkflowProps: WorkflowInput = {
+function buildMockWorkflowInstructions(): WorkflowInstructions {
+  const mockValidWorkflowProps: WorkflowInstructions = {
     query: mockQuery,
     enhancePromptRounds: mockEnhancePromptRounds,
     enhanceResultRounds: mockEnhanceResultRounds,
@@ -22,7 +41,7 @@ function buildMockWorkflowInput(): WorkflowInput {
 function buildMockWorkflowProps(): WorkflowProps {
   const mockValidWorkflowProps: WorkflowProps = {
     workflowId: mockWorkflowId,
-    input: {
+    instructions: {
       query: mockQuery,
       enhancePromptRounds: mockEnhancePromptRounds,
       enhanceResultRounds: mockEnhanceResultRounds,
@@ -37,90 +56,34 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
    *
    *
    ************************************************************
-   * Test Workflow.fromInput
+   * Test Workflow.fromInstructions
    ************************************************************/
-  describe(`Test Workflow.fromInput`, () => {
+  describe(`Test Workflow.fromInstructions`, () => {
     /*
      *
      *
      ************************************************************
-     * Test WorkflowInput edge cases
+     * Test WorkflowInstructions edge cases
      ************************************************************/
-    it(`does not return a Failure if the input WorkflowInput is valid`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      const result = Workflow.fromInput(mockWorkflowInput)
+    it(`does not return a Failure if the input WorkflowInstructions is valid`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput is undefined`, () => {
-      const mockWorkflowInput = undefined as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions is undefined`, () => {
+      const mockWorkflowInstructions = undefined as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput is null`, () => {
-      const mockWorkflowInput = null as never
-      const result = Workflow.fromInput(mockWorkflowInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    /*
-     *
-     *
-     ************************************************************
-     * Test WorkflowInput.query edge cases
-     ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.query is undefined`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.query = undefined as never
-      const result = Workflow.fromInput(mockWorkflowInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.query is null`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.query = null as never
-      const result = Workflow.fromInput(mockWorkflowInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.query is empty`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.query = '' as never
-      const result = Workflow.fromInput(mockWorkflowInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.query is blank`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.query = '      ' as never
-      const result = Workflow.fromInput(mockWorkflowInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.query length < 6`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.query = '12345' as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions is null`, () => {
+      const mockWorkflowInstructions = null as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -130,63 +93,53 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowInput.enhancePromptRounds edge cases
+     * Test WorkflowInstructions.query edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhancePromptRounds is undefined`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhancePromptRounds = undefined as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.query is undefined`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.query = undefined as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhancePromptRounds is null`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhancePromptRounds = null as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.query is null`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.query = null as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhancePromptRounds is < 1`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhancePromptRounds = 0 as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.query is empty`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.query = '' as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhancePromptRounds is > 10`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhancePromptRounds = 11 as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.query is blank`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.query = '      ' as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhancePromptRounds is not an integer`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhancePromptRounds = 3.45 as never
-      const result = Workflow.fromInput(mockWorkflowInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhancePromptRounds is not an number`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhancePromptRounds = '3' as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.query length < 6`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.query = '12345' as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -196,63 +149,129 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowInput.enhanceResultRounds edge cases
+     * Test WorkflowInstructions.enhancePromptRounds edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhanceResultRounds is undefined`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhanceResultRounds = undefined as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.enhancePromptRounds is undefined`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhancePromptRounds = undefined as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhanceResultRounds is null`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhanceResultRounds = null as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.enhancePromptRounds is null`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhancePromptRounds = null as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhanceResultRounds is < 1`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhanceResultRounds = 0 as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.enhancePromptRounds is < 1`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhancePromptRounds = 0 as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhanceResultRounds is > 10`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhanceResultRounds = 11 as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.enhancePromptRounds is > 10`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhancePromptRounds = 11 as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhanceResultRounds is not an integer`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhanceResultRounds = 3.45 as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.enhancePromptRounds is not an integer`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhancePromptRounds = 3.45 as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowInput.enhanceResultRounds is not an number`, () => {
-      const mockWorkflowInput = buildMockWorkflowInput()
-      mockWorkflowInput.enhanceResultRounds = '3' as never
-      const result = Workflow.fromInput(mockWorkflowInput)
+        WorkflowInstructions.enhancePromptRounds is not an number`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhancePromptRounds = '3' as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    /*
+     *
+     *
+     ************************************************************
+     * Test WorkflowInstructions.enhanceResultRounds edge cases
+     ************************************************************/
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowInstructions.enhanceResultRounds is undefined`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhanceResultRounds = undefined as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowInstructions.enhanceResultRounds is null`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhanceResultRounds = null as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowInstructions.enhanceResultRounds is < 1`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhanceResultRounds = 0 as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowInstructions.enhanceResultRounds is > 10`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhanceResultRounds = 11 as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowInstructions.enhanceResultRounds is not an integer`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhanceResultRounds = 3.45 as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+        WorkflowInstructions.enhanceResultRounds is not an number`, () => {
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      mockWorkflowInstructions.enhanceResultRounds = '3' as never
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -264,20 +283,20 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      ************************************************************
      * Test expected results
      ************************************************************/
-    it(`returns the expected Success<WorkflowInput> if the execution path is successful`, () => {
+    it(`returns the expected Success<Workflow> if the execution path is successful`, () => {
       // Mock KSUID to return a fixed workflowId
       jest.spyOn(KSUID, 'randomSync').mockReturnValue({
         string: mockWorkflowId,
       } as never)
 
-      const mockWorkflowInput = buildMockWorkflowInput()
-      const result = Workflow.fromInput(mockWorkflowInput)
+      const mockWorkflowInstructions = buildMockWorkflowInstructions()
+      const result = Workflow.fromInstructions(mockWorkflowInstructions)
       const expectedWorkflow: WorkflowProps = {
         workflowId: mockWorkflowId,
-        input: {
-          query: mockWorkflowInput.query,
-          enhancePromptRounds: mockWorkflowInput.enhancePromptRounds,
-          enhanceResultRounds: mockWorkflowInput.enhanceResultRounds,
+        instructions: {
+          query: mockWorkflowInstructions.query,
+          enhancePromptRounds: mockWorkflowInstructions.enhancePromptRounds,
+          enhanceResultRounds: mockWorkflowInstructions.enhanceResultRounds,
         },
         steps: [],
       }
@@ -285,6 +304,41 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const expectedResult = Result.makeSuccess(expectedWorkflow)
       expect(Result.isSuccess(result)).toBe(true)
       expect(result).toStrictEqual(expectedResult)
+    })
+
+    it(`returns the expected Success<Workflow> for valid instructions`, () => {
+      const { instructions } = standardValidInstructions
+      const result = Workflow.fromInstructions(instructions)
+      expect(Result.isSuccess(result)).toBe(true)
+      const workflow = Result.getSuccessValueOrThrow(result)
+      expect(workflow.instructions).toStrictEqual(instructions)
+      expect(workflow.steps).toEqual([])
+      expect(workflow.workflowId).toEqual(expect.any(String))
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError for a short query`, () => {
+      const { instructions } = shortQueryInstructions
+      const result = Workflow.fromInstructions(instructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError for zero rounds`, () => {
+      const { instructions } = zeroRoundsInstructions
+      const result = Workflow.fromInstructions(instructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError when rounds exceed
+        max`, () => {
+      const { instructions } = maxRoundsExceededInstructions
+      const result = Workflow.fromInstructions(instructions)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
   })
 
@@ -385,12 +439,12 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowProps.input edge cases
+     * Test WorkflowProps.instructions edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input is undefined`, () => {
+        WorkflowProps.instructions is undefined`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input = undefined as never
+      mockWorkflowProps.instructions = undefined as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -398,9 +452,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input is null`, () => {
+        WorkflowProps.instructions is null`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input = null as never
+      mockWorkflowProps.instructions = null as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -411,12 +465,12 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowProps.input.query edge cases
+     * Test WorkflowProps.instructions.query edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.query is undefined`, () => {
+        WorkflowProps.instructions.query is undefined`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.query = undefined as never
+      mockWorkflowProps.instructions.query = undefined as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -424,9 +478,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.query is null`, () => {
+        WorkflowProps.instructions.query is null`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.query = null as never
+      mockWorkflowProps.instructions.query = null as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -434,9 +488,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.query is empty`, () => {
+        WorkflowProps.instructions.query is empty`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.query = '' as never
+      mockWorkflowProps.instructions.query = '' as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -444,9 +498,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.query is blank`, () => {
+        WorkflowProps.instructions.query is blank`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.query = '      ' as never
+      mockWorkflowProps.instructions.query = '      ' as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -454,9 +508,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.query length < 6`, () => {
+        WorkflowProps.instructions.query length < 6`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.query = '12345' as never
+      mockWorkflowProps.instructions.query = '12345' as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -467,12 +521,12 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowProps.input.enhancePromptRounds edge cases
+     * Test WorkflowProps.instructions.enhancePromptRounds edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhancePromptRounds is undefined`, () => {
+        WorkflowProps.instructions.enhancePromptRounds is undefined`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhancePromptRounds = undefined as never
+      mockWorkflowProps.instructions.enhancePromptRounds = undefined as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -480,9 +534,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhancePromptRounds is null`, () => {
+        WorkflowProps.instructions.enhancePromptRounds is null`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhancePromptRounds = null as never
+      mockWorkflowProps.instructions.enhancePromptRounds = null as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -490,9 +544,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhancePromptRounds is < 1`, () => {
+        WorkflowProps.instructions.enhancePromptRounds is < 1`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhancePromptRounds = 0 as never
+      mockWorkflowProps.instructions.enhancePromptRounds = 0 as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -500,9 +554,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhancePromptRounds is > 10`, () => {
+        WorkflowProps.instructions.enhancePromptRounds is > 10`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhancePromptRounds = 11 as never
+      mockWorkflowProps.instructions.enhancePromptRounds = 11 as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -510,9 +564,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhancePromptRounds is not an integer`, () => {
+        WorkflowProps.instructions.enhancePromptRounds is not an integer`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhancePromptRounds = 3.45 as never
+      mockWorkflowProps.instructions.enhancePromptRounds = 3.45 as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -520,9 +574,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhancePromptRounds is not an number`, () => {
+        WorkflowProps.instructions.enhancePromptRounds is not an number`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhancePromptRounds = '3' as never
+      mockWorkflowProps.instructions.enhancePromptRounds = '3' as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -533,12 +587,12 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowProps.input.enhanceResultRounds edge cases
+     * Test WorkflowProps.instructions.enhanceResultRounds edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhanceResultRounds is undefined`, () => {
+        WorkflowProps.instructions.enhanceResultRounds is undefined`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhanceResultRounds = undefined as never
+      mockWorkflowProps.instructions.enhanceResultRounds = undefined as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -546,9 +600,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhanceResultRounds is null`, () => {
+        WorkflowProps.instructions.enhanceResultRounds is null`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhanceResultRounds = null as never
+      mockWorkflowProps.instructions.enhanceResultRounds = null as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -556,9 +610,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhanceResultRounds is < 1`, () => {
+        WorkflowProps.instructions.enhanceResultRounds is < 1`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhanceResultRounds = 0 as never
+      mockWorkflowProps.instructions.enhanceResultRounds = 0 as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -566,9 +620,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhanceResultRounds is > 10`, () => {
+        WorkflowProps.instructions.enhanceResultRounds is > 10`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhanceResultRounds = 11 as never
+      mockWorkflowProps.instructions.enhanceResultRounds = 11 as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -576,9 +630,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhanceResultRounds is not an integer`, () => {
+        WorkflowProps.instructions.enhanceResultRounds is not an integer`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhanceResultRounds = 3.45 as never
+      mockWorkflowProps.instructions.enhanceResultRounds = 3.45 as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -586,9 +640,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowProps.input.enhanceResultRounds is not an number`, () => {
+        WorkflowProps.instructions.enhanceResultRounds is not an number`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
-      mockWorkflowProps.input.enhanceResultRounds = '3' as never
+      mockWorkflowProps.instructions.enhanceResultRounds = '3' as never
       const result = Workflow.fromProps(mockWorkflowProps)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -601,22 +655,40 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
      ************************************************************
      * Test expected results
      ************************************************************/
-    it(`returns the expected Success<WorkflowProps> if the execution path is successful`, () => {
+    it(`returns the expected Success<Workflow> if the execution path is successful`, () => {
       const mockWorkflowProps = buildMockWorkflowProps()
       const result = Workflow.fromProps(mockWorkflowProps)
-      const expectedWorkflow: WorkflowProps = {
-        workflowId: mockWorkflowProps.workflowId,
-        input: {
-          query: mockWorkflowProps.input.query,
-          enhancePromptRounds: mockWorkflowProps.input.enhancePromptRounds,
-          enhanceResultRounds: mockWorkflowProps.input.enhanceResultRounds,
-        },
-        steps: mockWorkflowProps.steps,
-      }
+      const expectedWorkflow: WorkflowProps = { ...mockWorkflowProps }
       Object.setPrototypeOf(expectedWorkflow, Workflow.prototype)
       const expectedResult = Result.makeSuccess(expectedWorkflow)
       expect(Result.isSuccess(result)).toBe(true)
       expect(result).toStrictEqual(expectedResult)
+    })
+
+    it(`returns the expected Success<Workflow> if the input WorkflowProps are valid`, () => {
+      const { props } = emptyWorkflowScenario
+      const result = Workflow.fromProps(props)
+      expect(Result.isSuccess(result)).toBe(true)
+      const expectedWorkflow = Object.setPrototypeOf({ ...props }, Workflow.prototype)
+      expect(result).toStrictEqual(Result.makeSuccess(expectedWorkflow))
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the if the
+        input WorkflowProps.workflowId is empty`, () => {
+      const { props } = invalidIdScenario
+      const result = Workflow.fromProps(props)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if the if the
+        input WorkflowProps.instructions are invalid`, () => {
+      const { props } = invalidInstructionsScenario
+      const result = Workflow.fromProps(props)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
   })
 
@@ -624,7 +696,267 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
    *
    *
    ************************************************************
-   * Test Workflow.fromProps
+   * Test Workflow.nextStep
+   ************************************************************/
+  describe(`Test Workflow.nextStep`, () => {
+    it(`returns null when no steps are present`, () => {
+      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.nextStep()).toBeNull()
+    })
+
+    it(`returns the first step when no steps have been executed`, () => {
+      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.nextStep()).toMatchObject({ stepId: 'deploy-agents-round-1-1' })
+    })
+
+    it(`returns the first pending step in a partially executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.nextStep()).toMatchObject({ stepId: 'enhance-prompt-Bob-round-1-2' })
+    })
+
+    it(`returns null when all steps are completed`, () => {
+      const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.nextStep()).toBeNull()
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test Workflow.lastExecutedStep
+   ************************************************************/
+  describe(`Test Workflow.lastExecutedStep`, () => {
+    it(`returns null when no steps are present`, () => {
+      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.lastExecutedStep()).toBeNull()
+    })
+
+    it(`returns null when no steps have been completed`, () => {
+      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.lastExecutedStep()).toBeNull()
+    })
+
+    it(`returns the correct step when only the initial step is completed`, () => {
+      const workflowResult = Workflow.fromProps(initialStepValidScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'deploy-agents-round-1-1' })
+    })
+
+    it(`returns the last completed step in a partially executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-prompt-Alice-round-1-2' })
+    })
+
+    it(`returns the final step in a fully executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-result-Alice-round-1-4' })
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test Workflow.getObjectKey
+   ************************************************************/
+  describe(`Test Workflow.getObjectKey`, () => {
+    const mockDate = '2025-07-17T01:29:00.000Z'
+    const mockDateSafe = '2025-07-17T01-29-00.000Z'
+
+    beforeEach(() => {
+      jest.useFakeTimers()
+      jest.setSystemTime(new Date(mockDate))
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it(`returns the correct key format for an empty workflow`, () => {
+      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const workflowId = emptyWorkflowScenario.props.workflowId
+      const expectedKey = `workflow-${workflowId}-${mockDateSafe}-created`
+      expect(workflow.getObjectKey()).toBe(expectedKey)
+    })
+
+    it(`returns the correct key format when no steps have been executed`, () => {
+      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const workflowId = noStepsExecutedScenario.props.workflowId
+      const expectedKey = `workflow-${workflowId}-${mockDateSafe}-created`
+      expect(workflow.getObjectKey()).toBe(expectedKey)
+    })
+
+    it(`returns the correct key format for a partially executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const workflowId = partiallyExecutedScenario.props.workflowId
+      const expectedKey = `workflow-${workflowId}-${mockDateSafe}-enhance-prompt-Alice-round-1-2`
+      expect(workflow.getObjectKey()).toBe(expectedKey)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test Workflow.deployAgents
+   ************************************************************/
+  describe(`Workflow.deployAgents`, () => {
+    it(`generates the correct final state for a single agent`, () => {
+      const workflowResult = Workflow.fromInstructions(singleAgentScenario.instructions)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      workflow.deployAgents(singleAgentScenario.agents)
+      const expectedProps: WorkflowProps = {
+        workflowId: workflow.workflowId,
+        instructions: singleAgentScenario.instructions,
+        steps: [
+          {
+            stepId: 'deploy-agents-round-1-1',
+            stepStatus: 'completed',
+            executionOrder: 1,
+            round: 1,
+            stepType: 'deploy_agents',
+            prompt: 'Test Query 1',
+            agents: singleAgent,
+          },
+          {
+            stepId: 'enhance-prompt-Copernicus-round-1-2',
+            stepStatus: 'pending',
+            executionOrder: 2,
+            round: 1,
+            stepType: 'enhance_prompt',
+            agent: singleAgent[0],
+            prompt: 'Test Query 1',
+            result: '',
+          },
+          {
+            stepId: 'enhance-result-Copernicus-round-1-3',
+            stepStatus: 'pending',
+            executionOrder: 3,
+            round: 1,
+            stepType: 'enhance_result',
+            agent: singleAgent[0],
+            prompt: '',
+            result: '',
+          },
+        ],
+      }
+      expect(workflow.toJSON()).toStrictEqual(expectedProps)
+    })
+
+    it(`generates the correct final state for multiple agents and rounds`, () => {
+      const workflowResult = Workflow.fromInstructions(multiAgentScenario.instructions)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      workflow.deployAgents(multiAgentScenario.agents)
+      const expectedProps: WorkflowProps = {
+        workflowId: workflow.workflowId,
+        instructions: multiAgentScenario.instructions,
+        steps: [
+          {
+            stepId: 'deploy-agents-round-1-1',
+            stepStatus: 'completed',
+            executionOrder: 1,
+            round: 1,
+            stepType: 'deploy_agents',
+            prompt: 'Test Query 2',
+            agents: multiAgents,
+          },
+          {
+            stepId: 'enhance-prompt-Architect-round-1-2',
+            stepStatus: 'pending',
+            executionOrder: 2,
+            round: 1,
+            stepType: 'enhance_prompt',
+            agent: multiAgents[0],
+            prompt: 'Test Query 2',
+            result: '',
+          },
+          {
+            stepId: 'enhance-prompt-Critic-round-1-3',
+            stepStatus: 'pending',
+            executionOrder: 3,
+            round: 1,
+            stepType: 'enhance_prompt',
+            agent: multiAgents[1],
+            prompt: '',
+            result: '',
+          },
+          {
+            stepId: 'enhance-prompt-Architect-round-2-4',
+            stepStatus: 'pending',
+            executionOrder: 4,
+            round: 2,
+            stepType: 'enhance_prompt',
+            agent: multiAgents[0],
+            prompt: '',
+            result: '',
+          },
+          {
+            stepId: 'enhance-prompt-Critic-round-2-5',
+            stepStatus: 'pending',
+            executionOrder: 5,
+            round: 2,
+            stepType: 'enhance_prompt',
+            agent: multiAgents[1],
+            prompt: '',
+            result: '',
+          },
+          {
+            stepId: 'enhance-result-Architect-round-1-6',
+            stepStatus: 'pending',
+            executionOrder: 6,
+            round: 1,
+            stepType: 'enhance_result',
+            agent: multiAgents[0],
+            prompt: '',
+            result: '',
+          },
+          {
+            stepId: 'enhance-result-Critic-round-1-7',
+            stepStatus: 'pending',
+            executionOrder: 7,
+            round: 1,
+            stepType: 'enhance_result',
+            agent: multiAgents[1],
+            prompt: '',
+            result: '',
+          },
+        ],
+      }
+      expect(workflow.toJSON()).toStrictEqual(expectedProps)
+    })
+
+    it(`returns a non-transient Failure of kind InvalidArgumentsError if steps are
+        already defined`, () => {
+      const workflowResult = Workflow.fromProps({
+        workflowId: mockWorkflowId,
+        instructions: preexistingStepsScenario.instructions,
+        steps: preexistingStepsScenario.initialSteps,
+      })
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const result = workflow.deployAgents(preexistingStepsScenario.agents)
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test Workflow.toJSON
    ************************************************************/
   describe(`Test Workflow.toJSON`, () => {
     /*

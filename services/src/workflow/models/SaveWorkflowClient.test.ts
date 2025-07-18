@@ -23,7 +23,7 @@ const mockEnhanceResultRounds = 2
 function buildMockWorkflowProps(): WorkflowProps {
   return {
     workflowId: mockWorkflowId,
-    input: {
+    instructions: {
       query: mockQuery,
       enhancePromptRounds: mockEnhancePromptRounds,
       enhanceResultRounds: mockEnhanceResultRounds,
@@ -105,7 +105,8 @@ describe(`Workflow SaveWorkflowClient tests`, () => {
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a non-transient Failure of kind InvalidArgumentsError if the env var process.env.WORKFLOW_BUCKET_NAME is empty`, async () => {
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the env var
+      process.env.WORKFLOW_BUCKET_NAME is empty`, async () => {
     const mockS3Client = buildMockS3Client_resolves()
     const saveWorkflow = new SaveWorkflowClient(mockS3Client)
     const props = buildMockWorkflowProps()

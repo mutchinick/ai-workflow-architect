@@ -23,7 +23,7 @@ const mockEnhanceResultRounds = 2
 function buildMockWorkflowProps(): WorkflowProps {
   return {
     workflowId: mockWorkflowId,
-    input: {
+    instructions: {
       query: mockQuery,
       enhancePromptRounds: mockEnhancePromptRounds,
       enhanceResultRounds: mockEnhanceResultRounds,
@@ -111,7 +111,8 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a non-transient Failure of kind InvalidArgumentsError if the env var process.env.WORKFLOW_BUCKET_NAME is empty`, async () => {
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the env var
+      process.env.WORKFLOW_BUCKET_NAME is empty`, async () => {
     const mockS3Client = buildMockS3Client_resolves()
     const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
     process.env.WORKFLOW_BUCKET_NAME = ''
@@ -149,7 +150,8 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
     )
   })
 
-  it(`returns a transient Failure of kind WorkflowFileCorruptedError if S3Client.send returns an invalid Workflow file`, async () => {
+  it(`returns a transient Failure of kind WorkflowFileCorruptedError if S3Client.send
+      returns an invalid Workflow file`, async () => {
     const mockS3Client = buildMockS3Client_resolves('{"invalid": "data"}')
     const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
     const result = await readWorkflowClient.read(mockObjectKey)
@@ -158,7 +160,8 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a transient Failure of kind WorkflowFileCorruptedError if S3Client.send returns and empty string`, async () => {
+  it(`returns a transient Failure of kind WorkflowFileCorruptedError if S3Client.send
+      returns and empty string`, async () => {
     const mockS3Client = buildMockS3Client_resolves('')
     const readWorkflowClient = new ReadWorkflowClient(mockS3Client)
     const result = await readWorkflowClient.read(mockObjectKey)
@@ -177,8 +180,8 @@ describe(`Workflow ReadWorkflowClient tests`, () => {
     expect(Result.isFailureTransient(result)).toBe(true)
   })
 
-  it(`returns a non-transient Failure of kind WorkflowFileNotFoundError if S3Client.send
-      throws a NoSuckKey error`, async () => {
+  it(`returns a non-transient Failure of kind WorkflowFileNotFoundError if
+      S3Client.send throws a NoSuckKey error`, async () => {
     const preconditionFailedError = new S3ServiceException({
       name: 'NoSuchKey',
       $fault: 'server',

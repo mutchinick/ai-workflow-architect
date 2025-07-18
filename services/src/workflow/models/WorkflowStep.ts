@@ -6,7 +6,6 @@ import { agentSchema } from './Agent'
  */
 const baseStepProperties = {
   stepId: z.string(),
-  stepName: z.string(),
   stepStatus: z.enum(['pending', 'completed']),
   round: z.number(),
   executionOrder: z.number().int(),

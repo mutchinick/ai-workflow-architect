@@ -6,14 +6,14 @@ import { Construct } from 'constructs'
  *
  */
 export class S3BucketConstruct extends Construct {
-  public bucket: Bucket
+  public s3Bucket: Bucket
 
   /**
    *
    */
   constructor(scope: Construct, id: string) {
     super(scope, id)
-    this.bucket = this.createBucket(scope, id)
+    this.s3Bucket = this.createBucket(scope, id)
   }
 
   /**

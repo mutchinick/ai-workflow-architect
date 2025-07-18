@@ -122,6 +122,15 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
         },
       ],
     },
+    {
+      envFilePath: '../_restclient/workflow-service/.env',
+      envVariables: [
+        {
+          cdkOutputName: `${outputPrefix}WorkflowServiceApiHttpApiUrl`,
+          envVarName: 'WORKFLOW_SERVICE_API_BASE_URL',
+        },
+      ],
+    },
     // Services .env file (used by services)
     {
       envFilePath: '../services/.env',
@@ -129,6 +138,10 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
         {
           cdkOutputName: `${outputPrefix}TemplateServiceApiHttpApiUrl`,
           envVarName: 'TEMPLATE_SERVICE_API_BASE_URL',
+        },
+        {
+          cdkOutputName: `${outputPrefix}WorkflowServiceApiHttpApiUrl`,
+          envVarName: 'WORKFLOW_SERVICE_API_BASE_URL',
         },
       ],
     },

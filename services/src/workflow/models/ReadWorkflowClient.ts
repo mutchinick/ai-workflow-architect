@@ -2,6 +2,18 @@ import { GetObjectCommand, S3Client, S3ServiceException } from '@aws-sdk/client-
 import { Failure, Result, Success } from '../../errors/Result'
 import { Workflow } from './Workflow'
 
+export interface IReadWorkflowClient {
+  read: (
+    objectKey: string,
+  ) => Promise<
+    | Success<Workflow>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'WorkflowFileNotFoundError'>
+    | Failure<'WorkflowFileCorruptedError'>
+    | Failure<'UnrecognizedError'>
+  >
+}
+
 /**
  *
  */

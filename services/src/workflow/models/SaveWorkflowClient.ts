@@ -2,6 +2,14 @@ import { PutObjectCommand, S3Client, S3ServiceException } from '@aws-sdk/client-
 import { Failure, Result, Success } from '../../errors/Result'
 import { Workflow } from './Workflow'
 
+export interface ISaveWorkflowClient {
+  save: (
+    workflow: Workflow,
+  ) => Promise<
+    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateWorkflowError'> | Failure<'UnrecognizedError'>
+  >
+}
+
 /**
  *
  */

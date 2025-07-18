@@ -11,7 +11,7 @@ import { Workflow, WorkflowProps } from './Workflow'
  * Mock setup
  ************************************************************/
 const mockBucket = 'mockWorkflowBucket'
-process.env.WORKFLOW_BUCKET_NAME = mockBucket
+process.env.WORKFLOW_SERVICE_BUCKET_NAME = mockBucket
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
@@ -55,7 +55,7 @@ function buildMockS3Client_throws(error?: unknown): S3Client {
  ************************************************************/
 describe(`Workflow SaveWorkflowClient tests`, () => {
   beforeEach(() => {
-    process.env.WORKFLOW_BUCKET_NAME = mockBucket
+    process.env.WORKFLOW_SERVICE_BUCKET_NAME = mockBucket
   })
 
   /*
@@ -106,13 +106,13 @@ describe(`Workflow SaveWorkflowClient tests`, () => {
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the env var
-      process.env.WORKFLOW_BUCKET_NAME is empty`, async () => {
+      process.env.WORKFLOW_SERVICE_BUCKET_NAME is empty`, async () => {
     const mockS3Client = buildMockS3Client_resolves()
     const saveWorkflow = new SaveWorkflowClient(mockS3Client)
     const props = buildMockWorkflowProps()
     const workflowResult = Workflow.fromProps(props)
     const workflow = Result.getSuccessValueOrThrow(workflowResult)
-    process.env.WORKFLOW_BUCKET_NAME = ''
+    process.env.WORKFLOW_SERVICE_BUCKET_NAME = ''
     const result = await saveWorkflow.save(workflow)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)

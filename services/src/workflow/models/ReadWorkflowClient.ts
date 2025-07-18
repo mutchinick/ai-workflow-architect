@@ -82,9 +82,9 @@ export class ReadWorkflowClient {
     const logCtx = 'ReadWorkflowClient.buildS3Command'
 
     try {
-      const bucketName = process.env.WORKFLOW_BUCKET_NAME
+      const bucketName = process.env.WORKFLOW_SERVICE_BUCKET_NAME
       if (!bucketName) {
-        throw new Error('Missing WORKFLOW_BUCKET_NAME environment variable')
+        throw new Error('Missing WORKFLOW_SERVICE_BUCKET_NAME environment variable')
       }
 
       const command = new GetObjectCommand({

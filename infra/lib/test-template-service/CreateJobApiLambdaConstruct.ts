@@ -66,7 +66,7 @@ export class CreateJobApiLambdaConstruct extends Construct {
     })
 
     httpApi.addRoutes({
-      path: '/api/v1/template-service/createJob',
+      path: '/api/v1/test-template-service/createJob',
       methods: [HttpMethod.POST],
       integration: lambdaIntegration,
     })

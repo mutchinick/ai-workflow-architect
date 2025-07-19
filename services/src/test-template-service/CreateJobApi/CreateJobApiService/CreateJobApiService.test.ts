@@ -41,7 +41,7 @@ function buildMockEventStoreClient_fails(
   return { publish: jest.fn().mockResolvedValue(mockFailure) }
 }
 
-describe(`Template Service CreateJobApi CreateJobApiService tests`, () => {
+describe(`Test Template Service CreateJobApi CreateJobApiService tests`, () => {
   /*
    *
    *

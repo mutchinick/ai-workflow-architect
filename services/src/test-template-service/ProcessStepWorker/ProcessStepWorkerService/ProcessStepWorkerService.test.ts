@@ -64,7 +64,7 @@ function buildEventStoreClient_fails(
   }
 }
 
-describe(`Template Service ProcessStepWorker ProcessStepWorkerService tests`, () => {
+describe(`Test Template Service ProcessStepWorker ProcessStepWorkerService tests`, () => {
   /*
    *
    *

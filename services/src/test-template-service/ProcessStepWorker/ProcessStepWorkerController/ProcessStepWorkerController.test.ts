@@ -148,7 +148,7 @@ function buildMockProcessStepWorkerService_failsOnData({
   }
 }
 
-describe(`Template Service ProcessStepWorker ProcessStepWorkerController tests`, () => {
+describe(`Test Template Service ProcessStepWorker ProcessStepWorkerController tests`, () => {
   /*
    *
    *

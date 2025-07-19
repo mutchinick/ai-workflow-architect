@@ -2,7 +2,7 @@ import { Duration } from 'aws-cdk-lib'
 
 export const settings = {
   SQS: {
-    visibilityTimeout: Duration.seconds(10),
+    visibilityTimeout: Duration.seconds(31),
     receiveMessageWaitTime: Duration.seconds(20),
     maxReceiveCount: 10,
   },

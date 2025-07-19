@@ -2,7 +2,7 @@ import { Duration } from 'aws-cdk-lib'
 
 export const settings = {
   SQS: {
-    visibilityTimeout: Duration.seconds(31),
+    visibilityTimeout: Duration.seconds(29),
     receiveMessageWaitTime: Duration.seconds(20),
     maxReceiveCount: 10,
   },
@@ -13,6 +13,9 @@ export const settings = {
     maxConcurrency: 2,
   },
   Lambda: {
-    timeout: Duration.seconds(30),
+    timeout: Duration.seconds(28),
+  },
+  LambdaIntegration: {
+    timeout: Duration.seconds(29),
   },
 }

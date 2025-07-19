@@ -5,3 +5,5 @@ export type FailureKind =
   | 'DuplicateWorkflowError'
   | 'WorkflowFileNotFoundError'
   | 'WorkflowFileCorruptedError'
+  | 'TestBedrockTransientError'
+  | 'TestBedrockPermanentError'

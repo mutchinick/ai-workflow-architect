@@ -1,8 +1,8 @@
-@baseUrl = {{$dotenv TEMPLATE_SERVICE_API_BASE_URL}}
+@baseUrl = {{$dotenv TEST_TEMPLATE_SERVICE_API_BASE_URL}}
 
 ### JOB_CREATED_EVENT
 ### POST ###
-POST {{baseUrl}}/api/v1/template-service/createJob
+POST {{baseUrl}}/api/v1/test-template-service/createJob
 Origin: https://localhost
 Content-Type: application/json
 
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ### JOB_CREATED_EVENT
 ### POST ###
-POST {{baseUrl}}/api/v1/template-service/createJob
+POST {{baseUrl}}/api/v1/test-template-service/createJob
 Origin: https://localhost
 Content-Type: application/json
 
@@ -23,7 +23,7 @@ Content-Type: application/json
 ### RANDOM
 ### JOB_CREATED_EVENT
 ### POST ###
-POST {{baseUrl}}/api/v1/template-service/createJob
+POST {{baseUrl}}/api/v1/test-template-service/createJob
 Origin: https://localhost
 Content-Type: application/json
 
@@ -33,6 +33,6 @@ Content-Type: application/json
 
 ### CORS QUERY
 ### OPTIONS ###
-OPTIONS {{baseUrl}}/api/v1/template-service/createJob
+OPTIONS {{baseUrl}}/api/v1/test-template-service/createJob
 Origin: https://localhost
 Access-Control-Request-Method: POST

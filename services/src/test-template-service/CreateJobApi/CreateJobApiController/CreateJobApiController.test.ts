@@ -41,7 +41,7 @@ function buildMockCreateJobApiService_fails(failureKind: FailureKind): ICreateJo
   return { createJob: jest.fn().mockResolvedValue(mockFailure) }
 }
 
-describe(`Template Service CreateJobApi CreateJobApiController tests`, () => {
+describe(`Test Template Service CreateJobApi CreateJobApiController tests`, () => {
   /*
    *
    *

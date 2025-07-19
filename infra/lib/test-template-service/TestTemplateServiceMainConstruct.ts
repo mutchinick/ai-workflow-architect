@@ -3,9 +3,9 @@ import { EventBus } from 'aws-cdk-lib/aws-events'
 import { Construct } from 'constructs'
 import { CreateJobApiLambdaConstruct } from './CreateJobApiLambdaConstruct'
 import { ProcessStepWorkerConstruct } from './ProcessStepWorkerConstruct'
-import { TemplateServiceApiConstruct } from './TemplateServiceApiConstruct'
+import { TestTemplateServiceApiConstruct } from './TestTemplateServiceApiConstruct'
 
-export interface ITemplateServiceMainConstructProps {
+export interface ITestTemplateServiceMainConstructProps {
   dynamoDbTable: Table
   eventBus: EventBus
 }
@@ -13,18 +13,18 @@ export interface ITemplateServiceMainConstructProps {
 /**
  *
  */
-export class TemplateServiceMainConstruct extends Construct {
+export class TestTemplateServiceMainConstruct extends Construct {
   /**
    *
    */
-  constructor(scope: Construct, id: string, props: ITemplateServiceMainConstructProps) {
+  constructor(scope: Construct, id: string, props: ITestTemplateServiceMainConstructProps) {
     super(scope, id)
 
     // API
-    const templateServiceHttpApi = new TemplateServiceApiConstruct(scope, `${id}-Api`)
+    const testTemplateServiceHttpApi = new TestTemplateServiceApiConstruct(scope, `${id}-Api`)
 
     new CreateJobApiLambdaConstruct(scope, `${id}-CreateJobApi`, {
-      httpApi: templateServiceHttpApi.httpApi,
+      httpApi: testTemplateServiceHttpApi.httpApi,
       dynamoDbTable: props.dynamoDbTable,
     })
 

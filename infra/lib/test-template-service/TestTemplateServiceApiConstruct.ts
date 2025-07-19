@@ -3,12 +3,12 @@ import { CorsHttpMethod, HttpApi } from 'aws-cdk-lib/aws-apigatewayv2'
 import { Construct } from 'constructs'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface ITemplateServiceApiConstructProps {}
+export interface ITestTemplateServiceApiConstructProps {}
 
 /**
  *
  */
-export class TemplateServiceApiConstruct extends Construct {
+export class TestTemplateServiceApiConstruct extends Construct {
   public readonly httpApi
 
   /**
@@ -16,13 +16,13 @@ export class TemplateServiceApiConstruct extends Construct {
    */
   constructor(scope: Construct, id: string) {
     super(scope, id)
-    this.httpApi = this.createTemplateServiceApiHttpApi(scope, id)
+    this.httpApi = this.createTestTemplateServiceApiHttpApi(scope, id)
   }
 
   /**
    *
    */
-  private createTemplateServiceApiHttpApi(scope: Construct, id: string): HttpApi {
+  private createTestTemplateServiceApiHttpApi(scope: Construct, id: string): HttpApi {
     const httpApiName = `${id}-HttpApi`
     const httpApi = new HttpApi(scope, httpApiName, {
       apiName: httpApiName,
@@ -36,7 +36,7 @@ export class TemplateServiceApiConstruct extends Construct {
 
     const httpApiUrlName = `${id}-HttpApiUrl`
     new CfnOutput(scope, httpApiUrlName, {
-      description: 'TemplateService API URL',
+      description: 'TestTemplateService API URL',
       value: httpApi.url ?? `Error in API deployment: ${httpApiUrlName}`,
     })
 

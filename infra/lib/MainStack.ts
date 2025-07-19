@@ -4,7 +4,7 @@ import { EventBus } from 'aws-cdk-lib/aws-events'
 import { Construct } from 'constructs'
 import { DynamoDbConstruct } from './common/DynamoDbConstruct'
 import { EventBusConstruct } from './common/EventBusConstruct'
-import { TemplateServiceMainConstruct } from './template-service/TemplateServiceMainConstruct'
+import { TestTemplateServiceMainConstruct } from './test-template-service/TestTemplateServiceMainConstruct'
 import { WorkflowServiceMainConstruct } from './workflow-service/WorkflowServiceMainConstruct'
 
 export interface IMainStackProps extends cdk.StackProps {
@@ -26,8 +26,8 @@ export class MainStack extends cdk.Stack {
     // Common
     const { dynamoDbTable, eventBus } = this.createCommon(id)
 
-    // TemplateService
-    new TemplateServiceMainConstruct(this, `${id}-TemplateService`, {
+    // TestTemplateService
+    new TestTemplateServiceMainConstruct(this, `${id}-TestTemplateService`, {
       dynamoDbTable,
       eventBus,
     })

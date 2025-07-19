@@ -10,7 +10,7 @@ function buildMockIncomingCreateJobRequestInput(): IncomingCreateJobRequestInput
   return mockValidRequestInput
 }
 
-describe(`Template Service CreateJobApi IncomingCreateJobRequest tests`, () => {
+describe(`Test Template Service CreateJobApi IncomingCreateJobRequest tests`, () => {
   /*
    *
    *

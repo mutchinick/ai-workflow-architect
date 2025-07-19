@@ -114,11 +114,11 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
   const envFilesConfig = [
     // API tests .env files (used by Rest Client files)
     {
-      envFilePath: '../_restclient/template-service/.env',
+      envFilePath: '../_restclient/test-template-service/.env',
       envVariables: [
         {
-          cdkOutputName: `${outputPrefix}TemplateServiceApiHttpApiUrl`,
-          envVarName: 'TEMPLATE_SERVICE_API_BASE_URL',
+          cdkOutputName: `${outputPrefix}TestTemplateServiceApiHttpApiUrl`,
+          envVarName: 'TEST_TEMPLATE_SERVICE_API_BASE_URL',
         },
       ],
     },
@@ -136,8 +136,8 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
       envFilePath: '../services/.env',
       envVariables: [
         {
-          cdkOutputName: `${outputPrefix}TemplateServiceApiHttpApiUrl`,
-          envVarName: 'TEMPLATE_SERVICE_API_BASE_URL',
+          cdkOutputName: `${outputPrefix}TestTemplateServiceApiHttpApiUrl`,
+          envVarName: 'TEST_TEMPLATE_SERVICE_API_BASE_URL',
         },
         {
           cdkOutputName: `${outputPrefix}WorkflowServiceApiHttpApiUrl`,

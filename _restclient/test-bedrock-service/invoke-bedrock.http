@@ -1,0 +1,27 @@
+@baseUrl = {{$dotenv TEST_BEDROCK_SERVICE_API_BASE_URL}}
+
+### POST ###
+POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "system": "You are a helpful assistant.",
+  "prompt": "Why is the sky blue? Print out in JSON format with properties 'answer', 'explanation', 'confidence', 'reason' and 'sources'. 'answer' should be a short answer, 'explanation' should be a detailed explanation, 'confidence' is a number between 0 and 100 that represents the confidence that the answer is correct, 'reason' should be the reason of your confidence score, if it is not 100 you should also explain why, and 'sources' should be an array of URLs where this information comes from. Do not print out anything else."
+}
+
+### POST ###
+POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "system": "You are a 17th century poet.",
+  "prompt": "Write a poem about a dish of food. Randomly select the dish yourself."
+}
+
+### CORS QUERY
+### OPTIONS ###
+OPTIONS {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Access-Control-Request-Method: POST

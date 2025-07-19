@@ -123,6 +123,15 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
       ],
     },
     {
+      envFilePath: '../_restclient/test-bedrock-service/.env',
+      envVariables: [
+        {
+          cdkOutputName: `${outputPrefix}TestBedrockServiceApiHttpApiUrl`,
+          envVarName: 'TEST_BEDROCK_SERVICE_API_BASE_URL',
+        },
+      ],
+    },
+    {
       envFilePath: '../_restclient/workflow-service/.env',
       envVariables: [
         {
@@ -138,6 +147,10 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
         {
           cdkOutputName: `${outputPrefix}TestTemplateServiceApiHttpApiUrl`,
           envVarName: 'TEST_TEMPLATE_SERVICE_API_BASE_URL',
+        },
+        {
+          cdkOutputName: `${outputPrefix}TestBedrockServiceApiHttpApiUrl`,
+          envVarName: 'TEST_BEDROCK_SERVICE_API_BASE_URL',
         },
         {
           cdkOutputName: `${outputPrefix}WorkflowServiceApiHttpApiUrl`,

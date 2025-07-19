@@ -27,6 +27,10 @@ export const workflowPropsSchema = z.object({
 
 export type WorkflowProps = z.infer<typeof workflowPropsSchema>
 
+// constants
+const CURRENT_ROUND_ID_LENGTH = 3
+const EXECUTION_ORDER_ID_LENGTH = 4
+
 /**
  *
  */
@@ -119,10 +123,8 @@ export class Workflow implements WorkflowProps {
    *
    */
   getObjectKey(): string {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-
     const workflowKey = `workflow-${this.workflowId}`
-    const baseKey = `${workflowKey}/${workflowKey}-${timestamp}`
+    const baseKey = `${workflowKey}/${workflowKey}`
     const createdKey = `${baseKey}-created.json`
     if (!this.steps || this.steps.length === 0) {
       return createdKey
@@ -175,8 +177,10 @@ export class Workflow implements WorkflowProps {
     // Populate the 'deploy_agents' steps
     {
       const currentRound = 1
+      const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
+      const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
       const deployStep: WorkflowStep = {
-        stepId: `deploy-agents-round-${currentRound}-${executionOrder}`,
+        stepId: `deploy-agents-x${executionOrderId}-r${currenRoundId}`,
         stepStatus: 'completed',
         executionOrder,
         round: 1,
@@ -192,14 +196,17 @@ export class Workflow implements WorkflowProps {
       const currentRound = i + 1
       for (const agent of agents) {
         executionOrder++
+        const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
+        const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
+        const stepId = this.normalizeStepId(`enhance-prompt-${agent.name}-x${executionOrderId}-r${currenRoundId}`)
         const step: WorkflowStep = {
-          stepId: `enhance-prompt-${agent.name.replace(/\s+/g, '-')}-round-${currentRound}-${executionOrder}`,
+          stepId,
           stepStatus: 'pending',
           executionOrder,
           round: currentRound,
           stepType: 'enhance_prompt',
           agent,
-          prompt: i === 0 && this.steps.length === 1 ? this.instructions.query : '',
+          prompt: '',
           result: '',
         }
         this.steps.push(step)
@@ -211,8 +218,11 @@ export class Workflow implements WorkflowProps {
       const currentRound = i + 1
       for (const agent of agents) {
         executionOrder++
+        const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
+        const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
+        const stepId = this.normalizeStepId(`enhance-result-${agent.name}-x${executionOrderId}-r${currenRoundId}`)
         const step: WorkflowStep = {
-          stepId: `enhance-result-${agent.name.replace(/\s+/g, '-')}-round-${currentRound}-${executionOrder}`,
+          stepId,
           stepStatus: 'pending',
           executionOrder,
           round: currentRound,
@@ -228,5 +238,23 @@ export class Workflow implements WorkflowProps {
     const result = Result.makeSuccess()
     console.info(`${logCtx} exit success:`, { result, agents })
     return result
+  }
+
+  /**
+   *
+   */
+  private zeroPad(num: number, size: number): string {
+    let s = num.toString()
+    while (s.length < size) {
+      s = '0' + s
+    }
+    return s
+  }
+
+  /**
+   * Normalizes the step ID by removing spaces and unfriendly character and replacing them with hyphens.
+   */
+  private normalizeStepId(stepId: string): string {
+    return stepId.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')
   }
 }

@@ -708,13 +708,13 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     it(`returns the first step when no steps have been executed`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toMatchObject({ stepId: 'deploy-agents-round-1-1' })
+      expect(workflow.nextStep()).toMatchObject({ stepId: 'deploy-agents-x0001-r001' })
     })
 
     it(`returns the first pending step in a partially executed workflow`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toMatchObject({ stepId: 'enhance-prompt-Bob-round-1-2' })
+      expect(workflow.nextStep()).toMatchObject({ stepId: 'enhance-prompt-Bob-x0003-r001' })
     })
 
     it(`returns null when all steps are completed`, () => {
@@ -746,19 +746,19 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     it(`returns the correct step when only the initial step is completed`, () => {
       const workflowResult = Workflow.fromProps(initialStepValidScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'deploy-agents-round-1-1' })
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'deploy-agents-x0001-r001' })
     })
 
     it(`returns the last completed step in a partially executed workflow`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-prompt-Alice-round-1-2' })
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-prompt-Alice-x0002-r001' })
     })
 
     it(`returns the final step in a fully executed workflow`, () => {
       const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-result-Alice-round-1-4' })
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-result-Alice-x0004-r001' })
     })
   })
 
@@ -769,23 +769,11 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
    * Test Workflow.getObjectKey
    ************************************************************/
   describe(`Test Workflow.getObjectKey`, () => {
-    const mockDate = '2025-07-17T01:29:00.000Z'
-    const mockDateSafe = '2025-07-17T01-29-00-000Z'
-
-    beforeEach(() => {
-      jest.useFakeTimers()
-      jest.setSystemTime(new Date(mockDate))
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it(`returns the correct key format for an empty workflow`, () => {
       const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = emptyWorkflowScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}-${mockDateSafe}`
+      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
       const expectedKey = `${baseKey}-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
@@ -794,7 +782,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = noStepsExecutedScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}-${mockDateSafe}`
+      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
       const expectedKey = `${baseKey}-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
@@ -803,8 +791,8 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = partiallyExecutedScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}-${mockDateSafe}`
-      const expectedKey = `${baseKey}-enhance-prompt-Alice-round-1-2.json`
+      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
+      const expectedKey = `${baseKey}-enhance-prompt-Alice-x0002-r001.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
   })
@@ -825,7 +813,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
         instructions: singleAgentScenario.instructions,
         steps: [
           {
-            stepId: 'deploy-agents-round-1-1',
+            stepId: 'deploy-agents-x0001-r001',
             stepStatus: 'completed',
             executionOrder: 1,
             round: 1,
@@ -834,17 +822,17 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             agents: singleAgent,
           },
           {
-            stepId: 'enhance-prompt-Copernicus-round-1-2',
+            stepId: 'enhance-prompt-Copernicus-x0002-r001',
             stepStatus: 'pending',
             executionOrder: 2,
             round: 1,
             stepType: 'enhance_prompt',
             agent: singleAgent[0],
-            prompt: 'Test Query 1',
+            prompt: '',
             result: '',
           },
           {
-            stepId: 'enhance-result-Copernicus-round-1-3',
+            stepId: 'enhance-result-Copernicus-x0003-r001',
             stepStatus: 'pending',
             executionOrder: 3,
             round: 1,
@@ -867,7 +855,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
         instructions: multiAgentScenario.instructions,
         steps: [
           {
-            stepId: 'deploy-agents-round-1-1',
+            stepId: 'deploy-agents-x0001-r001',
             stepStatus: 'completed',
             executionOrder: 1,
             round: 1,
@@ -876,17 +864,17 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             agents: multiAgents,
           },
           {
-            stepId: 'enhance-prompt-Architect-round-1-2',
+            stepId: 'enhance-prompt-Architect-x0002-r001',
             stepStatus: 'pending',
             executionOrder: 2,
             round: 1,
             stepType: 'enhance_prompt',
             agent: multiAgents[0],
-            prompt: 'Test Query 2',
+            prompt: '',
             result: '',
           },
           {
-            stepId: 'enhance-prompt-Critic-round-1-3',
+            stepId: 'enhance-prompt-Critic-x0003-r001',
             stepStatus: 'pending',
             executionOrder: 3,
             round: 1,
@@ -896,7 +884,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-prompt-Architect-round-2-4',
+            stepId: 'enhance-prompt-Architect-x0004-r002',
             stepStatus: 'pending',
             executionOrder: 4,
             round: 2,
@@ -906,7 +894,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-prompt-Critic-round-2-5',
+            stepId: 'enhance-prompt-Critic-x0005-r002',
             stepStatus: 'pending',
             executionOrder: 5,
             round: 2,
@@ -916,7 +904,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Architect-round-1-6',
+            stepId: 'enhance-result-Architect-x0006-r001',
             stepStatus: 'pending',
             executionOrder: 6,
             round: 1,
@@ -926,7 +914,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Critic-round-1-7',
+            stepId: 'enhance-result-Critic-x0007-r001',
             stepStatus: 'pending',
             executionOrder: 7,
             round: 1,

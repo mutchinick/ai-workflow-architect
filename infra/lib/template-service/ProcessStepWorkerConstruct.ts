@@ -1,10 +1,11 @@
-import { Duration } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy } from 'aws-cdk-lib'
 import { Table } from 'aws-cdk-lib/aws-dynamodb'
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events'
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs'
 import { Queue } from 'aws-cdk-lib/aws-sqs'
 import { Construct } from 'constructs'
 import { join } from 'path'
@@ -70,6 +71,13 @@ export class ProcessStepWorkerConstruct extends Construct {
     queue: Queue,
   ): NodejsFunction {
     const lambdaFuncName = `${id}-Lambda`.slice(0, 64)
+
+    const logGroup = new LogGroup(scope, `${lambdaFuncName}LogGroup`, {
+      logGroupName: `/aws/lambda/${lambdaFuncName}`,
+      retention: RetentionDays.INFINITE,
+      removalPolicy: RemovalPolicy.DESTROY,
+    })
+
     const lambdaFunc = new NodejsFunction(scope, lambdaFuncName, {
       functionName: lambdaFuncName,
       runtime: Runtime.NODEJS_20_X,
@@ -78,7 +86,8 @@ export class ProcessStepWorkerConstruct extends Construct {
       environment: {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
       },
-      timeout: Duration.seconds(10),
+      timeout: settings.Lambda.timeout,
+      logGroup,
     })
 
     const { batchSize, maxBatchingWindow, maxConcurrency, reportBatchItemFailures } = settings.LambdaSQS

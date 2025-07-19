@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { Failure, Result, Success } from '../errors/Result'
-import { EventStoreEvent, EventStoreEventConstructor } from '../event-store/EventStoreEvent'
-import { EventStoreEventName } from '../event-store/EventStoreEventName'
+import { Failure, Result, Success } from '../../errors/Result'
+import { EventStoreEvent, EventStoreEventConstructor } from '../../event-store/EventStoreEvent'
+import { EventStoreEventName } from '../../event-store/EventStoreEventName'
 
 /**
  *
@@ -9,8 +9,8 @@ import { EventStoreEventName } from '../event-store/EventStoreEventName'
 const dataSchema = z.object({
   workflowId: z.string().trim().min(6),
   objectKey: z.string().trim().min(6),
-  promptEnhancementRounds: z.number().int().min(1).max(10),
-  responseEnhancementRounds: z.number().int().min(1).max(10),
+  enhancePromptRounds: z.number().int().min(1).max(10),
+  enhanceResultRounds: z.number().int().min(1).max(10),
 })
 
 export type WorkflowCreatedEventData = z.infer<typeof dataSchema>

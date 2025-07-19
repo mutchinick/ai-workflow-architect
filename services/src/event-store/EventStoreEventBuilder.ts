@@ -1,7 +1,6 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { EventBridgeEvent } from 'aws-lambda'
-import { FailureKind } from '../errors/FailureKind'
 import { Failure, Result, Success } from '../errors/Result'
 import { EventStoreEvent, EventStoreEventConstructor } from './EventStoreEvent'
 import { EventStoreEventName } from './EventStoreEventName'
@@ -42,7 +41,7 @@ export class EventStoreEventBuilder {
   public static fromEventBridge(
     eventClassMap: EventClassMap,
     incomingEvent: IncomingEventBridgeEvent,
-  ): Success<EventStoreEvent> | Failure<FailureKind> {
+  ): Success<EventStoreEvent> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'EventStoreEventBuilder.fromEventBridge'
 
     try {

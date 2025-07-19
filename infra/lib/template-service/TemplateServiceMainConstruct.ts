@@ -28,7 +28,7 @@ export class TemplateServiceMainConstruct extends Construct {
       dynamoDbTable: props.dynamoDbTable,
     })
 
-    // // Workers
+    // Workers
     new ProcessStepWorkerConstruct(scope, `${id}-ProcessStepWorker`, {
       dynamoDbTable: props.dynamoDbTable,
       eventBus: props.eventBus,

@@ -6,24 +6,26 @@ import { Construct } from 'constructs'
  *
  */
 export class S3BucketConstruct extends Construct {
-  public bucket: Bucket
+  public s3Bucket: Bucket
 
   /**
    *
    */
   constructor(scope: Construct, id: string) {
     super(scope, id)
-    this.bucket = this.createBucket(scope, id)
+    this.s3Bucket = this.createBucket(scope, id)
   }
 
   /**
    *
    */
   private createBucket(scope: Construct, id: string): Bucket {
-    const bucketName = `${id}-Bucket`.toLowerCase()
+    const bucketName = `${id}-BucketV3`.toLowerCase()
     const bucket = new Bucket(scope, bucketName, {
       bucketName,
       publicReadAccess: false,
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     })
 
     bucket.applyRemovalPolicy(RemovalPolicy.DESTROY)

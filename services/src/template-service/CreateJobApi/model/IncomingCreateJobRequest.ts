@@ -62,7 +62,7 @@ export class IncomingCreateJobRequest implements IncomingCreateJobRequestProps {
   private static parseValidateInput(
     input: IncomingCreateJobRequestInput,
   ): Success<IncomingCreateJobRequestInput> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'IncomingCreateJobRequest.validateInput'
+    const logCtx = 'IncomingCreateJobRequest.parseValidateInput'
 
     const schema = z.object({
       jobId: z.string().trim().min(6),

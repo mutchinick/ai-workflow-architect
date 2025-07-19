@@ -1,4 +1,3 @@
-import { FailureKind } from '../errors/FailureKind'
 import { Failure, Success } from '../errors/Result'
 import { EventStoreEventData } from './EventStoreEventData'
 
@@ -26,11 +25,11 @@ export abstract class EventStoreEvent<TEventStoreData extends EventStoreEventDat
  *
  */
 export interface EventStoreEventConstructor {
-  fromData(eventData: EventStoreEventData): Success<EventStoreEvent> | Failure<FailureKind>
+  fromData(eventData: EventStoreEventData): Success<EventStoreEvent> | Failure<'InvalidArgumentsError'>
 
   reconstitute(
     eventData: EventStoreEventData,
     idempotencyKey: string,
     createdAt: string,
-  ): Success<EventStoreEvent> | Failure<FailureKind>
+  ): Success<EventStoreEvent> | Failure<'InvalidArgumentsError'>
 }

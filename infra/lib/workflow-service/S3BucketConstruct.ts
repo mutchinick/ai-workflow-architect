@@ -20,7 +20,7 @@ export class S3BucketConstruct extends Construct {
    *
    */
   private createBucket(scope: Construct, id: string): Bucket {
-    const bucketName = `${id}-Bucket`.toLowerCase()
+    const bucketName = `${id}-BucketV3`.toLowerCase()
     const bucket = new Bucket(scope, bucketName, {
       bucketName,
       publicReadAccess: false,

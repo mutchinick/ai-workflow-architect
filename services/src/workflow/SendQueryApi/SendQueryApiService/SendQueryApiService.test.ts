@@ -15,9 +15,7 @@ const mockWorkflowId = 'mockWorkflowId'
 const mockQuery = 'mockQuery'
 const mockEnhancePromptRounds = 3
 const mockEnhanceResultRounds = 2
-const mockDate = new Date().toISOString()
-const mockDateSafe = mockDate.replace(/[:.]/g, '-')
-const mockObjectKey = `workflow-${mockWorkflowId}/workflow-${mockWorkflowId}-${mockDateSafe}-created.json`
+const mockObjectKey = `workflow-${mockWorkflowId}/workflow-${mockWorkflowId}-created.json`
 
 function buildMockIncomingRequest(): TypeUtilsMutable<IncomingSendQueryRequest> {
   const mockClass = IncomingSendQueryRequest.fromProps({

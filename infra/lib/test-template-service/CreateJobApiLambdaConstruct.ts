@@ -39,11 +39,15 @@ export class CreateJobApiLambdaConstruct extends Construct {
       removalPolicy: RemovalPolicy.DESTROY,
     })
 
+    const servicesRoot = join(__dirname, '../../../services')
+
     const lambdaFunc = new NodejsFunction(scope, lambdaFuncName, {
       functionName: lambdaFuncName,
       runtime: Runtime.NODEJS_20_X,
+      projectRoot: servicesRoot,
+      depsLockFilePath: join(servicesRoot, 'package-lock.json'),
+      entry: join(servicesRoot, 'src/test-template-service/handlers/createJobApi.ts'),
       handler: 'handler',
-      entry: join(__dirname, './createJobApiLambdaEntry.ts'),
       environment: {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
       },

@@ -15,8 +15,8 @@ const mockResponseText = 'mockResponseText'
 
 // A mock LanguageModel object that satisfies the type dependency.
 const mockModel = {
-  id: 'mock-model',
-  provider: 'mock-provider',
+  id: 'mockModel',
+  provider: 'mockProvider',
 } as unknown as LanguageModel
 
 type GenerateTextFunction = (config: {

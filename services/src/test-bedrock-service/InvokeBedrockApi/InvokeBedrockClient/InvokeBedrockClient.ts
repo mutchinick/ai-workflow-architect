@@ -122,9 +122,9 @@ export class InvokeBedrockClient implements IInvokeBedrockClient {
           console.error(`${logCtx} exit failure:`, { transientFailure })
           return transientFailure
         } else {
-          const invalidFailure = Result.makeFailure('TestBedrockPermanentError', error.message, false)
-          console.error(`${logCtx} exit failure:`, { invalidFailure })
-          return invalidFailure
+          const permanentFailure = Result.makeFailure('TestBedrockPermanentError', error.message, false)
+          console.error(`${logCtx} exit failure:`, { permanentFailure })
+          return permanentFailure
         }
       }
 

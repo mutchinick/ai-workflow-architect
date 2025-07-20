@@ -27,14 +27,14 @@ export class IncomingSendQueryRequest implements IncomingSendQueryRequestProps {
    *
    */
   public static fromProps(
-    incomingSendQueryRequestProps: IncomingSendQueryRequestProps,
+    props: IncomingSendQueryRequestProps,
   ): Success<IncomingSendQueryRequest> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'IncomingSendQueryRequest.fromInput'
-    console.info(`${logCtx} init:`, { incomingSendQueryRequestProps })
+    console.info(`${logCtx} init:`, { props })
 
-    const propsResult = this.parseValidateProps(incomingSendQueryRequestProps)
+    const propsResult = this.parseValidateProps(props)
     if (Result.isFailure(propsResult)) {
-      console.error(`${logCtx} exit failure:`, { propsResult, incomingSendQueryRequestProps })
+      console.error(`${logCtx} exit failure:`, { propsResult, props })
       return propsResult
     }
 
@@ -49,16 +49,16 @@ export class IncomingSendQueryRequest implements IncomingSendQueryRequestProps {
    *
    */
   private static parseValidateProps(
-    input: IncomingSendQueryRequestProps,
+    props: IncomingSendQueryRequestProps,
   ): Success<IncomingSendQueryRequestProps> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'IncomingSendQueryRequest.parseValidateProps'
 
     try {
-      const validInput = propsSchema.parse(input)
+      const validInput = propsSchema.parse(props)
       return Result.makeSuccess(validInput)
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, input })
+      console.error(`${logCtx} exit failure:`, { failure, props })
       return failure
     }
   }

@@ -19,7 +19,8 @@ describe(`Test Bedrock Service InvokeBedrockApi IncomingInvokeBedrockRequest tes
    ************************************************************
    * Test IncomingInvokeBedrockRequestProps edge cases
    ************************************************************/
-  it(`does not return a Failure if the input IncomingInvokeBedrockRequestProps is valid`, () => {
+  it(`does not return a Failure if the input IncomingInvokeBedrockRequestProps is
+      valid`, () => {
     const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
     const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
     expect(Result.isFailure(result)).toBe(false)
@@ -49,8 +50,8 @@ describe(`Test Bedrock Service InvokeBedrockApi IncomingInvokeBedrockRequest tes
    ************************************************************
    * Test IncomingInvokeBedrockRequestProps.system edge cases
    ************************************************************/
-  it(`does not return a Failure if the input
-      IncomingInvokeBedrockRequestProps.system is undefined`, () => {
+  it(`does not return a Failure if the input IncomingInvokeBedrockRequestProps.system
+      is undefined`, () => {
     const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
     mockIncomingInvokeBedrockRequestProps.system = undefined as never
     const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
@@ -139,8 +140,8 @@ describe(`Test Bedrock Service InvokeBedrockApi IncomingInvokeBedrockRequest tes
    ************************************************************
    * Test expected results
    ************************************************************/
-  it(`returns the expected Success<IncomingInvokeBedrockRequest> if the execution path is
-      successful`, () => {
+  it(`returns the expected Success<IncomingInvokeBedrockRequest> if the execution path
+      is successful`, () => {
     const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
     const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
     const expectedRequest: IncomingInvokeBedrockRequest = {

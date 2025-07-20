@@ -103,7 +103,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     expect(mockGenerateText).toHaveBeenCalledTimes(1)
   })
 
-  it(`calls generateTextFn with the expected GenerationConfig if the input system is provided`, async () => {
+  it(`calls generateTextFn with the expected GenerationConfig if the input system is
+      provided`, async () => {
     const mockGenerateText = buildMockGenerateText_resolves()
     const invokeBedrockClient = new InvokeBedrockClient(mockModel, mockGenerateText)
     await invokeBedrockClient.invoke(mockSystem, mockPrompt)
@@ -114,7 +115,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     })
   })
 
-  it(`calls generateTextFn with the expected GenerationConfig if the input system is not provided`, async () => {
+  it(`calls generateTextFn with the expected GenerationConfig if the input system is
+      not provided`, async () => {
     const mockGenerateText = buildMockGenerateText_resolves()
     const invokeBedrockClient = new InvokeBedrockClient(mockModel, mockGenerateText)
     await invokeBedrockClient.invoke('', mockPrompt)
@@ -141,8 +143,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     expect(Result.isFailureTransient(result)).toBe(true)
   })
 
-  it(`returns a non-transient Failure of kind TestBedrockPermanentError if generateTextFn
-      throws a non-retryable APICallError`, async () => {
+  it(`returns a non-transient Failure of kind TestBedrockPermanentError if
+      generateTextFn throws a non-retryable APICallError`, async () => {
     const permanentError = new APICallError({
       requestBodyValues: {},
       url: 'mockUrl',
@@ -158,8 +160,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a transient Failure of kind UnrecognizedError if generateTextFn throws an
-      unrecognized error`, async () => {
+  it(`returns a transient Failure of kind UnrecognizedError if generateTextFn throws
+      an unrecognized error`, async () => {
     const mockGenerateText = buildMockGenerateText_throws(new Error('Something went wrong'))
     const invokeBedrockClient = new InvokeBedrockClient(mockModel, mockGenerateText)
     const result = await invokeBedrockClient.invoke(mockSystem, mockPrompt)

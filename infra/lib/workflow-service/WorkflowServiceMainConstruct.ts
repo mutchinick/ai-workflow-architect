@@ -1,7 +1,7 @@
 import { Table } from 'aws-cdk-lib/aws-dynamodb'
 import { EventBus } from 'aws-cdk-lib/aws-events'
 import { Construct } from 'constructs'
-import { S3BucketConstruct } from './S3BucketConstruct'
+import { WorkflowServiceS3BucketConstruct } from './WorkflowServiceS3BucketConstruct'
 import { SendQueryApiLambdaConstruct } from './SendQueryApiLambdaConstruct'
 import { WorkflowServiceApiConstruct } from './WorkflowServiceApiConstruct'
 
@@ -22,7 +22,7 @@ export class WorkflowServiceMainConstruct extends Construct {
 
     // S3 Bucket
     const bucketConstructName = `${id}-S3`
-    const bucketConstruct = new S3BucketConstruct(this, bucketConstructName)
+    const bucketConstruct = new WorkflowServiceS3BucketConstruct(this, bucketConstructName)
 
     // API
     const workflowServiceHttpApi = new WorkflowServiceApiConstruct(scope, `${id}-Api`)

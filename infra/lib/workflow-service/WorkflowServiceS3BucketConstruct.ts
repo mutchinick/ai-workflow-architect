@@ -5,7 +5,7 @@ import { Construct } from 'constructs'
 /**
  *
  */
-export class S3BucketConstruct extends Construct {
+export class WorkflowServiceS3BucketConstruct extends Construct {
   public s3Bucket: Bucket
 
   /**

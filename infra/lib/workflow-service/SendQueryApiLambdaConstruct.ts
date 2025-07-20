@@ -46,11 +46,15 @@ export class SendQueryApiLambdaConstruct extends Construct {
       removalPolicy: RemovalPolicy.DESTROY,
     })
 
+    const servicesRoot = join(__dirname, '../../../services')
+
     const lambdaFunc = new NodejsFunction(scope, lambdaFuncName, {
       functionName: lambdaFuncName,
       runtime: Runtime.NODEJS_20_X,
+      projectRoot: servicesRoot,
+      depsLockFilePath: join(servicesRoot, 'package-lock.json'),
+      entry: join(servicesRoot, 'src/workflow-service/handlers/sendQueryApi.ts'),
       handler: 'handler',
-      entry: join(__dirname, './sendQueryApiLambdaEntry.ts'),
       environment: {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
         WORKFLOW_SERVICE_BUCKET_NAME: s3Bucket.bucketName,

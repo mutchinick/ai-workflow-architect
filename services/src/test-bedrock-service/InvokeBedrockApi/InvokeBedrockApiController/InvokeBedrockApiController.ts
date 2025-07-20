@@ -33,7 +33,7 @@ export class InvokeBedrockApiController implements IInvokeBedrockApiController {
     const invokeBedrockResult = await this.invokeBedrockSafe(apiEvent)
     if (Result.isSuccess(invokeBedrockResult)) {
       const invokeBedrockOutput = invokeBedrockResult.value
-      const successResponse = HttpResponse.Accepted(invokeBedrockOutput)
+      const successResponse = HttpResponse.OK(invokeBedrockOutput)
       console.info(`${logCtx} exit success:`, { successResponse, apiEvent })
       return successResponse
     }
@@ -57,8 +57,8 @@ export class InvokeBedrockApiController implements IInvokeBedrockApiController {
   ): Promise<
     | Success<InvokeBedrockApiServiceOutput>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'TestBedrockTransientError'>
-    | Failure<'TestBedrockPermanentError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'InvokeBedrockApiController.invokeBedrockSafe'
@@ -71,13 +71,13 @@ export class InvokeBedrockApiController implements IInvokeBedrockApiController {
     }
 
     const unverifiedRequest = parseInputRequestResult.value as IncomingInvokeBedrockRequestProps
-    const incomingInvokeBedrockRequestResult = IncomingInvokeBedrockRequest.fromProps(unverifiedRequest)
-    if (Result.isFailure(incomingInvokeBedrockRequestResult)) {
-      console.error(`${logCtx} failure exit:`, { incomingInvokeBedrockRequestResult, unverifiedRequest })
-      return incomingInvokeBedrockRequestResult
+    const buildIncomingRequestResult = IncomingInvokeBedrockRequest.fromProps(unverifiedRequest)
+    if (Result.isFailure(buildIncomingRequestResult)) {
+      console.error(`${logCtx} failure exit:`, { buildIncomingRequestResult, unverifiedRequest })
+      return buildIncomingRequestResult
     }
 
-    const incomingInvokeBedrockRequest = incomingInvokeBedrockRequestResult.value
+    const incomingInvokeBedrockRequest = buildIncomingRequestResult.value
     const invokeBedrockResult = await this.invokeBedrockApiService.invokeBedrock(incomingInvokeBedrockRequest)
     Result.isFailure(invokeBedrockResult)
       ? console.error(`${logCtx} exit failure:`, { invokeBedrockResult, incomingInvokeBedrockRequest })

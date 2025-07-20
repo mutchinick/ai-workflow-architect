@@ -13,7 +13,6 @@ const mockSystem = 'mockSystem'
 const mockPrompt = 'mockPrompt'
 const mockResponseText = 'mockResponseText'
 
-// A mock LanguageModel object that satisfies the type dependency.
 const mockModel = {
   id: 'mockModel',
   provider: 'mockProvider',
@@ -126,12 +125,12 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     })
   })
 
-  it(`returns a transient Failure of kind TestBedrockTransientError if generateTextFn
+  it(`returns a transient Failure of kind BedrockInvokeTransientError if generateTextFn
       throws a retryable APICallError`, async () => {
     const retryableError = new APICallError({
       requestBodyValues: {},
       url: 'mockUrl',
-      message: 'Retryable error',
+      message: 'Transient error',
       isRetryable: true,
       statusCode: 500,
     })
@@ -139,11 +138,11 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     const invokeBedrockClient = new InvokeBedrockClient(mockModel, mockGenerateText)
     const result = await invokeBedrockClient.invoke(mockSystem, mockPrompt)
     expect(Result.isFailure(result)).toBe(true)
-    expect(Result.isFailureOfKind(result, 'TestBedrockTransientError')).toBe(true)
+    expect(Result.isFailureOfKind(result, 'BedrockInvokeTransientError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(true)
   })
 
-  it(`returns a non-transient Failure of kind TestBedrockPermanentError if
+  it(`returns a non-transient Failure of kind BedrockInvokePermanentError if
       generateTextFn throws a non-retryable APICallError`, async () => {
     const permanentError = new APICallError({
       requestBodyValues: {},
@@ -156,13 +155,13 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     const invokeBedrockClient = new InvokeBedrockClient(mockModel, mockGenerateText)
     const result = await invokeBedrockClient.invoke(mockSystem, mockPrompt)
     expect(Result.isFailure(result)).toBe(true)
-    expect(Result.isFailureOfKind(result, 'TestBedrockPermanentError')).toBe(true)
+    expect(Result.isFailureOfKind(result, 'BedrockInvokePermanentError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
   it(`returns a transient Failure of kind UnrecognizedError if generateTextFn throws
       an unrecognized error`, async () => {
-    const mockGenerateText = buildMockGenerateText_throws(new Error('Something went wrong'))
+    const mockGenerateText = buildMockGenerateText_throws(new Error('mockError'))
     const invokeBedrockClient = new InvokeBedrockClient(mockModel, mockGenerateText)
     const result = await invokeBedrockClient.invoke(mockSystem, mockPrompt)
     expect(Result.isFailure(result)).toBe(true)

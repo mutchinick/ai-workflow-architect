@@ -8,8 +8,8 @@ export interface IInvokeBedrockApiService {
   ) => Promise<
     | Success<InvokeBedrockApiServiceOutput>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'TestBedrockTransientError'>
-    | Failure<'TestBedrockPermanentError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   >
 }
@@ -35,8 +35,8 @@ export class InvokeBedrockApiService implements IInvokeBedrockApiService {
   ): Promise<
     | Success<InvokeBedrockApiServiceOutput>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'TestBedrockTransientError'>
-    | Failure<'TestBedrockPermanentError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'InvokeBedrockApiService.invokeBedrock'
@@ -89,19 +89,19 @@ export class InvokeBedrockApiService implements IInvokeBedrockApiService {
   ): Promise<
     | Success<string>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'TestBedrockTransientError'>
-    | Failure<'TestBedrockPermanentError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'InvokeBedrockApiService.publishWorkflowCreatedEvent'
+    const logCtx = 'InvokeBedrockApiService.invoke'
     console.info(`${logCtx} init:`, { incomingRequest })
 
     const { system, prompt } = incomingRequest
     const invocationResult = await this.invokeBedrockClient.invoke(system, prompt)
-    if (Result.isFailure(invocationResult)) {
-      console.error(`${logCtx} exit failure:`, { invocationResult, incomingRequest })
-      return invocationResult
-    }
+
+    Result.isFailure(invocationResult)
+      ? console.error(`${logCtx} exit failure:`, { invocationResult, incomingRequest })
+      : console.info(`${logCtx} exit success:`, { invocationResult, incomingRequest })
 
     return invocationResult
   }

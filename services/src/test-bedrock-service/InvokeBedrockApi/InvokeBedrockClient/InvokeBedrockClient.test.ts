@@ -125,8 +125,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockClient tests`, () =
     })
   })
 
-  it(`returns a transient Failure of kind BedrockInvokeTransientError if generateTextFn
-      throws a retryable APICallError`, async () => {
+  it(`returns a transient Failure of kind BedrockInvokeTransientError if
+      generateTextFn throws a retryable APICallError`, async () => {
     const retryableError = new APICallError({
       requestBodyValues: {},
       url: 'mockUrl',

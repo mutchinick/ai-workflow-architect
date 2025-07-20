@@ -18,7 +18,7 @@ const mockJobId = 'mockJobId'
 const mockCreated = true
 
 function buildMockJobCreatedEvent(id: string): TypeUtilsMutable<JobCreatedEvent> {
-  const incomingJobCreatedEvent: JobCreatedEvent = {
+  const incomingEvent: JobCreatedEvent = {
     idempotencyKey: mockIdempotencyKey,
     eventName: EventStoreEventName.JOB_CREATED_EVENT,
     eventData: {
@@ -27,7 +27,7 @@ function buildMockJobCreatedEvent(id: string): TypeUtilsMutable<JobCreatedEvent>
     },
     createdAt: mockDate,
   }
-  return incomingJobCreatedEvent
+  return incomingEvent
 }
 
 function buildMockJobCreatedEvents(ids: string[]): TypeUtilsMutable<JobCreatedEvent>[] {

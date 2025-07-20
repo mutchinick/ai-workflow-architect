@@ -52,8 +52,8 @@ export class IncomingCreateJobRequest implements IncomingCreateJobRequestProps {
     }
 
     const { jobId } = incomingCreateJobRequestInput
-    const incomingCreateJobRequestProps: IncomingCreateJobRequestProps = { jobId }
-    return Result.makeSuccess(incomingCreateJobRequestProps)
+    const props: IncomingCreateJobRequestProps = { jobId }
+    return Result.makeSuccess(props)
   }
 
   /**

@@ -47,6 +47,40 @@ describe(`Test Bedrock Service InvokeBedrockApi IncomingInvokeBedrockRequest tes
    *
    *
    ************************************************************
+   * Test IncomingInvokeBedrockRequestProps.system edge cases
+   ************************************************************/
+  it(`does not return a Failure if the input
+      IncomingInvokeBedrockRequestProps.system is undefined`, () => {
+    const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
+    mockIncomingInvokeBedrockRequestProps.system = undefined as never
+    const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
+    expect(Result.isFailure(result)).toBe(false)
+  })
+
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      IncomingInvokeBedrockRequestProps.system is null`, () => {
+    const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
+    mockIncomingInvokeBedrockRequestProps.system = null as never
+    const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      IncomingInvokeBedrockRequestProps.system not a string`, () => {
+    const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
+    mockIncomingInvokeBedrockRequestProps.system = 123 as never
+    const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  /*
+   *
+   *
+   ************************************************************
    * Test IncomingInvokeBedrockRequestProps.prompt edge cases
    ************************************************************/
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input

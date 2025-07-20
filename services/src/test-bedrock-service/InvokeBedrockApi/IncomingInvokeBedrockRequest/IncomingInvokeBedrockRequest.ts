@@ -3,7 +3,7 @@ import { Failure, Result, Success } from '../../../errors/Result'
 
 // Zod schema
 const propsSchema = z.object({
-  system: z.string().trim().min(6),
+  system: z.string().optional(),
   prompt: z.string().trim().min(6),
 })
 
@@ -17,7 +17,7 @@ export class IncomingInvokeBedrockRequest implements IncomingInvokeBedrockReques
    *
    */
   private constructor(
-    public readonly system: string,
+    public readonly system: string | undefined,
     public readonly prompt: string,
   ) {}
 
@@ -25,14 +25,14 @@ export class IncomingInvokeBedrockRequest implements IncomingInvokeBedrockReques
    *
    */
   public static fromProps(
-    incomingInvokeBedrockRequestProps: IncomingInvokeBedrockRequestProps,
+    props: IncomingInvokeBedrockRequestProps,
   ): Success<IncomingInvokeBedrockRequest> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'IncomingInvokeBedrockRequest.fromInput'
-    console.info(`${logCtx} init:`, { incomingInvokeBedrockRequestProps })
+    console.info(`${logCtx} init:`, { props })
 
-    const propsResult = this.parseValidateProps(incomingInvokeBedrockRequestProps)
+    const propsResult = this.parseValidateProps(props)
     if (Result.isFailure(propsResult)) {
-      console.error(`${logCtx} exit failure:`, { propsResult, incomingInvokeBedrockRequestProps })
+      console.error(`${logCtx} exit failure:`, { propsResult, props })
       return propsResult
     }
 

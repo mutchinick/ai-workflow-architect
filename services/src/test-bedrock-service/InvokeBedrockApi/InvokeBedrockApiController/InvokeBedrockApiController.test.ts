@@ -63,8 +63,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
     await expect(invokeBedrockApiController.invokeBedrock(mockApiEvent)).resolves.not.toThrow()
   })
 
-  it(`does not call InvokeBedrockApiService.invokeBedrock if the input APIGatewayProxyEventV2
-      is undefined`, async () => {
+  it(`does not call InvokeBedrockApiService.invokeBedrock if the input
+      APIGatewayProxyEventV2 is undefined`, async () => {
     const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_succeeds()
     const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
     const mockApiEvent = undefined as unknown as APIGatewayProxyEventV2
@@ -81,8 +81,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call InvokeBedrockApiService.invokeBedrock if the input APIGatewayProxyEventV2
-      is invalid`, async () => {
+  it(`does not call InvokeBedrockApiService.invokeBedrock if the input
+      APIGatewayProxyEventV2 is invalid`, async () => {
     const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_succeeds()
     const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
     const mockApiEvent = 'mockInvalidValue' as unknown as APIGatewayProxyEventV2
@@ -168,6 +168,59 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
    *
    *
    ************************************************************
+   * Test APIGatewayProxyEventV2.body.system edge cases
+   ************************************************************/
+  it(`does not call InvokeBedrockApiService.invokeBedrock if the input
+      APIGatewayProxyEventV2.body.system is undefined`, async () => {
+    const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_succeeds()
+    const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
+    const mockApiEventBody = buildMockApiEventBody()
+    mockApiEventBody.system = undefined as never
+    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
+    await invokeBedrockApiController.invokeBedrock(mockApiEvent)
+    expect(mockInvokeBedrockApiService.invokeBedrock).not.toHaveBeenCalled()
+  })
+
+  it(`responds with 400 Bad Request if the input APIGatewayProxyEventV2.body.system is
+      undefined`, async () => {
+    const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_succeeds()
+    const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
+    const mockApiEventBody = buildMockApiEventBody()
+    mockApiEventBody.system = undefined as never
+    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
+    const response = await invokeBedrockApiController.invokeBedrock(mockApiEvent)
+    const expectedResponse = HttpResponse.BadRequestError()
+    expect(response).toStrictEqual(expectedResponse)
+  })
+
+  //
+  it(`does not call InvokeBedrockApiService.invokeBedrock if the input
+      APIGatewayProxyEventV2.body.system is null`, async () => {
+    const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_succeeds()
+    const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
+    const mockApiEventBody = buildMockApiEventBody()
+    mockApiEventBody.system = null as never
+    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
+    await invokeBedrockApiController.invokeBedrock(mockApiEvent)
+    expect(mockInvokeBedrockApiService.invokeBedrock).not.toHaveBeenCalled()
+  })
+
+  it(`responds with 400 Bad Request if the input APIGatewayProxyEventV2.body.system is
+      null`, async () => {
+    const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_succeeds()
+    const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
+    const mockApiEventBody = buildMockApiEventBody()
+    mockApiEventBody.system = null as never
+    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
+    const response = await invokeBedrockApiController.invokeBedrock(mockApiEvent)
+    const expectedResponse = HttpResponse.BadRequestError()
+    expect(response).toStrictEqual(expectedResponse)
+  })
+
+  /*
+   *
+   *
+   ************************************************************
    * Test APIGatewayProxyEventV2.body.prompt edge cases
    ************************************************************/
   it(`does not call InvokeBedrockApiService.invokeBedrock if the input
@@ -234,8 +287,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
     expect(mockInvokeBedrockApiService.invokeBedrock).toHaveBeenCalledTimes(1)
   })
 
-  it(`responds with 500 Internal Server Error if InvokeBedrockApiService.invokeBedrock returns
-      a Failure of kind not accounted for`, async () => {
+  it(`responds with 500 Internal Server Error if InvokeBedrockApiService.invokeBedrock
+      returns a Failure of kind not accounted for`, async () => {
     const mockFailureKind = 'mockFailureKind' as FailureKind
     const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_fails(mockFailureKind)
     const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
@@ -246,8 +299,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`responds with 500 Internal Server Error if InvokeBedrockApiService.invokeBedrock returns
-      a Failure of kind UnrecognizedError`, async () => {
+  it(`responds with 500 Internal Server Error if InvokeBedrockApiService.invokeBedrock
+      returns a Failure of kind UnrecognizedError`, async () => {
     const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_fails('UnrecognizedError')
     const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
     const mockApiEventBody = buildMockApiEventBody()
@@ -257,8 +310,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`responds with 400 Bad Request if InvokeBedrockApiService.invokeBedrock returns a Failure
-      of kind InvalidArgumentsError`, async () => {
+  it(`responds with 400 Bad Request if InvokeBedrockApiService.invokeBedrock returns a
+      Failure of kind InvalidArgumentsError`, async () => {
     const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_fails('InvalidArgumentsError')
     const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
     const mockApiEventBody = buildMockApiEventBody()
@@ -274,13 +327,13 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
    ************************************************************
    * Test expected results
    ************************************************************/
-  it(`responds with status code 202 Accepted`, async () => {
+  it(`responds with status code 200 OK`, async () => {
     const mockInvokeBedrockApiService = buildMockInvokeBedrockApiService_succeeds()
     const invokeBedrockApiController = new InvokeBedrockApiController(mockInvokeBedrockApiService)
     const mockApiEventBody = buildMockApiEventBody()
     const mockApiEvent = buildMockApiEvent(mockApiEventBody)
     const response = await invokeBedrockApiController.invokeBedrock(mockApiEvent)
-    expect(response.statusCode).toBe(202)
+    expect(response.statusCode).toBe(200)
   })
 
   it(`responds with the expected HttpResponse.Accepted response`, async () => {
@@ -292,7 +345,7 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiController tests
     const expectedServiceOutput: InvokeBedrockApiServiceOutput = {
       completion: mockCompletion,
     }
-    const expectedResponse = HttpResponse.Accepted(expectedServiceOutput)
+    const expectedResponse = HttpResponse.OK(expectedServiceOutput)
     expect(response).toStrictEqual(expectedResponse)
   })
 })

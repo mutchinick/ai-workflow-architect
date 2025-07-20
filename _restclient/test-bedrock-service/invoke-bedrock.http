@@ -20,6 +20,25 @@ Content-Type: application/json
   "prompt": "Write a poem about a dish of food. Randomly select the dish yourself."
 }
 
+### POST ###
+POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "prompt": "What is the meaning of life?"
+}
+
+### POST ###
+POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "system": "",
+  "prompt": "Hello, what model are you?"
+}
+
 ### CORS QUERY
 ### OPTIONS ###
 OPTIONS {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock

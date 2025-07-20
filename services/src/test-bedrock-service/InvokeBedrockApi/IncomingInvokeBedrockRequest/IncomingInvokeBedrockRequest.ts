@@ -1,9 +1,8 @@
 import { z } from 'zod'
 import { Failure, Result, Success } from '../../../errors/Result'
 
-// Zod schema
 const propsSchema = z.object({
-  system: z.string().trim().min(6),
+  system: z.string(),
   prompt: z.string().trim().min(6),
 })
 
@@ -25,14 +24,14 @@ export class IncomingInvokeBedrockRequest implements IncomingInvokeBedrockReques
    *
    */
   public static fromProps(
-    incomingInvokeBedrockRequestProps: IncomingInvokeBedrockRequestProps,
+    props: IncomingInvokeBedrockRequestProps,
   ): Success<IncomingInvokeBedrockRequest> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'IncomingInvokeBedrockRequest.fromInput'
-    console.info(`${logCtx} init:`, { incomingInvokeBedrockRequestProps })
+    const logCtx = 'IncomingInvokeBedrockRequest.fromProps'
+    console.info(`${logCtx} init:`, { props })
 
-    const propsResult = this.parseValidateProps(incomingInvokeBedrockRequestProps)
+    const propsResult = this.parseValidateProps(props)
     if (Result.isFailure(propsResult)) {
-      console.error(`${logCtx} exit failure:`, { propsResult, incomingInvokeBedrockRequestProps })
+      console.error(`${logCtx} exit failure:`, { propsResult, props })
       return propsResult
     }
 
@@ -47,16 +46,16 @@ export class IncomingInvokeBedrockRequest implements IncomingInvokeBedrockReques
    *
    */
   private static parseValidateProps(
-    input: IncomingInvokeBedrockRequestProps,
+    props: IncomingInvokeBedrockRequestProps,
   ): Success<IncomingInvokeBedrockRequestProps> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'IncomingInvokeBedrockRequest.parseValidateProps'
 
     try {
-      const validInput = propsSchema.parse(input)
+      const validInput = propsSchema.parse(props)
       return Result.makeSuccess(validInput)
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
-      console.error(`${logCtx} exit failure:`, { failure, input })
+      console.error(`${logCtx} exit failure:`, { failure, props })
       return failure
     }
   }

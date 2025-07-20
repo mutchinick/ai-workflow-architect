@@ -130,8 +130,8 @@ describe(`Test Bedrock Service InvokeBedrockApi InvokeBedrockApiService tests`, 
    ************************************************************
    * Test expected results
    ************************************************************/
-  it(`returns the expected Success<InvokeBedrockApiServiceOutput> if the execution path is
-      successful`, async () => {
+  it(`returns the expected Success<InvokeBedrockApiServiceOutput> if the execution
+      path is successful`, async () => {
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const invokeBedrockApiService = new InvokeBedrockApiService(mockInvokeBedrockClient)
     const result = await invokeBedrockApiService.invokeBedrock(mockIncomingRequest)

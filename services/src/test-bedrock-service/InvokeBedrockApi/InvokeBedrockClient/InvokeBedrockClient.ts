@@ -3,7 +3,7 @@ import { Failure, Result, Success } from '../../../errors/Result'
 
 interface GenerationConfig {
   model: LanguageModel
-  system?: string
+  system: string | undefined
   prompt: string
 }
 
@@ -19,8 +19,8 @@ export interface IInvokeBedrockClient {
   ) => Promise<
     | Success<string>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'TestBedrockTransientError'>
-    | Failure<'TestBedrockPermanentError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   >
 }
@@ -46,8 +46,8 @@ export class InvokeBedrockClient implements IInvokeBedrockClient {
   ): Promise<
     | Success<string>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'TestBedrockTransientError'>
-    | Failure<'TestBedrockPermanentError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'InvokeBedrockClient.invoke'
@@ -64,8 +64,8 @@ export class InvokeBedrockClient implements IInvokeBedrockClient {
     const sendRequestResult = await this.sendGenerationRequest(generationConfig)
 
     Result.isFailure(sendRequestResult)
-      ? console.error(`${logCtx} exit failure:`, { sendRequestResult })
-      : console.info(`${logCtx} exit success`)
+      ? console.error(`${logCtx} exit failure:`, { sendRequestResult, generationConfig })
+      : console.info(`${logCtx} exit success`, { sendRequestResult, generationConfig })
 
     return sendRequestResult
   }
@@ -101,35 +101,35 @@ export class InvokeBedrockClient implements IInvokeBedrockClient {
    *
    */
   private async sendGenerationRequest(
-    config: GenerationConfig,
+    generationConfig: GenerationConfig,
   ): Promise<
     | Success<string>
-    | Failure<'TestBedrockTransientError'>
-    | Failure<'TestBedrockPermanentError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'InvokeBedrockClient.sendGenerationRequest'
 
     try {
-      const { text } = await this.generateTextFn(config)
-      return Result.makeSuccess(text)
+      const { text } = await this.generateTextFn(generationConfig)
+      const bedrockTextResult = Result.makeSuccess(text)
+      console.info(`${logCtx} exit success:`, { result: bedrockTextResult })
+      return bedrockTextResult
     } catch (error) {
-      console.error(`${logCtx} error caught:`, { error })
-
       if (error instanceof APICallError) {
         if (error.isRetryable) {
-          const transientFailure = Result.makeFailure('TestBedrockTransientError', error.message, true)
-          console.error(`${logCtx} exit failure:`, { transientFailure })
+          const transientFailure = Result.makeFailure('BedrockInvokeTransientError', error, true)
+          console.error(`${logCtx} exit failure:`, { transientFailure, generationConfig })
           return transientFailure
         } else {
-          const invalidFailure = Result.makeFailure('TestBedrockPermanentError', error.message, false)
-          console.error(`${logCtx} exit failure:`, { invalidFailure })
-          return invalidFailure
+          const permanentFailure = Result.makeFailure('BedrockInvokePermanentError', error, false)
+          console.error(`${logCtx} exit failure:`, { permanentFailure, generationConfig })
+          return permanentFailure
         }
       }
 
       const unrecognizedFailure = Result.makeFailure('UnrecognizedError', String(error), true)
-      console.error(`${logCtx} exit failure:`, { failure: unrecognizedFailure })
+      console.error(`${logCtx} exit failure:`, { unrecognizedFailure })
       return unrecognizedFailure
     }
   }

@@ -19,7 +19,8 @@ describe(`Test Bedrock Service InvokeBedrockApi IncomingInvokeBedrockRequest tes
    ************************************************************
    * Test IncomingInvokeBedrockRequestProps edge cases
    ************************************************************/
-  it(`does not return a Failure if the input IncomingInvokeBedrockRequestProps is valid`, () => {
+  it(`does not return a Failure if the input IncomingInvokeBedrockRequestProps is
+      valid`, () => {
     const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
     const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
     expect(Result.isFailure(result)).toBe(false)
@@ -37,6 +38,42 @@ describe(`Test Bedrock Service InvokeBedrockApi IncomingInvokeBedrockRequest tes
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
       IncomingInvokeBedrockRequestProps is null`, () => {
     const mockIncomingInvokeBedrockRequestProps = null as never
+    const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  /*
+   *
+   *
+   ************************************************************
+   * Test IncomingInvokeBedrockRequestProps.system edge cases
+   ************************************************************/
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      IncomingInvokeBedrockRequestProps.system is undefined`, () => {
+    const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
+    mockIncomingInvokeBedrockRequestProps.system = undefined as never
+    const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      IncomingInvokeBedrockRequestProps.system is null`, () => {
+    const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
+    mockIncomingInvokeBedrockRequestProps.system = null as never
+    const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureTransient(result)).toBe(false)
+  })
+
+  it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
+      IncomingInvokeBedrockRequestProps.system not a string`, () => {
+    const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
+    mockIncomingInvokeBedrockRequestProps.system = 123 as never
     const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -105,8 +142,8 @@ describe(`Test Bedrock Service InvokeBedrockApi IncomingInvokeBedrockRequest tes
    ************************************************************
    * Test expected results
    ************************************************************/
-  it(`returns the expected Success<IncomingInvokeBedrockRequest> if the execution path is
-      successful`, () => {
+  it(`returns the expected Success<IncomingInvokeBedrockRequest> if the execution path
+      is successful`, () => {
     const mockIncomingInvokeBedrockRequestProps = buildMockIncomingInvokeBedrockRequestProps()
     const result = IncomingInvokeBedrockRequest.fromProps(mockIncomingInvokeBedrockRequestProps)
     const expectedRequest: IncomingInvokeBedrockRequest = {

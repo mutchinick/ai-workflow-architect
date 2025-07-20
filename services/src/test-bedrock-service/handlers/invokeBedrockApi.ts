@@ -5,6 +5,7 @@ import { InvokeBedrockApiController } from '../InvokeBedrockApi/InvokeBedrockApi
 import { InvokeBedrockApiService } from '../InvokeBedrockApi/InvokeBedrockApiService/InvokeBedrockApiService'
 import { InvokeBedrockClient } from '../InvokeBedrockApi/InvokeBedrockClient/InvokeBedrockClient'
 
+// Some available models:
 // meta.llama3-3-70b-instruct-v1:0
 // meta.llama4-maverick-17b-instruct-v1:0
 // deepseek.r1-v1:0

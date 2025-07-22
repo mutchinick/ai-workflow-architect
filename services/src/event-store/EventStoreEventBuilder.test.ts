@@ -35,20 +35,20 @@ const mockEventClassMap: EventClassMap = {
  */
 function buildEventBridgeInput(): IncomingEventBridgeEvent {
   return {
-    version: '0',
-    id: 'some-event-id',
-    'detail-type': 'DynamoDB Stream Record',
-    source: 'aws.dynamodb',
-    account: '123456789012',
-    time: new Date().toISOString(),
-    region: 'us-east-1',
-    resources: ['some-arn'],
+    'detail-type': 'mockDetailType',
+    account: 'mockAccount',
+    id: 'mockId',
+    region: 'mockRegion',
+    resources: ['mockResource'],
+    source: 'mockSource',
+    time: 'mockTime',
+    version: 'mockVersion',
     detail: {
+      awsRegion: 'mockAwsRegion',
+      eventID: 'mockEventId',
       eventName: 'INSERT',
       eventSource: 'aws:dynamodb',
-      eventID: 'some-stream-event-id',
-      eventVersion: '1.1',
-      awsRegion: 'us-east-1',
+      eventVersion: 'mockEventVersion',
       dynamodb: {
         NewImage: {
           eventName: { S: MOCK_SOME_EVENT },

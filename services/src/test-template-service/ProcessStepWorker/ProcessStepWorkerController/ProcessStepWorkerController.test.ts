@@ -1,9 +1,8 @@
-import { AttributeValue } from '@aws-sdk/client-dynamodb'
 import { marshall } from '@aws-sdk/util-dynamodb'
-import { EventBridgeEvent, SQSBatchResponse, SQSEvent, SQSRecord } from 'aws-lambda'
+import { SQSBatchResponse, SQSEvent, SQSRecord } from 'aws-lambda'
 import { Result } from '../../../errors/Result'
 import { EventStoreEvent } from '../../../event-store/EventStoreEvent'
-import { EventStoreEventBuilder } from '../../../event-store/EventStoreEventBuilder'
+import { EventStoreEventBuilder, IncomingEventBridgeEvent } from '../../../event-store/EventStoreEventBuilder'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
 import { JobCreatedEvent } from '../../events/JobCreatedEvent'
@@ -34,28 +33,14 @@ function buildMockJobCreatedEvents(ids: string[]): TypeUtilsMutable<JobCreatedEv
   return ids.map((id) => buildMockJobCreatedEvent(id))
 }
 
-type MockEventDetail = {
-  awsRegion: string
-  eventID: string
-  eventName: 'INSERT'
-  eventSource: 'aws:dynamodb'
-  eventVersion: string
-  dynamodb: {
-    NewImage: Record<string, AttributeValue>
-  }
-}
-
 // COMBAK: Work a simpler way to build/wrap/unwrap these EventBridgeEvents (maybe some abstraction util?)
-function buildMockEventBridgeEvent(
-  id: string,
-  incomingJobCreatedEvent: JobCreatedEvent,
-): EventBridgeEvent<string, MockEventDetail> {
-  const mockEventBridgeEvent: EventBridgeEvent<string, MockEventDetail> = {
+function buildMockEventBridgeEvent(id: string, incomingEvent: JobCreatedEvent): IncomingEventBridgeEvent {
+  const mockEventBridgeEvent: IncomingEventBridgeEvent = {
     'detail-type': 'mockDetailType',
     account: 'mockAccount',
     id: `mockId-${id}`,
     region: 'mockRegion',
-    resources: [],
+    resources: ['mockResource'],
     source: 'mockSource',
     time: 'mockTime',
     version: 'mockVersion',
@@ -66,7 +51,7 @@ function buildMockEventBridgeEvent(
       eventSource: 'aws:dynamodb',
       eventVersion: 'mockEventVersion',
       dynamodb: {
-        NewImage: marshall(incomingJobCreatedEvent, { removeUndefinedValues: true }),
+        NewImage: marshall(incomingEvent, { removeUndefinedValues: true }),
       },
     },
   }
@@ -77,21 +62,18 @@ function buildMockEventBridgeEvent(
 function buildMockEventBridgeEvents(
   ids: string[],
   incomingJobCreatedEvents: JobCreatedEvent[],
-): EventBridgeEvent<string, MockEventDetail>[] {
+): IncomingEventBridgeEvent[] {
   return ids.map((id, index) => buildMockEventBridgeEvent(id, incomingJobCreatedEvents[index]))
 }
 
-function buildMockSqsRecord(id: string, eventBridgeEvent: EventBridgeEvent<string, MockEventDetail>): SQSRecord {
+function buildMockSqsRecord(id: string, eventBridgeEvent: IncomingEventBridgeEvent): SQSRecord {
   return {
     messageId: `mockMessageId-${id}`,
     body: JSON.stringify(eventBridgeEvent),
   } as unknown as SQSRecord
 }
 
-function buildMockSqsRecords(
-  ids: string[],
-  eventBridgeEvents: EventBridgeEvent<string, MockEventDetail>[],
-): SQSRecord[] {
+function buildMockSqsRecords(ids: string[], eventBridgeEvents: IncomingEventBridgeEvent[]): SQSRecord[] {
   return ids.map((id, index) => buildMockSqsRecord(id, eventBridgeEvents[index]))
 }
 
@@ -101,7 +83,7 @@ function buildMockSqsEvent(sqsRecords: SQSRecord[]): SQSEvent {
 
 function buildMockTestObjects(ids: string[]): {
   mockJobCreatedEvents: TypeUtilsMutable<JobCreatedEvent>[]
-  mockEventBridgeEvents: EventBridgeEvent<string, MockEventDetail>[]
+  mockEventBridgeEvents: IncomingEventBridgeEvent[]
   mockSqsRecords: SQSRecord[]
   mockSqsEvent: SQSEvent
 } {

@@ -115,7 +115,7 @@ export class SendQueryApiService implements ISendQueryApiService {
     | Failure<'DuplicateWorkflowError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'SendQueryApiService.publishWorkflowCreatedEvent'
+    const logCtx = 'SendQueryApiService.createWorkflow'
     console.info(`${logCtx} init:`, { incomingRequest })
 
     const { query, enhancePromptRounds, enhanceResultRounds } = incomingRequest

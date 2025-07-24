@@ -96,6 +96,9 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
       },
       timeout: settings.Lambda.timeout,
       logGroup,
+      bundling: {
+        externalModules: ['@aws-sdk/*'],
+      },
     })
 
     const { batchSize, maxBatchingWindow, maxConcurrency, reportBatchItemFailures } = settings.LambdaSQS

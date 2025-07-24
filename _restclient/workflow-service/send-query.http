@@ -24,7 +24,6 @@ Content-Type: application/json
   "enhanceResultRounds": 2
 }
 
-### RANDOM
 ### WORKFLOW_CREATED_EVENT
 ### POST ###
 POST {{baseUrl}}/api/v1/workflow-service/sendQuery
@@ -35,6 +34,18 @@ Content-Type: application/json
   "query": "Can you design a business plan for an ice cream shop? The idea is to grow to 20 stores in 5 years.",
   "enhancePromptRounds": 5,
   "enhanceResultRounds": 4
+}
+
+### WORKFLOW_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/workflow-service/sendQuery
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "query": "I am writing a TypeScript with Next.js application. I need to implement a feature that allows users to upload images and display them in a gallery. Can you help me with that?",
+  "enhancePromptRounds": 1,
+  "enhanceResultRounds": 1
 }
 
 ### CORS QUERY

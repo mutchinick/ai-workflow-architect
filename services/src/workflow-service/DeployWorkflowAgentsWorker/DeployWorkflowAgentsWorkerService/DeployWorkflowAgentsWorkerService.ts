@@ -17,11 +17,11 @@ export interface IDeployWorkflowAgentsWorkerService {
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
-    | Failure<'UnrecognizedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
     | Failure<'DuplicateEventError'>
+    | Failure<'UnrecognizedError'>
   >
 }
 
@@ -49,11 +49,11 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
-    | Failure<'UnrecognizedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
     | Failure<'DuplicateEventError'>
+    | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'DeployWorkflowAgentsWorkerService.deployWorkflowAgents'
     console.info(`${logCtx} init:`, { incomingEvent })

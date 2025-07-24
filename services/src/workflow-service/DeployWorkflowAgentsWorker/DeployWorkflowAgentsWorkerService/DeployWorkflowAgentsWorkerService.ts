@@ -4,10 +4,10 @@ import { WorkflowAgentsDeployedEvent, WorkflowAgentsDeployedEventData } from '..
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
 import { Agent } from '../../models/Agent'
+import { AgentPromptBuilder } from '../../models/AgentPromptBuilder'
 import { IReadWorkflowClient } from '../../models/ReadWorkflowClient'
 import { ISaveWorkflowClient } from '../../models/SaveWorkflowClient'
 import { Workflow } from '../../models/Workflow'
-import { PromptBuilder } from '../model/PromptBuilder'
 
 export interface IDeployWorkflowAgentsWorkerService {
   deployWorkflowAgents: (
@@ -23,6 +23,12 @@ export interface IDeployWorkflowAgentsWorkerService {
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   >
+}
+
+type DesignAgentsOutput = {
+  system: string
+  prompt: string
+  agents: Agent[]
 }
 
 /**
@@ -146,12 +152,10 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
   /**
    *
    */
-  private async designAgents(workflow: Workflow): Promise<
-    | Success<{
-        system: string
-        prompt: string
-        agents: Agent[]
-      }>
+  private async designAgents(
+    workflow: Workflow,
+  ): Promise<
+    | Success<DesignAgentsOutput>
     | Failure<'InvalidArgumentsError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
@@ -161,7 +165,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
     const userQuery = workflow.instructions.query
-    const { system, prompt } = PromptBuilder.buildSystemAndPrompt(userQuery)
+    const { system, prompt } = AgentPromptBuilder.buildDeployAgents(userQuery)
 
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(system, prompt)
     if (Result.isFailure(invokeBedrockResult)) {

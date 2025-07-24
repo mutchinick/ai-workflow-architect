@@ -1,9 +1,10 @@
 import { Table } from 'aws-cdk-lib/aws-dynamodb'
 import { EventBus } from 'aws-cdk-lib/aws-events'
 import { Construct } from 'constructs'
-import { WorkflowServiceS3BucketConstruct } from './WorkflowServiceS3BucketConstruct'
+import { DeployWorkflowAgentsWorkerConstruct } from './DeployWorkflowAgentsWorkerConstruct'
 import { SendQueryApiLambdaConstruct } from './SendQueryApiLambdaConstruct'
 import { WorkflowServiceApiConstruct } from './WorkflowServiceApiConstruct'
+import { WorkflowServiceS3BucketConstruct } from './WorkflowServiceS3BucketConstruct'
 
 export interface IWorkflowServiceMainConstructProps {
   dynamoDbTable: Table
@@ -34,5 +35,10 @@ export class WorkflowServiceMainConstruct extends Construct {
     })
 
     // Workers
+    new DeployWorkflowAgentsWorkerConstruct(scope, `${id}-DeployWorkflowAgentsWorker`, {
+      dynamoDbTable: props.dynamoDbTable,
+      eventBus: props.eventBus,
+      s3Bucket: bucketConstruct.s3Bucket,
+    })
   }
 }

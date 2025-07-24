@@ -161,7 +161,7 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  deployAgents(agents: Agent[]): Success<void> | Failure<'InvalidArgumentsError'> {
+  deployAgents(prompt: string, result: string, agents: Agent[]): Success<void> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'Workflow.deployAgents'
     console.info(`${logCtx} init:`, { agents })
 
@@ -185,7 +185,8 @@ export class Workflow implements WorkflowProps {
         executionOrder,
         round: 1,
         stepType: 'deploy_agents',
-        prompt: this.instructions.query, // FIXME: Value should be design-deploy agents prompt
+        prompt,
+        result,
         agents,
       }
       this.steps.push(deployStep)
@@ -235,9 +236,9 @@ export class Workflow implements WorkflowProps {
       }
     }
 
-    const result = Result.makeSuccess()
-    console.info(`${logCtx} exit success:`, { result, agents })
-    return result
+    const deployAgentsResult = Result.makeSuccess()
+    console.info(`${logCtx} exit success:`, { deployAgentsResult, agents })
+    return deployAgentsResult
   }
 
   /**

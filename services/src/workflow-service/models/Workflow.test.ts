@@ -807,7 +807,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     it(`generates the correct final state for a single agent`, () => {
       const workflowResult = Workflow.fromInstructions(singleAgentScenario.instructions)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      workflow.deployAgents(singleAgentScenario.agents)
+      const mockResult = 'Test Result'
+      const mockPrompt = 'Test Prompt'
+      workflow.deployAgents(mockPrompt, mockResult, singleAgentScenario.agents)
       const expectedProps: WorkflowProps = {
         workflowId: workflow.workflowId,
         instructions: singleAgentScenario.instructions,
@@ -818,7 +820,8 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             executionOrder: 1,
             round: 1,
             stepType: 'deploy_agents',
-            prompt: 'Test Query 1',
+            prompt: mockPrompt,
+            result: mockResult,
             agents: singleAgent,
           },
           {
@@ -849,7 +852,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
     it(`generates the correct final state for multiple agents and rounds`, () => {
       const workflowResult = Workflow.fromInstructions(multiAgentScenario.instructions)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      workflow.deployAgents(multiAgentScenario.agents)
+      const mockResult = 'Test Result'
+      const mockPrompt = 'Test Prompt'
+      workflow.deployAgents(mockPrompt, mockResult, multiAgentScenario.agents)
       const expectedProps: WorkflowProps = {
         workflowId: workflow.workflowId,
         instructions: multiAgentScenario.instructions,
@@ -860,7 +865,8 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             executionOrder: 1,
             round: 1,
             stepType: 'deploy_agents',
-            prompt: 'Test Query 2',
+            prompt: mockPrompt,
+            result: mockResult,
             agents: multiAgents,
           },
           {
@@ -936,7 +942,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
         steps: preexistingStepsScenario.initialSteps,
       })
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const result = workflow.deployAgents(preexistingStepsScenario.agents)
+      const mockResult = 'Test Result'
+      const mockPrompt = 'Test Prompt'
+      const result = workflow.deployAgents(mockPrompt, mockResult, preexistingStepsScenario.agents)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)

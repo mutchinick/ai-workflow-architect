@@ -2,6 +2,7 @@ import { Duration, RemovalPolicy } from 'aws-cdk-lib'
 import { Table } from 'aws-cdk-lib/aws-dynamodb'
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events'
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets'
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
@@ -101,6 +102,14 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
       },
     })
 
+    lambdaFunc.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['bedrock:InvokeModel'],
+        resources: ['arn:aws:bedrock:*::foundation-model/*'],
+      }),
+    )
+
     const { batchSize, maxBatchingWindow, maxConcurrency, reportBatchItemFailures } = settings.LambdaSQS
     lambdaFunc.addEventSource(
       new SqsEventSource(queue, {
@@ -113,6 +122,7 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
 
     dynamoDbTable.grantReadWriteData(lambdaFunc)
     queue.grantConsumeMessages(lambdaFunc)
+    s3Bucket.grantReadWrite(lambdaFunc)
 
     return lambdaFunc
   }

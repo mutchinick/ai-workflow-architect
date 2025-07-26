@@ -1,12 +1,12 @@
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
-import { WorkflowAgentsDeployedEvent, WorkflowAgentsDeployedEventData } from '../../events/WorkflowAgentsDeployedEvent'
-import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
-import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
 import { Agent } from '../../agents/Agent'
 import { AgentPromptBuilder } from '../../agents/AgentPromptBuilder'
 import { AgentsDesignerAgent } from '../../agents/AgentsDesignerAgent'
 import { FirstResponderAgent } from '../../agents/FirstResponderAgent'
+import { WorkflowAgentsDeployedEvent, WorkflowAgentsDeployedEventData } from '../../events/WorkflowAgentsDeployedEvent'
+import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
+import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
 import { IReadWorkflowClient } from '../../models/ReadWorkflowClient'
 import { ISaveWorkflowClient } from '../../models/SaveWorkflowClient'
 import { Workflow } from '../../models/Workflow'
@@ -88,7 +88,9 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     }
 
     const { system, prompt, agents } = designAgentsResult.value
-    const deployAgentsResult = workflow.deployAgents(system, prompt, agents, FirstResponderAgent)
+    const userQuery = workflow.instructions.query
+    const fullPrompt = `${system}\n${prompt}`
+    const deployAgentsResult = workflow.deployAgents(fullPrompt, userQuery, agents, FirstResponderAgent)
     if (Result.isFailure(deployAgentsResult)) {
       console.error(`${logCtx} exit failure:`, { deployAgentsResult, incomingEvent })
       return deployAgentsResult

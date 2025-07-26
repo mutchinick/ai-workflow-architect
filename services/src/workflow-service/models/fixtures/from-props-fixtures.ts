@@ -26,7 +26,7 @@ export const initialStepValidScenario: { props: WorkflowProps } = {
     instructions: baseInstructions,
     steps: [
       {
-        stepId: 'deploy-agents-x0001-r001',
+        stepId: 'x0001-r001-deploy-agents',
         stepStatus: 'completed',
         executionOrder: 1,
         round: 1,
@@ -44,7 +44,7 @@ export const noStepsExecutedScenario: { props: WorkflowProps } = {
     instructions: baseInstructions,
     steps: [
       {
-        stepId: 'deploy-agents-x0001-r001',
+        stepId: 'x0001-r001-deploy-agents',
         stepStatus: 'pending',
         executionOrder: 1,
         round: 1,
@@ -62,7 +62,7 @@ export const partiallyExecutedScenario: { props: WorkflowProps } = {
     instructions: baseInstructions,
     steps: [
       {
-        stepId: 'deploy-agents-x0001-r001',
+        stepId: 'x0001-r001-deploy-agents',
         stepStatus: 'completed',
         executionOrder: 1,
         round: 1,
@@ -71,7 +71,7 @@ export const partiallyExecutedScenario: { props: WorkflowProps } = {
         prompt: '',
       },
       {
-        stepId: 'enhance-prompt-Alice-x0002-r001',
+        stepId: 'x0002-r001-enhance-prompt-Alice',
         stepStatus: 'completed',
         executionOrder: 2,
         round: 1,
@@ -79,7 +79,7 @@ export const partiallyExecutedScenario: { props: WorkflowProps } = {
         agent: testAgents[0],
       },
       {
-        stepId: 'enhance-prompt-Bob-x0003-r001',
+        stepId: 'x0003-r001-enhance-prompt-Bob',
         stepStatus: 'pending',
         executionOrder: 3,
         round: 1,
@@ -87,7 +87,7 @@ export const partiallyExecutedScenario: { props: WorkflowProps } = {
         agent: testAgents[1],
       },
       {
-        stepId: 'enhance-prompt-Alice-x0004-r002',
+        stepId: 'x0004-r002-enhance-prompt-Alice',
         stepStatus: 'pending',
         executionOrder: 4,
         round: 2,
@@ -95,7 +95,7 @@ export const partiallyExecutedScenario: { props: WorkflowProps } = {
         agent: testAgents[0],
       },
       {
-        stepId: 'enhance-prompt-Bob-x0004-r002',
+        stepId: 'x0004-r002-enhance-prompt-Bob',
         stepStatus: 'pending',
         executionOrder: 4,
         round: 1,
@@ -112,7 +112,7 @@ export const fullyExecutedScenario: { props: WorkflowProps } = {
     instructions: { ...baseInstructions, enhancePromptRounds: 1, enhanceResultRounds: 1 },
     steps: [
       {
-        stepId: 'deploy-agents-x0001-r001',
+        stepId: 'x0001-r001-deploy-agents',
         stepStatus: 'completed',
         executionOrder: 1,
         round: 1,
@@ -121,7 +121,7 @@ export const fullyExecutedScenario: { props: WorkflowProps } = {
         prompt: '',
       },
       {
-        stepId: 'enhance-prompt-Alice-x0002-r001',
+        stepId: 'x0002-r001-enhance-prompt-Alice',
         stepStatus: 'completed',
         executionOrder: 2,
         round: 1,
@@ -129,7 +129,7 @@ export const fullyExecutedScenario: { props: WorkflowProps } = {
         agent: testAgents[0],
       },
       {
-        stepId: 'enhance-prompt-Bob-x0003-r001',
+        stepId: 'x0003-r001-enhance-prompt-Bob',
         stepStatus: 'completed',
         executionOrder: 3,
         round: 1,
@@ -137,7 +137,7 @@ export const fullyExecutedScenario: { props: WorkflowProps } = {
         agent: testAgents[1],
       },
       {
-        stepId: 'enhance-result-Alice-x0004-r001',
+        stepId: 'x0004-r001-enhance-result-Alice',
         stepStatus: 'completed',
         executionOrder: 4,
         round: 1,
@@ -158,7 +158,7 @@ export const invalidIdScenario: { props: WorkflowProps } = {
 
 export const invalidInstructionsScenario: { props: WorkflowProps } = {
   props: {
-    workflowId: 'mockInvalidId',
+    workflowId: 'mockWorkflowId',
     instructions: { query: 'bad' } as never,
     steps: [],
   },

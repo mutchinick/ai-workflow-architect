@@ -12,7 +12,7 @@ const baseStepProperties = {
 }
 
 /**
- *
+ * FIXME: Add property for carry over piped data from previous steps
  */
 export const workflowStepSchema = z.discriminatedUnion('stepType', [
   // Schema for a "deploy_agents" step

@@ -709,13 +709,13 @@ describe(`Workflow Service models Workflow tests`, () => {
     it(`returns the first step when no steps have been executed`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toMatchObject({ stepId: 'deploy-agents-x0001-r001' })
+      expect(workflow.nextStep()).toMatchObject({ stepId: 'x0001-r001-deploy-agents' })
     })
 
     it(`returns the first pending step in a partially executed workflow`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toMatchObject({ stepId: 'enhance-prompt-Bob-x0003-r001' })
+      expect(workflow.nextStep()).toMatchObject({ stepId: 'x0003-r001-enhance-prompt-Bob' })
     })
 
     it(`returns null when all steps are completed`, () => {
@@ -747,19 +747,19 @@ describe(`Workflow Service models Workflow tests`, () => {
     it(`returns the correct step when only the initial step is completed`, () => {
       const workflowResult = Workflow.fromProps(initialStepValidScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'deploy-agents-x0001-r001' })
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'x0001-r001-deploy-agents' })
     })
 
     it(`returns the last completed step in a partially executed workflow`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-prompt-Alice-x0002-r001' })
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'x0002-r001-enhance-prompt-Alice' })
     })
 
     it(`returns the final step in a fully executed workflow`, () => {
       const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'enhance-result-Alice-x0004-r001' })
+      expect(workflow.lastExecutedStep()).toMatchObject({ stepId: 'x0004-r001-enhance-result-Alice' })
     })
   })
 
@@ -775,7 +775,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = emptyWorkflowScenario.props.workflowId
       const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
-      const expectedKey = `${baseKey}-created.json`
+      const expectedKey = `${baseKey}-x0000-r000-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
 
@@ -784,7 +784,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = noStepsExecutedScenario.props.workflowId
       const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
-      const expectedKey = `${baseKey}-created.json`
+      const expectedKey = `${baseKey}-x0000-r000-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
 
@@ -793,7 +793,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = partiallyExecutedScenario.props.workflowId
       const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
-      const expectedKey = `${baseKey}-enhance-prompt-Alice-x0002-r001.json`
+      const expectedKey = `${baseKey}-x0002-r001-enhance-prompt-Alice.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
   })
@@ -816,7 +816,7 @@ describe(`Workflow Service models Workflow tests`, () => {
         instructions: singleAgentScenario.instructions,
         steps: [
           {
-            stepId: 'deploy-agents-x0001-r001',
+            stepId: 'x0001-r001-deploy-agents',
             stepStatus: 'completed',
             executionOrder: 1,
             round: 1,
@@ -826,7 +826,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             agents: singleAgent,
           },
           {
-            stepId: 'enhance-prompt-Copernicus-x0002-r001',
+            stepId: 'x0002-r001-enhance-prompt-Copernicus',
             stepStatus: 'pending',
             executionOrder: 2,
             round: 1,
@@ -836,7 +836,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'respond-prompt-First-Responder-x0003-r001',
+            stepId: 'x0003-r001-respond-prompt-First-Responder',
             stepStatus: 'pending',
             executionOrder: 3,
             round: 1,
@@ -846,7 +846,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Copernicus-x0004-r001',
+            stepId: 'x0004-r001-enhance-result-Copernicus',
             stepStatus: 'pending',
             executionOrder: 4,
             round: 1,
@@ -871,7 +871,7 @@ describe(`Workflow Service models Workflow tests`, () => {
         instructions: multiAgentScenario.instructions,
         steps: [
           {
-            stepId: 'deploy-agents-x0001-r001',
+            stepId: 'x0001-r001-deploy-agents',
             stepStatus: 'completed',
             executionOrder: 1,
             round: 1,
@@ -881,7 +881,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             agents: multiAgents,
           },
           {
-            stepId: 'enhance-prompt-Architect-x0002-r001',
+            stepId: 'x0002-r001-enhance-prompt-Architect',
             stepStatus: 'pending',
             executionOrder: 2,
             round: 1,
@@ -891,7 +891,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-prompt-Critic-x0003-r001',
+            stepId: 'x0003-r001-enhance-prompt-Critic',
             stepStatus: 'pending',
             executionOrder: 3,
             round: 1,
@@ -901,7 +901,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-prompt-Architect-x0004-r002',
+            stepId: 'x0004-r002-enhance-prompt-Architect',
             stepStatus: 'pending',
             executionOrder: 4,
             round: 2,
@@ -911,7 +911,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-prompt-Critic-x0005-r002',
+            stepId: 'x0005-r002-enhance-prompt-Critic',
             stepStatus: 'pending',
             executionOrder: 5,
             round: 2,
@@ -921,7 +921,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'respond-prompt-First-Responder-x0006-r001',
+            stepId: 'x0006-r001-respond-prompt-First-Responder',
             stepStatus: 'pending',
             executionOrder: 6,
             round: 1,
@@ -931,7 +931,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Architect-x0007-r001',
+            stepId: 'x0007-r001-enhance-result-Architect',
             stepStatus: 'pending',
             executionOrder: 7,
             round: 1,
@@ -941,7 +941,7 @@ describe(`Workflow Service models Workflow tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Critic-x0008-r001',
+            stepId: 'x0008-r001-enhance-result-Critic',
             stepStatus: 'pending',
             executionOrder: 8,
             round: 1,

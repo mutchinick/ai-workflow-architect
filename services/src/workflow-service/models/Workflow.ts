@@ -125,13 +125,12 @@ export class Workflow implements WorkflowProps {
   getObjectKey(): string {
     const workflowKey = `workflow-${this.workflowId}`
     const baseKey = `${workflowKey}/${workflowKey}`
-    const createdKey = `${baseKey}-created.json`
-    if (!this.steps || this.steps.length === 0) {
-      return createdKey
-    }
 
     const executedSteps = this.steps.filter((step) => step.stepStatus === 'completed')
     if (executedSteps.length === 0) {
+      const currenRoundId = this.zeroPad(0, CURRENT_ROUND_ID_LENGTH)
+      const executionOrderId = this.zeroPad(0, EXECUTION_ORDER_ID_LENGTH)
+      const createdKey = `${baseKey}-x${executionOrderId}-r${currenRoundId}-created.json`
       return createdKey
     }
 
@@ -185,7 +184,7 @@ export class Workflow implements WorkflowProps {
       const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
       const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
       const deployStep: WorkflowStep = {
-        stepId: `deploy-agents-x${executionOrderId}-r${currenRoundId}`,
+        stepId: `x${executionOrderId}-r${currenRoundId}-deploy-agents`,
         stepStatus: 'completed',
         executionOrder,
         round: currentRound,
@@ -204,7 +203,7 @@ export class Workflow implements WorkflowProps {
         executionOrder++
         const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
         const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
-        const stepId = this.normalizeStepId(`enhance-prompt-${agent.name}-x${executionOrderId}-r${currenRoundId}`)
+        const stepId = this.normalizeStepId(`x${executionOrderId}-r${currenRoundId}-enhance-prompt-${agent.name}`)
         const step: WorkflowStep = {
           stepId,
           stepStatus: 'pending',
@@ -226,7 +225,7 @@ export class Workflow implements WorkflowProps {
       const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
       const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
       const stepId = this.normalizeStepId(
-        `respond-prompt-${firstResponder.name}-x${executionOrderId}-r${currenRoundId}`,
+        `x${executionOrderId}-r${currenRoundId}-respond-prompt-${firstResponder.name}`,
       )
       const deployStep: WorkflowStep = {
         stepId,
@@ -248,7 +247,7 @@ export class Workflow implements WorkflowProps {
         executionOrder++
         const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
         const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
-        const stepId = this.normalizeStepId(`enhance-result-${agent.name}-x${executionOrderId}-r${currenRoundId}`)
+        const stepId = this.normalizeStepId(`x${executionOrderId}-r${currenRoundId}-enhance-result-${agent.name}`)
         const step: WorkflowStep = {
           stepId,
           stepStatus: 'pending',

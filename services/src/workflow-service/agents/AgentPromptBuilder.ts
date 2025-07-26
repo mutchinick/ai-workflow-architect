@@ -1,9 +1,51 @@
+import { Failure, Result, Success } from '../../errors/Result'
 import { Agent } from './Agent'
+
+export type AgentPromptBuilderOutput = {
+  system: string
+  prompt: string
+}
 
 /**
  *
  */
 export class AgentPromptBuilder {
+  /**
+   *
+   */
+  public static buildPrompt(
+    agent: Agent,
+    data: string,
+    stepType: 'deploy_agents' | 'first_responder' | 'enhance_prompt' | 'enhance_result',
+  ): Success<AgentPromptBuilderOutput> | Failure<'InvalidArgumentsError'> {
+    switch (stepType) {
+      case 'deploy_agents': {
+        const output = this.buildDeployAgents(agent, data)
+        return Result.makeSuccess(output)
+      }
+
+      case 'first_responder': {
+        const output = this.buildFirstResponder(agent, data)
+        return Result.makeSuccess(output)
+      }
+
+      case 'enhance_prompt': {
+        const output = this.buildEnhancePrompt(agent, data)
+        return Result.makeSuccess(output)
+      }
+
+      case 'enhance_result': {
+        const output = this.buildEnhanceResult(agent, data)
+        return Result.makeSuccess(output)
+      }
+
+      default: {
+        const message = `Unrecognized step type: ${stepType}`
+        return Result.makeFailure('InvalidArgumentsError', message, false)
+      }
+    }
+  }
+
   /**
    *
    */
@@ -32,7 +74,7 @@ export class AgentPromptBuilder {
       You are an AI assistant acting as a query refiner. 
       Your goal is to rewrite a user's query to be more specific, detailed, and effective, based on a primary directive.
 
-      Your primary directive is: "${agent.directive}"
+      ${agent.directive}
 
       You must analyze the user's original query and rewrite it to incorporate the focus of your directive. 
       The new query should be a single, self-contained question or instruction that an AI could answer effectively.
@@ -59,7 +101,7 @@ export class AgentPromptBuilder {
       You are an AI assistant acting as a result enhancer. 
       Your goal is to rewrite or add to an existing text to make it better, based on a primary directive.
 
-      Your primary directive is: "${agent.directive}"
+      ${agent.directive}
 
       You must analyze the original text and rewrite it to incorporate the focus of your directive. 
       The new text should be a complete and coherent response.

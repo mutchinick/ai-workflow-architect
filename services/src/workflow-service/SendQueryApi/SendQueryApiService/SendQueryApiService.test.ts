@@ -15,7 +15,9 @@ const mockWorkflowId = 'mockWorkflowId'
 const mockQuery = 'mockQuery'
 const mockEnhancePromptRounds = 3
 const mockEnhanceResultRounds = 2
-const mockObjectKey = `workflow-${mockWorkflowId}/workflow-${mockWorkflowId}-created.json`
+const mockObjectKey = `mockObjectKey`
+
+jest.spyOn(Workflow.prototype, 'getObjectKey').mockReturnValue(mockObjectKey)
 
 function buildMockIncomingRequest(): TypeUtilsMutable<IncomingSendQueryRequest> {
   const mockClass = IncomingSendQueryRequest.fromProps({

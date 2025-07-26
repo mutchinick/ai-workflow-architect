@@ -2,6 +2,7 @@ import KSUID from 'ksuid'
 import { Result } from '../../errors/Result'
 import { Workflow, WorkflowInstructions, WorkflowProps } from './Workflow'
 import {
+  firstResponder,
   multiAgents,
   multiAgentScenario,
   preexistingStepsScenario,
@@ -51,7 +52,7 @@ function buildMockWorkflowProps(): WorkflowProps {
   return mockValidWorkflowProps
 }
 
-describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
+describe(`Workflow Service models Workflow tests`, () => {
   /*
    *
    *
@@ -809,7 +810,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const mockResult = 'Test Result'
       const mockPrompt = 'Test Prompt'
-      workflow.deployAgents(mockPrompt, mockResult, singleAgentScenario.agents)
+      workflow.deployAgents(mockPrompt, mockResult, singleAgentScenario.agents, firstResponder)
       const expectedProps: WorkflowProps = {
         workflowId: workflow.workflowId,
         instructions: singleAgentScenario.instructions,
@@ -835,9 +836,19 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Copernicus-x0003-r001',
+            stepId: 'respond-prompt-First-Responder-x0003-r001',
             stepStatus: 'pending',
             executionOrder: 3,
+            round: 1,
+            stepType: 'respond_prompt',
+            agent: firstResponder,
+            prompt: '',
+            result: '',
+          },
+          {
+            stepId: 'enhance-result-Copernicus-x0004-r001',
+            stepStatus: 'pending',
+            executionOrder: 4,
             round: 1,
             stepType: 'enhance_result',
             agent: singleAgent[0],
@@ -854,7 +865,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const mockResult = 'Test Result'
       const mockPrompt = 'Test Prompt'
-      workflow.deployAgents(mockPrompt, mockResult, multiAgentScenario.agents)
+      workflow.deployAgents(mockPrompt, mockResult, multiAgentScenario.agents, firstResponder)
       const expectedProps: WorkflowProps = {
         workflowId: workflow.workflowId,
         instructions: multiAgentScenario.instructions,
@@ -910,9 +921,19 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Architect-x0006-r001',
+            stepId: 'respond-prompt-First-Responder-x0006-r001',
             stepStatus: 'pending',
             executionOrder: 6,
+            round: 1,
+            stepType: 'respond_prompt',
+            agent: firstResponder,
+            prompt: '',
+            result: '',
+          },
+          {
+            stepId: 'enhance-result-Architect-x0007-r001',
+            stepStatus: 'pending',
+            executionOrder: 7,
             round: 1,
             stepType: 'enhance_result',
             agent: multiAgents[0],
@@ -920,9 +941,9 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
             result: '',
           },
           {
-            stepId: 'enhance-result-Critic-x0007-r001',
+            stepId: 'enhance-result-Critic-x0008-r001',
             stepStatus: 'pending',
-            executionOrder: 7,
+            executionOrder: 8,
             round: 1,
             stepType: 'enhance_result',
             agent: multiAgents[1],
@@ -944,7 +965,7 @@ describe(`Workflow Service SendQueryApi WorkflowProps tests`, () => {
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const mockResult = 'Test Result'
       const mockPrompt = 'Test Prompt'
-      const result = workflow.deployAgents(mockPrompt, mockResult, preexistingStepsScenario.agents)
+      const result = workflow.deployAgents(mockPrompt, mockResult, preexistingStepsScenario.agents, firstResponder)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)

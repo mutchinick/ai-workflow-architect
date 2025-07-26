@@ -31,6 +31,14 @@ export const workflowStepSchema = z.discriminatedUnion('stepType', [
     prompt: z.string().optional(),
     result: z.string().optional(),
   }),
+  // Schema for a "respond_prompt" step
+  z.object({
+    ...baseStepProperties,
+    stepType: z.literal('respond_prompt'),
+    agent: agentSchema,
+    prompt: z.string().optional(),
+    result: z.string().optional(),
+  }),
   // Schema for a "enhance_result" step
   z.object({
     ...baseStepProperties,

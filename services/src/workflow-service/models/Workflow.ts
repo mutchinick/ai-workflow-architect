@@ -161,7 +161,12 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  deployAgents(prompt: string, result: string, agents: Agent[]): Success<void> | Failure<'InvalidArgumentsError'> {
+  deployAgents(
+    prompt: string,
+    result: string,
+    agents: Agent[],
+    firstResponder: Agent,
+  ): Success<void> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'Workflow.deployAgents'
     console.info(`${logCtx} init:`, { agents })
 
@@ -183,7 +188,7 @@ export class Workflow implements WorkflowProps {
         stepId: `deploy-agents-x${executionOrderId}-r${currenRoundId}`,
         stepStatus: 'completed',
         executionOrder,
-        round: 1,
+        round: currentRound,
         stepType: 'deploy_agents',
         prompt,
         result,
@@ -212,6 +217,28 @@ export class Workflow implements WorkflowProps {
         }
         this.steps.push(step)
       }
+    }
+
+    // Populate the 'respond_prompt' steps
+    {
+      executionOrder++
+      const currentRound = 1
+      const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
+      const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
+      const stepId = this.normalizeStepId(
+        `respond-prompt-${firstResponder.name}-x${executionOrderId}-r${currenRoundId}`,
+      )
+      const deployStep: WorkflowStep = {
+        stepId,
+        stepStatus: 'pending',
+        executionOrder,
+        round: currentRound,
+        stepType: 'respond_prompt',
+        prompt: '',
+        result: '',
+        agent: firstResponder,
+      }
+      this.steps.push(deployStep)
     }
 
     // Populate the 'enhance_result' steps

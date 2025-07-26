@@ -1,4 +1,6 @@
 import { AgentPromptBuilder } from './AgentPromptBuilder'
+import { AgentsDesignerAgent } from './AgentsDesignerAgent'
+import { FirstResponderAgent } from './FirstResponderAgent'
 
 const mockUserQuery = 'Who built the pyramids?'
 const mockLlmResponse = 'The pyramids were built by ancient Egyptians.'
@@ -17,12 +19,12 @@ describe('Workflow Service DeployWorkflowAgentsWorker AgentPromptBuilder tests',
    ************************************************************/
   describe('Test buildDeployAgents', () => {
     it('should return the correct system prompt', () => {
-      const { system } = AgentPromptBuilder.buildDeployAgents(mockUserQuery)
-      expect(system).toBe(AgentPromptBuilder.DESIGNER_AGENT.directive)
+      const { system } = AgentPromptBuilder.buildDeployAgents(AgentsDesignerAgent, mockUserQuery)
+      expect(system).toBe(AgentsDesignerAgent.directive)
     })
 
     it('should return the correct user prompt', () => {
-      const { prompt } = AgentPromptBuilder.buildDeployAgents(mockUserQuery)
+      const { prompt } = AgentPromptBuilder.buildDeployAgents(AgentsDesignerAgent, mockUserQuery)
       expect(prompt).toContain('<query>Who built the pyramids?</query>')
       expect(prompt).toContain('Design the GenAI agents for the following user query:')
     })
@@ -36,12 +38,12 @@ describe('Workflow Service DeployWorkflowAgentsWorker AgentPromptBuilder tests',
    ************************************************************/
   describe('Test buildFirstResponder', () => {
     it('should return the correct system prompt', () => {
-      const { system } = AgentPromptBuilder.buildFirstResponder(AgentPromptBuilder.FIRST_RESPONDER_AGENT, mockUserQuery)
-      expect(system).toBe(AgentPromptBuilder.FIRST_RESPONDER_AGENT.directive)
+      const { system } = AgentPromptBuilder.buildFirstResponder(FirstResponderAgent, mockUserQuery)
+      expect(system).toBe(FirstResponderAgent.directive)
     })
 
     it('should return the correct user prompt', () => {
-      const { prompt } = AgentPromptBuilder.buildFirstResponder(AgentPromptBuilder.FIRST_RESPONDER_AGENT, mockUserQuery)
+      const { prompt } = AgentPromptBuilder.buildFirstResponder(FirstResponderAgent, mockUserQuery)
       expect(prompt).toBe(mockUserQuery)
     })
   })

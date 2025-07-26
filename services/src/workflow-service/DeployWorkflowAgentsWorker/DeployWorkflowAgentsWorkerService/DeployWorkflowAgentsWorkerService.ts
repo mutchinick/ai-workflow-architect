@@ -5,6 +5,8 @@ import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
 import { Agent } from '../../models/Agent'
 import { AgentPromptBuilder } from '../../models/AgentPromptBuilder'
+import { AgentsDesignerAgent } from '../../models/AgentsDesignerAgent'
+import { FirstResponderAgent } from '../../models/FirstResponderAgent'
 import { IReadWorkflowClient } from '../../models/ReadWorkflowClient'
 import { ISaveWorkflowClient } from '../../models/SaveWorkflowClient'
 import { Workflow } from '../../models/Workflow'
@@ -86,7 +88,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     }
 
     const { system, prompt, agents } = designAgentsResult.value
-    const deployAgentsResult = workflow.deployAgents(system, prompt, agents)
+    const deployAgentsResult = workflow.deployAgents(system, prompt, agents, FirstResponderAgent)
     if (Result.isFailure(deployAgentsResult)) {
       console.error(`${logCtx} exit failure:`, { deployAgentsResult, incomingEvent })
       return deployAgentsResult
@@ -165,7 +167,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
     const userQuery = workflow.instructions.query
-    const { system, prompt } = AgentPromptBuilder.buildDeployAgents(userQuery)
+    const { system, prompt } = AgentPromptBuilder.buildDeployAgents(AgentsDesignerAgent, userQuery)
 
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(system, prompt)
     if (Result.isFailure(invokeBedrockResult)) {

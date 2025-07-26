@@ -10,6 +10,12 @@ export const multiAgents: Agent[] = [
   { name: 'Critic', role: 'QA', directive: 'Review for flaws.' },
 ]
 
+export const firstResponder: Agent = {
+  name: 'First Responder',
+  role: 'Responder',
+  directive: 'Provide the first response.',
+}
+
 export const duplicateNameAgents: Agent[] = [
   { name: 'Validator', role: 'Reviewer', directive: 'Review the work.' },
   { name: 'Validator', role: 'Approver', directive: 'Approve the work.' },

@@ -2,7 +2,7 @@ import KSUID from 'ksuid'
 import z from 'zod'
 import { Failure, Result, Success } from '../../errors/Result'
 import { TypeUtilsPretty } from '../../shared/TypeUtils'
-import { Agent } from './Agent'
+import { Agent } from '../agents/Agent'
 import { WorkflowStep, workflowStepSchema } from './WorkflowStep'
 
 /**

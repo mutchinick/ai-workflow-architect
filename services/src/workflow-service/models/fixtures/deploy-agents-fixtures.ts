@@ -1,4 +1,4 @@
-import { Agent } from '../Agent'
+import { Agent } from '../../agents/Agent'
 import { WorkflowStep } from '../WorkflowStep'
 
 export const singleAgent: Agent[] = [

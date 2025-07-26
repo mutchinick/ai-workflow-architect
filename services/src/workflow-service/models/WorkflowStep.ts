@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { agentSchema } from './Agent'
+import { agentSchema } from '../agents/Agent'
 
 /**
  *

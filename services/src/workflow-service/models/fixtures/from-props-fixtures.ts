@@ -1,4 +1,4 @@
-import { Agent } from '../Agent'
+import { Agent } from '../../agents/Agent'
 import { WorkflowProps } from '../Workflow'
 
 const testAgents: Agent[] = [

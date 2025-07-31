@@ -13,15 +13,13 @@ jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
 const mockWorkflowId = 'mockWorkflowId'
 const mockQuery = 'mockQuery'
-const mockEnhancePromptRounds = 3
-const mockEnhanceResultRounds = 2
-const mockObjectKey = `workflow-${mockWorkflowId}/workflow-${mockWorkflowId}-created.json`
+const mockObjectKey = `mockObjectKey`
+
+jest.spyOn(Workflow.prototype, 'getObjectKey').mockReturnValue(mockObjectKey)
 
 function buildMockIncomingRequest(): TypeUtilsMutable<IncomingSendQueryRequest> {
   const mockClass = IncomingSendQueryRequest.fromProps({
     query: mockQuery,
-    enhancePromptRounds: 3,
-    enhanceResultRounds: 2,
   })
   return Result.getSuccessValueOrThrow(mockClass)
 }
@@ -39,8 +37,6 @@ function buildMockSaveWorkflowClient_succeeds(value?: unknown): ISaveWorkflowCli
     workflowId: mockWorkflowId,
     instructions: {
       query: mockQuery,
-      enhancePromptRounds: mockEnhancePromptRounds,
-      enhanceResultRounds: mockEnhanceResultRounds,
     },
     steps: [],
   }
@@ -169,8 +165,6 @@ describe(`Workflow Service SendQueryApi SendQueryApiService tests`, () => {
         workflowId: expect.any(String),
         instructions: {
           query: mockQuery,
-          enhancePromptRounds: mockEnhancePromptRounds,
-          enhanceResultRounds: mockEnhanceResultRounds,
         },
       }),
     )
@@ -230,8 +224,6 @@ describe(`Workflow Service SendQueryApi SendQueryApiService tests`, () => {
     const mockWorkflowCreatedEventInput: WorkflowCreatedEventData = {
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
-      enhancePromptRounds: mockEnhancePromptRounds,
-      enhanceResultRounds: mockEnhanceResultRounds,
     }
     const expectedWorkflowCreatedEventResult = WorkflowCreatedEvent.fromData(mockWorkflowCreatedEventInput)
     const expectedWorkflowCreatedEvent = Result.getSuccessValueOrThrow(expectedWorkflowCreatedEventResult)
@@ -265,8 +257,6 @@ describe(`Workflow Service SendQueryApi SendQueryApiService tests`, () => {
     const result = await sendQueryApiService.sendQuery(mockIncomingRequest)
     const expectedOutput: SendQueryApiServiceOutput = {
       query: mockIncomingRequest.query,
-      enhancePromptRounds: mockIncomingRequest.enhancePromptRounds,
-      enhanceResultRounds: mockIncomingRequest.enhanceResultRounds,
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
     }
@@ -283,8 +273,6 @@ describe(`Workflow Service SendQueryApi SendQueryApiService tests`, () => {
     const result = await sendQueryApiService.sendQuery(mockIncomingRequest)
     const expectedOutput: SendQueryApiServiceOutput = {
       query: mockIncomingRequest.query,
-      enhancePromptRounds: mockIncomingRequest.enhancePromptRounds,
-      enhanceResultRounds: mockIncomingRequest.enhanceResultRounds,
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
     }

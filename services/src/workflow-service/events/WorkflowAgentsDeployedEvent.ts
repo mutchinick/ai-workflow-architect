@@ -11,7 +11,7 @@ const dataSchema = z.object({
   objectKey: z.string().trim().min(6),
 })
 
-export type WorkflowCreatedEventData = z.infer<typeof dataSchema>
+export type WorkflowAgentsDeployedEventData = z.infer<typeof dataSchema>
 
 const eventSchema = z.object({
   eventData: dataSchema,
@@ -22,28 +22,28 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowCreatedEvent extends EventStoreEvent<WorkflowCreatedEventData> {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_CREATED_EVENT
+export class WorkflowAgentsDeployedEvent extends EventStoreEvent<WorkflowAgentsDeployedEventData> {
+  public static readonly eventName = EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT
 
   /**
    *
    */
-  private constructor(eventData: WorkflowCreatedEventData, idempotencyKey: string, createdAt: string) {
-    super(WorkflowCreatedEvent.eventName, eventData, idempotencyKey, createdAt)
+  private constructor(eventData: WorkflowAgentsDeployedEventData, idempotencyKey: string, createdAt: string) {
+    super(WorkflowAgentsDeployedEvent.eventName, eventData, idempotencyKey, createdAt)
   }
 
   /**
    *
    */
   static fromData(
-    eventData: WorkflowCreatedEventData,
-  ): Success<WorkflowCreatedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowCreatedEvent.fromData'
+    eventData: WorkflowAgentsDeployedEventData,
+  ): Success<WorkflowAgentsDeployedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'WorkflowAgentsDeployedEvent.fromData'
 
     try {
       const validData = dataSchema.parse(eventData)
       const idempotencyKey = this.generateIdempotencyKey(validData)
-      const event = new WorkflowCreatedEvent(validData, idempotencyKey, new Date().toISOString())
+      const event = new WorkflowAgentsDeployedEvent(validData, idempotencyKey, new Date().toISOString())
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -57,7 +57,7 @@ export class WorkflowCreatedEvent extends EventStoreEvent<WorkflowCreatedEventDa
   /**
    *
    */
-  private static generateIdempotencyKey(eventData: WorkflowCreatedEventData): string {
+  private static generateIdempotencyKey(eventData: WorkflowAgentsDeployedEventData): string {
     return `workflowId:${eventData.workflowId}:objectKey:${eventData.objectKey}`
   }
 
@@ -65,14 +65,14 @@ export class WorkflowCreatedEvent extends EventStoreEvent<WorkflowCreatedEventDa
    *
    */
   static reconstitute(
-    eventData: WorkflowCreatedEventData,
+    eventData: WorkflowAgentsDeployedEventData,
     idempotencyKey: string,
     createdAt: string,
-  ): Success<WorkflowCreatedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowCreatedEvent.reconstitute'
+  ): Success<WorkflowAgentsDeployedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'WorkflowAgentsDeployedEvent.reconstitute'
     try {
       const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
-      const event = new WorkflowCreatedEvent(validEvent.eventData, idempotencyKey, createdAt)
+      const event = new WorkflowAgentsDeployedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -89,4 +89,4 @@ export class WorkflowCreatedEvent extends EventStoreEvent<WorkflowCreatedEventDa
  * by EventStoreEventConstructor. It will cause a compile-time error if
  * fromData or reconstitute are missing or have the wrong signature.
  */
-const _ConstructorCheck: EventStoreEventConstructor = WorkflowCreatedEvent
+const _ConstructorCheck: EventStoreEventConstructor = WorkflowAgentsDeployedEvent

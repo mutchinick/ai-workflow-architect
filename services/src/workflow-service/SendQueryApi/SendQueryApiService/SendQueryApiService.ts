@@ -64,7 +64,7 @@ export class SendQueryApiService implements ISendQueryApiService {
     const workflow = createWorkflowResult.value
     const workflowId = workflow.workflowId
     const objectKey = workflow.getObjectKey()
-    const publishEventResult = await this.publishWorkflowCreatedEvent(incomingRequest, workflowId, objectKey)
+    const publishEventResult = await this.publishWorkflowCreatedEvent(workflowId, objectKey)
     if (Result.isSuccess(publishEventResult)) {
       const serviceOutput: SendQueryApiServiceOutput = { ...incomingRequest, workflowId, objectKey }
       const serviceOutputResult = Result.makeSuccess(serviceOutput)
@@ -115,11 +115,11 @@ export class SendQueryApiService implements ISendQueryApiService {
     | Failure<'DuplicateWorkflowError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'SendQueryApiService.publishWorkflowCreatedEvent'
+    const logCtx = 'SendQueryApiService.createWorkflow'
     console.info(`${logCtx} init:`, { incomingRequest })
 
-    const { query, enhancePromptRounds, enhanceResultRounds } = incomingRequest
-    const workflowResult = Workflow.fromInstructions({ query, enhancePromptRounds, enhanceResultRounds })
+    const { query } = incomingRequest
+    const workflowResult = Workflow.fromInstructions({ query })
     if (Result.isFailure(workflowResult)) {
       console.error(`${logCtx} exit failure:`, { workflowResult, incomingRequest })
       return workflowResult
@@ -139,21 +139,17 @@ export class SendQueryApiService implements ISendQueryApiService {
    *
    */
   private async publishWorkflowCreatedEvent(
-    incomingRequest: IncomingSendQueryRequest,
     workflowId: string,
     objectKey: string,
   ): Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'SendQueryApiService.publishWorkflowCreatedEvent'
-    console.info(`${logCtx} init:`, { incomingRequest })
+    console.info(`${logCtx} init:`, { workflowId, objectKey })
 
-    const { enhancePromptRounds, enhanceResultRounds } = incomingRequest
     const eventData: WorkflowCreatedEventData = {
       workflowId,
       objectKey,
-      enhancePromptRounds,
-      enhanceResultRounds,
     }
 
     const buildEventResult = WorkflowCreatedEvent.fromData(eventData)

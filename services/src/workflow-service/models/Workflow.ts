@@ -2,7 +2,7 @@ import KSUID from 'ksuid'
 import z from 'zod'
 import { Failure, Result, Success } from '../../errors/Result'
 import { TypeUtilsPretty } from '../../shared/TypeUtils'
-import { Agent } from './Agent'
+import { Agent } from '../agents/Agent'
 import { WorkflowStep, workflowStepSchema } from './WorkflowStep'
 
 /**
@@ -10,8 +10,6 @@ import { WorkflowStep, workflowStepSchema } from './WorkflowStep'
  */
 const instructionsSchema = z.object({
   query: z.string().trim().min(6),
-  enhancePromptRounds: z.number().int().min(1).max(10),
-  enhanceResultRounds: z.number().int().min(1).max(10),
 })
 
 export type WorkflowInstructions = TypeUtilsPretty<z.infer<typeof instructionsSchema>>
@@ -28,7 +26,6 @@ export const workflowPropsSchema = z.object({
 export type WorkflowProps = z.infer<typeof workflowPropsSchema>
 
 // constants
-const CURRENT_ROUND_ID_LENGTH = 3
 const EXECUTION_ORDER_ID_LENGTH = 4
 
 /**
@@ -125,13 +122,11 @@ export class Workflow implements WorkflowProps {
   getObjectKey(): string {
     const workflowKey = `workflow-${this.workflowId}`
     const baseKey = `${workflowKey}/${workflowKey}`
-    const createdKey = `${baseKey}-created.json`
-    if (!this.steps || this.steps.length === 0) {
-      return createdKey
-    }
 
     const executedSteps = this.steps.filter((step) => step.stepStatus === 'completed')
     if (executedSteps.length === 0) {
+      const executionOrderId = this.zeroPad(0, EXECUTION_ORDER_ID_LENGTH)
+      const createdKey = `${baseKey}-x${executionOrderId}-created.json`
       return createdKey
     }
 
@@ -161,7 +156,13 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  deployAgents(agents: Agent[]): Success<void> | Failure<'InvalidArgumentsError'> {
+  deployAgents(
+    system: string,
+    prompt: string,
+    result: string,
+    agent: Agent,
+    agents: Agent[],
+  ): Success<void> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'Workflow.deployAgents'
     console.info(`${logCtx} init:`, { agents })
 
@@ -176,68 +177,39 @@ export class Workflow implements WorkflowProps {
 
     // Populate the 'deploy_agents' steps
     {
-      const currentRound = 1
-      const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
       const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
       const deployStep: WorkflowStep = {
-        stepId: `deploy-agents-x${executionOrderId}-r${currenRoundId}`,
+        stepId: `x${executionOrderId}-deploy-agents`,
         stepStatus: 'completed',
         executionOrder,
-        round: 1,
-        stepType: 'deploy_agents',
-        prompt: this.instructions.query, // FIXME: Value should be design-deploy agents prompt
-        agents,
+        agent,
+        llmSystem: system,
+        llmPrompt: prompt,
+        llmResult: result,
       }
       this.steps.push(deployStep)
     }
 
-    // Populate the 'enhance_prompt' steps
-    for (let i = 0; i < this.instructions.enhancePromptRounds; i++) {
-      const currentRound = i + 1
-      for (const agent of agents) {
-        executionOrder++
-        const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
-        const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
-        const stepId = this.normalizeStepId(`enhance-prompt-${agent.name}-x${executionOrderId}-r${currenRoundId}`)
-        const step: WorkflowStep = {
-          stepId,
-          stepStatus: 'pending',
-          executionOrder,
-          round: currentRound,
-          stepType: 'enhance_prompt',
-          agent,
-          prompt: '',
-          result: '',
-        }
-        this.steps.push(step)
+    // Populate the 'agent' steps
+    for (const agent of agents) {
+      executionOrder++
+      const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
+      const stepId = this.normalizeStepId(`x${executionOrderId}-agent-${agent.name}`)
+      const step: WorkflowStep = {
+        stepId,
+        stepStatus: 'pending',
+        executionOrder,
+        agent,
+        llmSystem: agent.system,
+        llmPrompt: agent.prompt,
+        llmResult: '',
       }
+      this.steps.push(step)
     }
 
-    // Populate the 'enhance_result' steps
-    for (let i = 0; i < this.instructions.enhanceResultRounds; i++) {
-      const currentRound = i + 1
-      for (const agent of agents) {
-        executionOrder++
-        const currenRoundId = this.zeroPad(currentRound, CURRENT_ROUND_ID_LENGTH)
-        const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
-        const stepId = this.normalizeStepId(`enhance-result-${agent.name}-x${executionOrderId}-r${currenRoundId}`)
-        const step: WorkflowStep = {
-          stepId,
-          stepStatus: 'pending',
-          executionOrder,
-          round: currentRound,
-          stepType: 'enhance_result',
-          agent,
-          prompt: '',
-          result: '',
-        }
-        this.steps.push(step)
-      }
-    }
-
-    const result = Result.makeSuccess()
-    console.info(`${logCtx} exit success:`, { result, agents })
-    return result
+    const deployAgentsResult = Result.makeSuccess()
+    console.info(`${logCtx} exit success:`, { deployAgentsResult, agents })
+    return deployAgentsResult
   }
 
   /**

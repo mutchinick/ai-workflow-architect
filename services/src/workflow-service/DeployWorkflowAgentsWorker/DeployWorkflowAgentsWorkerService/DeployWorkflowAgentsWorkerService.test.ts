@@ -164,7 +164,8 @@ function buildEventStoreClient_fails(
   }
 }
 
-describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorkerService tests`, () => {
+describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorkerService
+          tests`, () => {
   /*
    *
    *
@@ -249,7 +250,8 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test internal logic deployWorkflowAgents
    ************************************************************/
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.deployAgents returns a Failure`, async () => {
+  it(`returns a Failure of kind InvalidArgumentsError if Workflow.deployAgents returns
+      a Failure`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -387,7 +389,8 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     expect(result).toStrictEqual(expectedResult)
   })
 
-  it(`returns a Failure of kind UnrecognizedError if InvokeBedrockClient.invoke returns an invalid JSON`, async () => {
+  it(`returns a Failure of kind UnrecognizedError if InvokeBedrockClient.invoke
+      returns an invalid JSON`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds('mockInvalidValue')
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()

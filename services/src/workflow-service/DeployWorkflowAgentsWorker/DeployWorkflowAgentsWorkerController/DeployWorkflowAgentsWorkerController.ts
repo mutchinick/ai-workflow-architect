@@ -63,7 +63,15 @@ export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgen
   private async deployWorkflowAgentsSafe(
     sqsRecord: SQSRecord,
   ): Promise<
-    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
+    | Success<void>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'WorkflowFileNotFoundError'>
+    | Failure<'WorkflowFileCorruptedError'>
+    | Failure<'BedrockInvokeTransientError'>
+    | Failure<'BedrockInvokePermanentError'>
+    | Failure<'DuplicateWorkflowError'>
+    | Failure<'DuplicateEventError'>
+    | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'DeployWorkflowAgentsWorkerController.deployWorkflowAgentsSafe'
     console.info(`${logCtx} init:`, { sqsRecord })

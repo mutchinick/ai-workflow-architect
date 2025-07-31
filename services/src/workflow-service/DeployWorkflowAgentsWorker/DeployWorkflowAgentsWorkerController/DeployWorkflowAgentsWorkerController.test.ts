@@ -23,8 +23,6 @@ function buildMockWorkflowCreatedEvent(id: string): TypeUtilsMutable<EventStoreE
     eventData: {
       workflowId: `${mockWorkflowId}-${id}`,
       objectKey: `mockObjectKey-${id}`,
-      enhancePromptRounds: 1,
-      enhanceResultRounds: 1,
     },
     createdAt: mockDate,
   }

@@ -4,8 +4,6 @@ import { Failure, Result, Success } from '../../../errors/Result'
 // Zod schema
 const propsSchema = z.object({
   query: z.string().trim().min(6),
-  enhancePromptRounds: z.number().int().min(1).max(10),
-  enhanceResultRounds: z.number().int().min(1).max(10),
 })
 
 export type IncomingSendQueryRequestProps = z.infer<typeof propsSchema>
@@ -17,11 +15,7 @@ export class IncomingSendQueryRequest implements IncomingSendQueryRequestProps {
   /**
    *
    */
-  private constructor(
-    public readonly query: string,
-    public readonly enhancePromptRounds: number,
-    public readonly enhanceResultRounds: number,
-  ) {}
+  private constructor(public readonly query: string) {}
 
   /**
    *
@@ -38,8 +32,8 @@ export class IncomingSendQueryRequest implements IncomingSendQueryRequestProps {
       return propsResult
     }
 
-    const { query, enhancePromptRounds, enhanceResultRounds } = propsResult.value
-    const incomingSendQueryRequest = new IncomingSendQueryRequest(query, enhancePromptRounds, enhanceResultRounds)
+    const { query } = propsResult.value
+    const incomingSendQueryRequest = new IncomingSendQueryRequest(query)
     const incomingSendQueryRequestResult = Result.makeSuccess(incomingSendQueryRequest)
     console.info(`${logCtx} exit success:`, { incomingSendQueryRequestResult })
     return incomingSendQueryRequestResult

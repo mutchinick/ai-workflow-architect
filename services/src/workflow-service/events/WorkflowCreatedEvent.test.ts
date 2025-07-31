@@ -1,5 +1,6 @@
 import { Result } from '../../errors/Result'
 import { EventStoreEventName } from '../../event-store/EventStoreEventName'
+import { TypeUtilsMutable } from '../../shared/TypeUtils'
 import { WorkflowCreatedEvent, WorkflowCreatedEventData } from './WorkflowCreatedEvent'
 
 jest.useFakeTimers().setSystemTime(new Date('2025-01-15T12:00:00Z'))
@@ -7,8 +8,6 @@ jest.useFakeTimers().setSystemTime(new Date('2025-01-15T12:00:00Z'))
 const mockDate = new Date().toISOString()
 const mockWorkflowId = 'mockWorkflowId'
 const mockObjectKey = 'mockObjectKey'
-const mockEnhancePromptRounds = 3
-const mockEnhanceResultRounds = 5
 const mockIdempotencyKey = `workflowId:${mockWorkflowId}:objectKey:${mockObjectKey}`
 
 /**
@@ -18,27 +17,15 @@ function buildTestInputData(): WorkflowCreatedEventData {
   return {
     workflowId: mockWorkflowId,
     objectKey: mockObjectKey,
-    enhancePromptRounds: mockEnhancePromptRounds,
-    enhanceResultRounds: mockEnhanceResultRounds,
   }
 }
 
-function buildReconstituteInput(): {
-  eventData: {
-    workflowId: string
-    objectKey: string
-    enhancePromptRounds: number
-    enhanceResultRounds: number
-  }
-  idempotencyKey: string
-  createdAt: string
-} {
+function buildReconstituteInput(): TypeUtilsMutable<WorkflowCreatedEvent> {
   return {
+    eventName: EventStoreEventName.WORKFLOW_CREATED_EVENT,
     eventData: {
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
-      enhancePromptRounds: mockEnhancePromptRounds,
-      enhanceResultRounds: mockEnhanceResultRounds,
     },
     idempotencyKey: mockIdempotencyKey,
     createdAt: mockDate,
@@ -202,98 +189,6 @@ describe(`Test WorkflowCreatedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowCreatedEventData.enhancePromptRounds edge cases
-     ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhancePromptRounds is less than 1`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhancePromptRounds = 0
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhancePromptRounds is greater than 10`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhancePromptRounds = 11
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhancePromptRounds is not an integer`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhancePromptRounds = 3.14
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhancePromptRounds is not a number`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhancePromptRounds = '3' as never
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    /*
-     *
-     *
-     ************************************************************
-     * Test WorkflowCreatedEventData.enhanceResultRounds edge cases
-     ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhanceResultRounds is less than 1`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhanceResultRounds = 0
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhanceResultRounds is greater than 10`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhanceResultRounds = 11
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhanceResultRounds is not an integer`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhanceResultRounds = 5.14
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEventData.enhanceResultRounds is not a number`, () => {
-      const testInput = buildTestInputData()
-      testInput.enhanceResultRounds = '5' as never
-      const result = WorkflowCreatedEvent.fromData(testInput)
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    /*
-     *
-     *
-     ************************************************************
      * Test expected results
      ************************************************************/
     it(`returns the expected Success<WorkflowCreatedEvent> if the execution path is
@@ -306,8 +201,6 @@ describe(`Test WorkflowCreatedEvent`, () => {
         eventName: EventStoreEventName.WORKFLOW_CREATED_EVENT,
         eventData: {
           workflowId: testInput.workflowId,
-          enhancePromptRounds: testInput.enhancePromptRounds,
-          enhanceResultRounds: testInput.enhanceResultRounds,
           objectKey: testInput.objectKey,
         },
         createdAt: mockDate,
@@ -601,130 +494,6 @@ describe(`Test WorkflowCreatedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowCreatedEvent.eventData.enhancePromptRounds edge cases
-     ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhancePromptRounds is less than 1`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhancePromptRounds = 0
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhancePromptRounds is greater than 10`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhancePromptRounds = 11
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhancePromptRounds is not an integer`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhancePromptRounds = 3.14
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhancePromptRounds is not a number`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhancePromptRounds = '3' as never
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    /*
-     *
-     *
-     ************************************************************
-     * Test WorkflowCreatedEventData.enhanceResultRounds edge cases
-     ************************************************************/
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhanceResultRounds is less than 1`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhanceResultRounds = 0
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhanceResultRounds is greater than 10`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhanceResultRounds = 11
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhanceResultRounds is not an integer`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhanceResultRounds = 5.14
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowCreatedEvent.eventData.enhanceResultRounds is not a number`, () => {
-      const testInput = buildReconstituteInput()
-      testInput.eventData.enhanceResultRounds = '5' as never
-      const result = WorkflowCreatedEvent.reconstitute(
-        testInput.eventData,
-        testInput.idempotencyKey,
-        testInput.createdAt,
-      )
-      expect(Result.isFailure(result)).toBe(true)
-      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
-      expect(Result.isFailureTransient(result)).toBe(false)
-    })
-
-    /*
-     *
-     *
-     ************************************************************
      * Test expected results
      ************************************************************/
     it(`returns the expected Success<WorkflowCreatedEvent> if the execution path is
@@ -742,8 +511,6 @@ describe(`Test WorkflowCreatedEvent`, () => {
         eventData: {
           workflowId: testInput.eventData.workflowId,
           objectKey: testInput.eventData.objectKey,
-          enhancePromptRounds: testInput.eventData.enhancePromptRounds,
-          enhanceResultRounds: testInput.eventData.enhanceResultRounds,
         },
         createdAt: mockDate,
       }

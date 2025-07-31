@@ -9,8 +9,6 @@ import { EventStoreEventName } from '../../event-store/EventStoreEventName'
 const dataSchema = z.object({
   workflowId: z.string().trim().min(6),
   objectKey: z.string().trim().min(6),
-  enhancePromptRounds: z.number().int().min(1).max(10),
-  enhanceResultRounds: z.number().int().min(1).max(10),
 })
 
 export type WorkflowCreatedEventData = z.infer<typeof dataSchema>

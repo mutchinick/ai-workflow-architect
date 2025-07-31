@@ -8,14 +8,10 @@ import { ISendQueryApiService, SendQueryApiServiceOutput } from '../SendQueryApi
 import { SendQueryApiController } from './SendQueryApiController'
 
 const mockQuery = 'mockQuery'
-const mockEnhancePromptRounds = 3
-const mockEnhanceResultRounds = 2
 
 function buildMockApiEventBody(): TypeUtilsMutable<IncomingSendQueryRequest> {
   const mockValidRequest: IncomingSendQueryRequest = {
     query: mockQuery,
-    enhancePromptRounds: mockEnhancePromptRounds,
-    enhanceResultRounds: mockEnhanceResultRounds,
   }
   return mockValidRequest
 }
@@ -37,8 +33,6 @@ function buildMockSendQueryApiService_succeeds(): ISendQueryApiService {
   const mockApiEventBody = buildMockApiEventBody()
   const mockServiceOutput: SendQueryApiServiceOutput = {
     query: mockApiEventBody.query,
-    enhancePromptRounds: mockApiEventBody.enhancePromptRounds,
-    enhanceResultRounds: mockApiEventBody.enhanceResultRounds,
     workflowId: 'mockWorkflowId',
     objectKey: 'mockObjectKey',
   }
@@ -224,110 +218,6 @@ describe(`Workflow Service SendQueryApi SendQueryApiController tests`, () => {
    *
    *
    ************************************************************
-   * Test APIGatewayProxyEventV2.body.enhancePromptRounds edge cases
-   ************************************************************/
-  it(`does not call SendQueryApiService.sendQuery if the input
-      APIGatewayProxyEventV2.body.enhancePromptRounds is undefined`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhancePromptRounds = undefined as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    await sendQueryApiController.sendQuery(mockApiEvent)
-    expect(mockSendQueryApiService.sendQuery).not.toHaveBeenCalled()
-  })
-
-  it(`responds with 400 Bad Request if the input
-      APIGatewayProxyEventV2.body.enhancePromptRounds is undefined`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhancePromptRounds = undefined as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    const response = await sendQueryApiController.sendQuery(mockApiEvent)
-    const expectedResponse = HttpResponse.BadRequestError()
-    expect(response).toStrictEqual(expectedResponse)
-  })
-
-  it(`does not call SendQueryApiService.sendQuery if the input
-      APIGatewayProxyEventV2.body.enhancePromptRounds is null`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhancePromptRounds = null as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    await sendQueryApiController.sendQuery(mockApiEvent)
-    expect(mockSendQueryApiService.sendQuery).not.toHaveBeenCalled()
-  })
-
-  it(`responds with 400 Bad Request if the input
-      APIGatewayProxyEventV2.body.enhancePromptRounds is null`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhancePromptRounds = null as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    const response = await sendQueryApiController.sendQuery(mockApiEvent)
-    const expectedResponse = HttpResponse.BadRequestError()
-    expect(response).toStrictEqual(expectedResponse)
-  })
-
-  /*
-   *
-   *
-   ************************************************************
-   * Test APIGatewayProxyEventV2.body.enhanceResultRounds edge cases
-   ************************************************************/
-  it(`does not call SendQueryApiService.sendQuery if the input
-      APIGatewayProxyEventV2.body.enhanceResultRounds is undefined`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhanceResultRounds = undefined as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    await sendQueryApiController.sendQuery(mockApiEvent)
-    expect(mockSendQueryApiService.sendQuery).not.toHaveBeenCalled()
-  })
-
-  it(`responds with 400 Bad Request if the input
-      APIGatewayProxyEventV2.body.enhanceResultRounds is undefined`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhanceResultRounds = undefined as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    const response = await sendQueryApiController.sendQuery(mockApiEvent)
-    const expectedResponse = HttpResponse.BadRequestError()
-    expect(response).toStrictEqual(expectedResponse)
-  })
-
-  it(`does not call SendQueryApiService.sendQuery if the input
-      APIGatewayProxyEventV2.body.enhanceResultRounds is null`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhanceResultRounds = null as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    await sendQueryApiController.sendQuery(mockApiEvent)
-    expect(mockSendQueryApiService.sendQuery).not.toHaveBeenCalled()
-  })
-
-  it(`responds with 400 Bad Request if the input
-      APIGatewayProxyEventV2.body.enhanceResultRounds is null`, async () => {
-    const mockSendQueryApiService = buildMockSendQueryApiService_succeeds()
-    const sendQueryApiController = new SendQueryApiController(mockSendQueryApiService)
-    const mockApiEventBody = buildMockApiEventBody()
-    mockApiEventBody.enhanceResultRounds = null as never
-    const mockApiEvent = buildMockApiEvent(mockApiEventBody)
-    const response = await sendQueryApiController.sendQuery(mockApiEvent)
-    const expectedResponse = HttpResponse.BadRequestError()
-    expect(response).toStrictEqual(expectedResponse)
-  })
-
-  /*
-   *
-   *
-   ************************************************************
    * Test internal logic
    ************************************************************/
   it(`calls SendQueryApiService.sendQuery with the expected input`, async () => {
@@ -398,8 +288,6 @@ describe(`Workflow Service SendQueryApi SendQueryApiController tests`, () => {
     const response = await sendQueryApiController.sendQuery(mockApiEvent)
     const expectedServiceOutput: SendQueryApiServiceOutput = {
       query: mockApiEventBody.query,
-      enhancePromptRounds: mockApiEventBody.enhancePromptRounds,
-      enhanceResultRounds: mockApiEventBody.enhanceResultRounds,
       workflowId: 'mockWorkflowId',
       objectKey: 'mockObjectKey',
     }

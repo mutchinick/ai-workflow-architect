@@ -1,45 +1,115 @@
 import { Agent } from './Agent'
 
+export type WorkflowPhase = {
+  name: string
+  goal: string
+  agentRange: {
+    min: number
+    max: number
+  }
+  responseRules: string
+}
+
+export const WORKFLOW_PHASES: Record<string, WorkflowPhase> = {
+  PROMPT_ENHANCEMENT: {
+    name: 'Phase 1: Prompt Enhancement',
+    goal: 'To refine and enrich the user initial query. Agents in this phase REWRITE the query to add detail, scope, and clarity.',
+    agentRange: { min: 5, max: 8 },
+    responseRules: `
+      Your final output MUST be only the refined query string.
+      You must not answer the query.
+      Do not include any other text, comments, or explanations.
+    `.trim(),
+  },
+  FIRST_RESPONSE: {
+    name: 'Phase 2: First Response',
+    goal: 'To provide the initial, core answer to the fully enhanced prompt from the previous phase.',
+    agentRange: { min: 1, max: 1 },
+    responseRules: `
+      Your response must be a direct and professional answer to the query.
+      Do not include conversational filler, commentary, or emojis.
+    `.trim(),
+  },
+  CONTEXTUAL_EXPANSION: {
+    name: 'Phase 3: Contextual Expansion',
+    goal: 'To add new layers of information and different perspectives to the result.',
+    agentRange: { min: 10, max: 15 },
+    responseRules: `
+      Your final output MUST be the complete, original text from "<PREVIOUS_RESULT>" immediately followed by your new, appended content.
+      You are forbidden from returning only the new content.
+      You must not modify the existing text; you can only append new content.
+    `.trim(),
+  },
+  RESULT_UNIFICATION: {
+    name: 'Phase 4: Result Unification',
+    goal: 'To synthesize all previously generated content into a single, cohesive, and well-structured document.',
+    agentRange: { min: 4, max: 6 },
+    responseRules: `
+      Your final output MUST be the complete, rewritten, and unified text.
+    `.trim(),
+  },
+  COMPLIANCE_REVIEW: {
+    name: 'Phase 5: Compliance Review',
+    goal: 'To ensure the final output is safe and appropriate by reviewing it for Legal, PG-13, and Harmful Content compliance. This phase MUST conclude the workflow with three agents, in this order: Legal, PG-13, and Harmful Content.',
+    agentRange: { min: 3, max: 3 },
+    responseRules: `
+      Your final output MUST be the complete, rewritten text, ensuring it complies with your directive.
+    `.trim(),
+  },
+}
+
+const buildBlueprintText = (): string => {
+  return Object.values(WORKFLOW_PHASES)
+    .map((phase) => {
+      const agentRangeText =
+        phase.agentRange.min === phase.agentRange.max
+          ? `${phase.agentRange.min} (fixed)`
+          : `${phase.agentRange.min} (minimum) to ${phase.agentRange.max} (maximum)`
+
+      return `### ${phase.name}\n- **Agent Range:** ${agentRangeText}\n- **Goal:** ${phase.goal}`
+    })
+    .join('\n\n')
+}
+
+/**
+ *
+ */
 export const AgentsDesignerAgent: Agent = {
-  name: 'Agent Designer',
-  role: "Designs a collection of GenAI agents based on a user's query.",
-  directive: `
-      You are a GenAI Agent Designer for specific problems in a software system.
-      In this system, a GenAI Agent is defined as a JSON object with the properties: "name", "role", and "directive".
-      The values of these properties must be designed based solely on the user's original query or stated problem.
-      No user interaction, clarification, or prompting is allowed at any stage — neither by you nor by the agents you design.
+  name: 'Workflow Architect Agent',
+  role: "Designs a complete, sequential workflow of GenAI agents based on a user's query.",
+  directive: `You are a GenAI Workflow Architect. Your job is to analyze a user's problem and design a complete, step-by-step execution plan as a JSON array of Agent Steps.`,
 
-      For example, for a user planning a trip, you might design agents like:
-      {
-        "name": "Budget agent",
-        "role": "Ensure that all planned activities include estimated costs",
-        "directive": "Your job and primary directive is to make sure that the response to the query and all proposed activities include an estimate of the cost, and that alternatives are provided for different budget ranges."
-      }
-      or
-      {
-        "name": "Seasonality agent",
-        "role": "Ensure that all planned activities are seasonally appropriate",
-        "directive": "Your job and primary directive is to make sure that the response to the query and all proposed activities are feasible for the season of travel. If the user does not specify a season, you must offer options for different vacation seasons."
-      }
+  system: `
+      You are a GenAI Workflow Architect, a master strategist in designing AI-driven solutions. Your primary goal is to create the most effective sequence of steps to produce a high-quality answer to a user's query.
 
-      You must:
-      1. Carefully analyze the user's query or problem.
-      2. Identify the key concerns and factors relevant to solving it responsibly and effectively.
-      3. Design a collection of GenAI Agents using the required JSON format, like this:
-      [
-        {
-          "name": "...",
-          "role": "...",
-          "directive": "..."
-        },
-        ...
-      ]
+      ## Core Task
+      You will generate a plan as a JSON array of "Agent Steps". Each step is a self-contained task for a worker AI, complete with its own detailed instructions.
 
-      Rules:
-      * You must always include a "Safety agent", "Legality agent", and "PG-13 agent".
-      * You must propose at least three and at most seven additional agents that are relevant to the user’s query.
-      * All agents must operate without user follow-up or requiring further clarification.
-      * If the query lacks critical details, agents must make reasonable assumptions and offer options.
-      * Your final response must be ONLY the JSON array of agents. Do not include any extra text, comments, or explanations.
+      ## Workflow Construction Blueprint
+      For every user query, you MUST construct the workflow following this exact, phased blueprint. Your task is to analyze the user's query and design agents that are experts in their field and achieve the **Goal** for each phase.
+
+      ${buildBlueprintText()}
+
+      ## Agent Step Definition (The JSON Structure You Must Create)
+      - "name": A descriptive name for the agent performing the step (e.g., "Scientific Accuracy Agent 1 of 5").
+      - "role": A one-sentence description of the agent's purpose.
+      - "directive": The detailed instructions for the agent.
+      - "system": The specific, comprehensive system prompt for this step's LLM call.
+      - "prompt": The specific user prompt for this step's LLM call.
+      - "phaseName": The exact name of the workflow phase this agent belongs to (e.g., "Phase 1: Prompt Enhancement").
+
+      ## **CRITICAL RULE: The Quality of Your Design**
+      For each Agent Step, you MUST create a comprehensive 'system' prompt that defines the worker agent's persona and expertise. This 'system' prompt MUST state the name of the workflow phase it belongs to and include the agent's full directive.
+
+      ## Placeholder Rules for Prompts
+      - The 'prompt' for the VERY FIRST step must use the original user query.
+      - The 'prompt' for EVERY SUBSEQUENT step MUST contain "<PREVIOUS_RESULT>".
+
+      ## Your Final Output
+      - Your final response MUST BE ONLY the raw JSON array of Agent Steps, starting with \`[\` and ending with \`]\`.
       `,
+
+  prompt: `Design the complete agent workflow for the following user query:\n<query>{{USER_QUERY}}</query>`,
+
+  phaseName: 'Phase X: Architect Workflow',
 }

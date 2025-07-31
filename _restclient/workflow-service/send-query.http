@@ -7,9 +7,7 @@ Origin: https://localhost
 Content-Type: application/json
 
 {
-  "query": "Who build the pyramids?",
-  "enhancePromptRounds": 2,
-  "enhanceResultRounds": 1
+  "query": "Who build the pyramids?"
 }
 
 ### WORKFLOW_CREATED_EVENT
@@ -19,9 +17,7 @@ Origin: https://localhost
 Content-Type: application/json
 
 {
-  "query": "How can I solve a quadratic equation?",
-  "enhancePromptRounds": 3,
-  "enhanceResultRounds": 2
+  "query": "How can I solve a quadratic equation?"
 }
 
 ### WORKFLOW_CREATED_EVENT
@@ -31,9 +27,7 @@ Origin: https://localhost
 Content-Type: application/json
 
 {
-  "query": "Can you design a business plan for an ice cream shop? The idea is to grow to 20 stores in 5 years.",
-  "enhancePromptRounds": 5,
-  "enhanceResultRounds": 4
+  "query": "Can you design a business plan for an ice cream shop? The idea is to grow to 20 stores in 5 years."
 }
 
 ### WORKFLOW_CREATED_EVENT
@@ -43,9 +37,7 @@ Origin: https://localhost
 Content-Type: application/json
 
 {
-  "query": "I am writing a TypeScript with Next.js application. I need to implement a feature that allows users to upload images and display them in a gallery. Can you help me with that?",
-  "enhancePromptRounds": 1,
-  "enhanceResultRounds": 1
+  "query": "I am writing a TypeScript with Next.js application. I need to implement a feature that allows users to upload images and display them in a gallery. Can you help me with that? Please provide step by step instructions and commands to execute."
 }
 
 ### CORS QUERY

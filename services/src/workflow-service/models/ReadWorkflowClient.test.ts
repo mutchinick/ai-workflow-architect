@@ -17,16 +17,12 @@ jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 const mockWorkflowId = 'mockWorkflowId'
 const mockObjectKey = `${mockWorkflowId}-object-key`
 const mockQuery = 'mockQuery'
-const mockEnhancePromptRounds = 3
-const mockEnhanceResultRounds = 2
 
 function buildMockWorkflowProps(): WorkflowProps {
   return {
     workflowId: mockWorkflowId,
     instructions: {
       query: mockQuery,
-      enhancePromptRounds: mockEnhancePromptRounds,
-      enhanceResultRounds: mockEnhanceResultRounds,
     },
     steps: [],
   }

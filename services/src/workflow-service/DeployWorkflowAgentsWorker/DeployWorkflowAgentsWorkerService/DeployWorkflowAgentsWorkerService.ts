@@ -1,9 +1,7 @@
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { Agent } from '../../agents/Agent'
-import { AgentPromptBuilder } from '../../agents/AgentPromptBuilder'
-import { AgentsDesignerAgent } from '../../agents/AgentsDesignerAgent'
-import { FirstResponderAgent } from '../../agents/FirstResponderAgent'
+import { AgentsDesignerAgent, WORKFLOW_PHASES } from '../../agents/AgentsDesignerAgent'
 import { WorkflowAgentsDeployedEvent, WorkflowAgentsDeployedEventData } from '../../events/WorkflowAgentsDeployedEvent'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
@@ -30,6 +28,7 @@ export interface IDeployWorkflowAgentsWorkerService {
 type DesignAgentsOutput = {
   system: string
   prompt: string
+  result: string
   agents: Agent[]
 }
 
@@ -87,10 +86,8 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
       return designAgentsResult
     }
 
-    const { system, prompt, agents } = designAgentsResult.value
-    const userQuery = workflow.instructions.query
-    const fullPrompt = `${system}\n${prompt}`
-    const deployAgentsResult = workflow.deployAgents(fullPrompt, userQuery, agents, FirstResponderAgent)
+    const { system, prompt, result, agents } = designAgentsResult.value
+    const deployAgentsResult = workflow.deployAgents(system, prompt, result, AgentsDesignerAgent, agents)
     if (Result.isFailure(deployAgentsResult)) {
       console.error(`${logCtx} exit failure:`, { deployAgentsResult, incomingEvent })
       return deployAgentsResult
@@ -169,7 +166,8 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
     const userQuery = workflow.instructions.query
-    const { system, prompt } = AgentPromptBuilder.buildDeployAgents(AgentsDesignerAgent, userQuery)
+    const { system, prompt: rawPrompt } = AgentsDesignerAgent
+    const prompt = rawPrompt.replace('<query>{{USER_QUERY}}</query>', `<query>${userQuery}</query>`)
 
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(system, prompt)
     if (Result.isFailure(invokeBedrockResult)) {
@@ -178,9 +176,11 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     }
 
     try {
-      const completion = invokeBedrockResult.value
-      const agents: Agent[] = JSON.parse(completion)
-      const agentsResult = Result.makeSuccess({ system, prompt, agents })
+      const agentsString = invokeBedrockResult.value
+      const agents: Agent[] = JSON.parse(agentsString)
+      const enrichedAgents = this.getEnrichedAgentsWithResponseRules(agents)
+      const designAgentsOutput: DesignAgentsOutput = { system, prompt, result: agentsString, agents: enrichedAgents }
+      const agentsResult = Result.makeSuccess(designAgentsOutput)
       console.info(`${logCtx} exit success:`, { agentsResult, workflow })
       return agentsResult
     } catch (error) {
@@ -189,6 +189,26 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
       console.error(`${logCtx} exit failure:`, { failure, invokeBedrockResult, workflow })
       return failure
     }
+  }
+
+  /**
+   *
+   */
+  private getEnrichedAgentsWithResponseRules(agents: Agent[]): Agent[] {
+    const responseRulesMap: Record<string, string> = {}
+    Object.values(WORKFLOW_PHASES).forEach((phase) => {
+      responseRulesMap[phase.name] = phase.responseRules
+    })
+
+    const enrichedAgents = agents.map((agent) => {
+      const agentPhase = agent.phaseName || ''
+      const responseRules = responseRulesMap[agentPhase] || ''
+      return {
+        ...agent,
+        system: `${agent.system}\n${responseRules}`,
+      }
+    })
+    return enrichedAgents
   }
 
   /**

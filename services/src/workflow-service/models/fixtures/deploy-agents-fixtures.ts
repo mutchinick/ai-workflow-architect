@@ -2,46 +2,85 @@ import { Agent } from '../../agents/Agent'
 import { WorkflowStep } from '../WorkflowStep'
 
 export const singleAgent: Agent[] = [
-  { name: 'Copernicus', role: 'Researcher', directive: 'Provide foundational answer.' },
+  {
+    name: 'Agent-01',
+    role: 'Agent-01-Role',
+    directive: 'Agent-01-Directive',
+    system: 'Agent-01-System',
+    prompt: 'Agent-01-Prompt',
+    phaseName: 'Agent-01-Phase',
+  },
 ]
 
 export const multiAgents: Agent[] = [
-  { name: 'Architect', role: 'Designer', directive: 'Design the structure.' },
-  { name: 'Critic', role: 'QA', directive: 'Review for flaws.' },
+  {
+    name: 'Agent-01',
+    role: 'Agent-01-Role',
+    directive: 'Agent-01-Directive',
+    system: 'Agent-01-System',
+    prompt: 'Agent-01-Prompt',
+    phaseName: 'Agent-01-Phase',
+  },
+  {
+    name: 'Agent-02',
+    role: 'Agent-02-Role',
+    directive: 'Agent-02-Directive',
+    system: 'Agent-02-System',
+    prompt: 'Agent-02-Prompt',
+    phaseName: 'Agent-02-Phase',
+  },
 ]
 
-export const firstResponder: Agent = {
-  name: 'First Responder',
-  role: 'Responder',
-  directive: 'Provide the first response.',
-}
-
 export const duplicateNameAgents: Agent[] = [
-  { name: 'Validator', role: 'Reviewer', directive: 'Review the work.' },
-  { name: 'Validator', role: 'Approver', directive: 'Approve the work.' },
+  {
+    name: 'Agent-01',
+    role: 'Agent-01-Role',
+    directive: 'Agent-01-Directive',
+    system: 'Agent-01-System',
+    prompt: 'Agent-01-Prompt',
+    phaseName: 'Agent-01-Phase',
+  },
+  {
+    name: 'Agent-01', // Duplicate name
+    role: 'Agent-02-Role',
+    directive: 'Agent-02-Directive',
+    system: 'Agent-02-System',
+    prompt: 'Agent-02-Prompt',
+    phaseName: 'Agent-02-Phase',
+  },
 ]
 
 export const singleAgentScenario = {
   agents: singleAgent,
-  instructions: { query: 'Test Query 1', enhancePromptRounds: 1, enhanceResultRounds: 1 },
+  instructions: { query: 'mockQuery' },
 }
 
 export const multiAgentScenario = {
   agents: multiAgents,
-  instructions: { query: 'Test Query 2', enhancePromptRounds: 2, enhanceResultRounds: 1 },
+  instructions: { query: 'mockQuery' },
 }
 
 export const preexistingStepsScenario = {
-  agents: [{ name: 'Late Agent', role: 'Test', directive: 'Test' }],
-  instructions: { query: 'mockQuery', enhancePromptRounds: 1, enhanceResultRounds: 1 },
+  agents: [
+    {
+      name: 'Agent-XX',
+      role: 'Role-XX',
+      directive: 'Directive-XX',
+      system: 'System-XX',
+      prompt: 'Prompt-XX',
+      phaseName: 'Phase-XX',
+    },
+  ],
+  instructions: { query: 'mockQuery' },
   initialSteps: [
     {
-      stepId: 'existing-step',
-      stepStatus: 'pending',
+      stepId: 'x0001-deploy-agents',
+      stepStatus: 'completed',
       executionOrder: 1,
-      round: 1,
-      stepType: 'enhance_prompt',
-      agent: { name: 'A', role: 'B', directive: 'C' },
+      llmSystem: 'mockSystem',
+      llmPrompt: 'mockPrompt',
+      llmResult: 'mockResult',
+      agent: singleAgent[0],
     },
   ] as WorkflowStep[],
 }

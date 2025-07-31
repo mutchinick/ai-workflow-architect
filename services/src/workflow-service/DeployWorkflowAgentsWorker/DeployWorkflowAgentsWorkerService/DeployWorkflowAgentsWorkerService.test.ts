@@ -3,13 +3,15 @@ import { Result } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
+import { Agent } from '../../agents/Agent'
+import { AgentsDesignerAgent } from '../../agents/AgentsDesignerAgent'
 import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
-import { Agent } from '../../agents/Agent'
 import { IReadWorkflowClient } from '../../models/ReadWorkflowClient'
 import { ISaveWorkflowClient } from '../../models/SaveWorkflowClient'
 import { Workflow } from '../../models/Workflow'
+import { WorkflowStep } from '../../models/WorkflowStep'
 import { DeployWorkflowAgentsWorkerService } from './DeployWorkflowAgentsWorkerService'
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
@@ -20,19 +22,23 @@ const mockWorkflowId = 'mockWorkflowId'
 const mockObjectKeyReceived = 'mockObjectKeyReceived'
 const mockObjectKeyProduced = 'mockObjectKeyProduced'
 const mockQuery = 'mockQuery'
-const mockEnhancePromptRounds = 2
-const mockEnhanceResultRounds = 1
 
 const mockAgents: Agent[] = [
   {
     role: 'mockAgentRole-1',
     name: 'mockAgentName-1',
     directive: 'mockAgentDirective-1',
+    system: 'mockAgentSystem-1',
+    prompt: 'mockAgentPrompt-1',
+    phaseName: 'mockPhaseName-1',
   },
   {
     role: 'mockAgentRole-2',
     name: 'mockAgentName-2',
     directive: 'mockAgentDirective-2',
+    system: 'mockAgentSystem-2',
+    prompt: 'mockAgentPrompt-2',
+    phaseName: 'mockPhaseName-2',
   },
 ]
 
@@ -46,8 +52,6 @@ function buildMockIncomingWorkflowCreatedEvent(): TypeUtilsMutable<WorkflowCreat
     eventData: {
       workflowId: mockWorkflowId,
       objectKey: mockObjectKeyReceived,
-      enhancePromptRounds: mockEnhancePromptRounds,
-      enhanceResultRounds: mockEnhanceResultRounds,
     },
     createdAt: mockDate,
   }
@@ -78,8 +82,6 @@ function buildMockReadWorkflowClient_succeeds(): IReadWorkflowClient {
     workflowId: mockWorkflowId,
     instructions: {
       query: mockQuery,
-      enhancePromptRounds: mockEnhancePromptRounds,
-      enhanceResultRounds: mockEnhanceResultRounds,
     },
     steps: [],
   })
@@ -439,23 +441,19 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     expect(mockSaveWorkflowClient.save).toHaveBeenCalledWith(expect.any(Workflow))
     const workflow = (mockSaveWorkflowClient.save as jest.Mock).mock.calls[0][0]
     expect(workflow.workflowId).toBe(mockWorkflowId)
-    expect(workflow.instructions).toEqual({
-      query: mockQuery,
-      enhancePromptRounds: mockEnhancePromptRounds,
-      enhanceResultRounds: mockEnhanceResultRounds,
-    })
+    expect(workflow.instructions).toEqual({ query: mockQuery })
     expect(workflow.steps).toBeInstanceOf(Array)
     expect(workflow.steps.length).toBeGreaterThan(0)
     expect(workflow.steps[0]).toEqual(
       expect.objectContaining({
         stepId: expect.any(String),
         stepStatus: 'completed',
-        stepType: 'deploy_agents',
         executionOrder: 1,
-        round: 1,
-        prompt: expect.any(String),
-        agents: mockAgents,
-      }),
+        agent: AgentsDesignerAgent,
+        llmSystem: AgentsDesignerAgent.system,
+        llmPrompt: expect.stringContaining(`<query>${mockQuery}</query>`),
+        llmResult: expect.any(String),
+      } as WorkflowStep),
     )
   })
 

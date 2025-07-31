@@ -37,6 +37,8 @@ function buildMockWorkflowCreatedEvent(id: string): TypeUtilsMutable<EventStoreE
     createdAt: mockDate,
   }
 
+  // FIXME: This is a workaround to return either WorkflowAgentsDeployedEvent or WorkflowStepProcessedEvent
+  // depending on the test case. Ideally, we should have a more structured way to handle this.
   return Math.random() > 0.5 ? workflowAgentsDeployedEvent : workflowCreatedEvent
 }
 

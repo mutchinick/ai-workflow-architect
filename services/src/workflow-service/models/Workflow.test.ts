@@ -19,8 +19,12 @@ import {
   partiallyExecutedScenario,
 } from './fixtures/from-props-fixtures'
 
-const mockWorkflowId = 'mockWorkflowId'
+jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
+
+const mockDateSafe = '2024-10-19T03-24-00-000Z'
+const mockKsuid = 'mockKsuid'
 const mockQuery = 'mockQuery'
+const mockWorkflowId = `workflow-${mockDateSafe}-${mockQuery}-${mockKsuid}`
 
 function buildMockWorkflowInstructions(): WorkflowInstructions {
   const mockValidWorkflowProps: WorkflowInstructions = {
@@ -143,7 +147,7 @@ describe(`Workflow Service models Workflow tests`, () => {
     it(`returns the expected Success<Workflow> if the execution path is successful`, () => {
       // Mock KSUID to return a fixed workflowId
       jest.spyOn(KSUID, 'randomSync').mockReturnValue({
-        string: mockWorkflowId,
+        string: mockKsuid,
       } as never)
 
       const mockWorkflowInstructions = buildMockWorkflowInstructions()

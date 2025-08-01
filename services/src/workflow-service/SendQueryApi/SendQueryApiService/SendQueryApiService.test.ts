@@ -11,8 +11,10 @@ import { SendQueryApiService, SendQueryApiServiceOutput } from './SendQueryApiSe
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
-const mockWorkflowId = 'mockWorkflowId'
+const mockDateSafe = '2024-10-19T03-24-00-000Z'
+const mockKsuid = 'mockKsuid'
 const mockQuery = 'mockQuery'
+const mockWorkflowId = `workflow-${mockDateSafe}-${mockQuery}-${mockKsuid}`
 const mockObjectKey = `mockObjectKey`
 
 jest.spyOn(Workflow.prototype, 'getObjectKey').mockReturnValue(mockObjectKey)
@@ -214,7 +216,7 @@ describe(`Workflow Service SendQueryApi SendQueryApiService tests`, () => {
   it(`calls EventStoreClient.publish with the expected input`, async () => {
     // Mock KSUID to return a fixed workflowId
     jest.spyOn(KSUID, 'randomSync').mockReturnValue({
-      string: mockWorkflowId,
+      string: mockKsuid,
     } as never)
 
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()

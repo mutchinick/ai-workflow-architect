@@ -187,7 +187,6 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     }
 
     const llmSystem = currentStep.llmSystem
-
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(llmSystem, llmPrompt)
     if (Result.isFailure(invokeBedrockResult)) {
       console.error(`${logCtx} exit failure:`, { invokeBedrockResult, workflow })

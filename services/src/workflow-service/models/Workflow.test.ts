@@ -405,6 +405,41 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
+   * Test Workflow.getObjectKey
+   ************************************************************/
+  describe(`Test Workflow.getObjectKey`, () => {
+    it(`returns the correct key format for an empty workflow`, () => {
+      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const workflowId = emptyWorkflowScenario.props.workflowId
+      const baseKey = `${workflowId}/${workflowId}`
+      const expectedKey = `${baseKey}-x0000-created.json`
+      expect(workflow.getObjectKey()).toBe(expectedKey)
+    })
+
+    it(`returns the correct key format when no steps have been executed`, () => {
+      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const workflowId = noStepsExecutedScenario.props.workflowId
+      const baseKey = `${workflowId}/${workflowId}`
+      const expectedKey = `${baseKey}-x0000-created.json`
+      expect(workflow.getObjectKey()).toBe(expectedKey)
+    })
+
+    it(`returns the correct key format for a partially executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const workflowId = partiallyExecutedScenario.props.workflowId
+      const baseKey = `${workflowId}/${workflowId}`
+      const expectedKey = `${baseKey}-x0002-agent-Agent-01.json`
+      expect(workflow.getObjectKey()).toBe(expectedKey)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
    * Test Workflow.getLastExecutedStep
    ************************************************************/
   describe(`Test Workflow.getLastExecutedStep`, () => {
@@ -495,41 +530,6 @@ describe(`Workflow Service models Workflow tests`, () => {
       expect(workflow.steps[2].stepStatus).toBe('completed')
       expect(workflow.steps[2].llmPrompt).toBe('mockPrompt')
       expect(workflow.steps[2].llmResult).toBe('mockResult')
-    })
-  })
-
-  /*
-   *
-   *
-   ************************************************************
-   * Test Workflow.getObjectKey
-   ************************************************************/
-  describe(`Test Workflow.getObjectKey`, () => {
-    it(`returns the correct key format for an empty workflow`, () => {
-      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
-      const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const workflowId = emptyWorkflowScenario.props.workflowId
-      const baseKey = `${workflowId}/${workflowId}`
-      const expectedKey = `${baseKey}-x0000-created.json`
-      expect(workflow.getObjectKey()).toBe(expectedKey)
-    })
-
-    it(`returns the correct key format when no steps have been executed`, () => {
-      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
-      const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const workflowId = noStepsExecutedScenario.props.workflowId
-      const baseKey = `${workflowId}/${workflowId}`
-      const expectedKey = `${baseKey}-x0000-created.json`
-      expect(workflow.getObjectKey()).toBe(expectedKey)
-    })
-
-    it(`returns the correct key format for a partially executed workflow`, () => {
-      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
-      const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const workflowId = partiallyExecutedScenario.props.workflowId
-      const baseKey = `${workflowId}/${workflowId}`
-      const expectedKey = `${baseKey}-x0002-agent-Agent-01.json`
-      expect(workflow.getObjectKey()).toBe(expectedKey)
     })
   })
 

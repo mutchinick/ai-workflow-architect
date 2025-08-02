@@ -301,7 +301,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
    ************************************************************
    * Test internal logic processWorkflowStep
    ************************************************************/
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
+  it(`returns a Failure of kind WorkflowInvalidStateError if Workflow.getCurrentStep includes
       '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
@@ -325,7 +325,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     })
     const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
     expect(Result.isFailure(result)).toBe(true)
-    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureOfKind(result, 'WorkflowInvalidStateError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
@@ -348,7 +348,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
+  it(`returns a Failure of kind WorkflowInvalidStateError if Workflow.getCurrentStep includes
       '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
@@ -372,7 +372,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     })
     const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
     expect(Result.isFailure(result)).toBe(true)
-    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureOfKind(result, 'WorkflowInvalidStateError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 

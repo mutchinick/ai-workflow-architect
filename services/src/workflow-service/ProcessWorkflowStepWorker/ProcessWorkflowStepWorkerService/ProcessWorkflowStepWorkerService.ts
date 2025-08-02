@@ -18,6 +18,7 @@ export interface IProcessWorkflowStepWorkerService {
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'WorkflowAlreadyCompletedError'>
+    | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
@@ -57,6 +58,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'WorkflowAlreadyCompletedError'>
+    | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
@@ -156,6 +158,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Success<ExecuteAgentOutput>
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowAlreadyCompletedError'>
+    | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
@@ -176,8 +179,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       const lastExecutedStep = workflow.getLastExecutedStep()
       if (!lastExecutedStep) {
         const message = 'No previous step to reference for <result>{{PREVIOUS_RESULT}}</result>'
-        // FIXME: Should be WorkflowInvalidStateError
-        const failure = Result.makeFailure('InvalidArgumentsError', message, false)
+        const failure = Result.makeFailure('WorkflowInvalidStateError', message, false)
         console.error(`${logCtx} exit failure:`, { failure, workflow })
         return failure
       }

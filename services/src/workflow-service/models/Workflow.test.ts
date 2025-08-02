@@ -405,6 +405,44 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
+   * Test Workflow.getLastExecutedStep
+   ************************************************************/
+  describe(`Test Workflow.getLastExecutedStep`, () => {
+    it(`returns null when no steps are present`, () => {
+      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getLastExecutedStep()).toBeNull()
+    })
+
+    it(`returns null when no steps have been completed`, () => {
+      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getLastExecutedStep()).toBeNull()
+    })
+
+    it(`returns the correct step when only the initial step is completed`, () => {
+      const workflowResult = Workflow.fromProps(initialStepValidScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0001-deploy-agents' })
+    })
+
+    it(`returns the last completed step in a partially executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0002-agent-Agent-01' })
+    })
+
+    it(`returns the final step in a fully executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0003-agent-Agent-02' })
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
    * Test Workflow.getCurrentStep
    ************************************************************/
   describe(`Test Workflow.getCurrentStep`, () => {
@@ -437,37 +475,26 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
-   * Test Workflow.getLastExecutedStep
+   * Test Workflow.completeStep
    ************************************************************/
-  describe(`Test Workflow.getLastExecutedStep`, () => {
-    it(`returns null when no steps are present`, () => {
+  describe(`Test Workflow.completeStep`, () => {
+    it(`returns a Failure of kind InvalidArgumentsError it cannot find the step`, () => {
       const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toBeNull()
+      const result = workflow.completeStep('x0001', 'mockPrompt', 'mockResult')
+      expect(Result.isFailure(result)).toBe(true)
+      expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+      expect(Result.isFailureTransient(result)).toBe(false)
     })
 
-    it(`returns null when no steps have been completed`, () => {
-      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
-      const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toBeNull()
-    })
-
-    it(`returns the correct step when only the initial step is completed`, () => {
-      const workflowResult = Workflow.fromProps(initialStepValidScenario.props)
-      const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0001-deploy-agents' })
-    })
-
-    it(`returns the last completed step in a partially executed workflow`, () => {
+    it(`completes the current step and returns Success<void>`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0002-agent-Agent-01' })
-    })
-
-    it(`returns the final step in a fully executed workflow`, () => {
-      const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
-      const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0003-agent-Agent-02' })
+      const result = workflow.completeStep('x0003-agent-Agent-02', 'mockPrompt', 'mockResult')
+      expect(Result.isSuccess(result)).toBe(true)
+      expect(workflow.steps[2].stepStatus).toBe('completed')
+      expect(workflow.steps[2].llmPrompt).toBe('mockPrompt')
+      expect(workflow.steps[2].llmResult).toBe('mockResult')
     })
   })
 

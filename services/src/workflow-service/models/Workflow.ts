@@ -169,6 +169,29 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
+  completeStep(stepId: string, llmPrompt: string, llmResult: string): Success<void> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'Workflow.completeStep'
+    console.info(`${logCtx} init:`, { stepId, llmPrompt, llmResult })
+
+    const currentStep = this.getCurrentStep()
+    if (!currentStep) {
+      const message = 'No current step to complete'
+      const failure = Result.makeFailure('InvalidArgumentsError', message, false)
+      console.error(`${logCtx} exit failure:`, { failure, stepId, llmPrompt, llmResult })
+      return failure
+    }
+
+    currentStep.llmPrompt = llmPrompt
+    currentStep.llmResult = llmResult
+    currentStep.stepStatus = 'completed'
+
+    console.info(`${logCtx} exit success:`, { stepId, llmPrompt, llmResult })
+    return Result.makeSuccess()
+  }
+
+  /**
+   *
+   */
   deployAgents(
     system: string,
     prompt: string,

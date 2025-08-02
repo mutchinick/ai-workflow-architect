@@ -530,6 +530,35 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
    *
    *
    ************************************************************
+   * Test internal logic if Workflow.completeStep returns a Failure
+   ************************************************************/
+  it(`propagates the Failure if Workflow.completeStep returns a failure`, async () => {
+    const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
+    const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
+    const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
+    const mockEventStoreClient = buildEventStoreClient_succeeds()
+    const processWorkflowStepWorkerService = new ProcessWorkflowStepWorkerService(
+      mockReadWorkflowClient,
+      mockInvokeBedrockClient,
+      mockSaveWorkflowClient,
+      mockEventStoreClient,
+    )
+    const mockFailureKind = 'mockFailureKind' as never
+    const mockError = 'mockError'
+    const mockTransient = 'mockTransient' as never
+    jest
+      .spyOn(Workflow.prototype, 'completeStep')
+      .mockReturnValueOnce(Result.makeFailure(mockFailureKind, mockError, mockTransient))
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
+    expect(Result.isFailure(result)).toBe(true)
+    expect(result).toStrictEqual(expectedResult)
+  })
+
+  /*
+   *
+   *
+   ************************************************************
    * Test internal logic SaveWorkflowClient.save
    ************************************************************/
   it(`calls SaveWorkflowClient.save a single time`, async () => {

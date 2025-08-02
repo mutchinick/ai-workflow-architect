@@ -194,12 +194,12 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       return invokeBedrockResult
     }
 
-    currentStep.llmPrompt = llmPrompt
-
     const llmResult = invokeBedrockResult.value
-    // FIXME: Add workflow.completeStep(stepId, llmResult)
-    currentStep.llmResult = llmResult
-    currentStep.stepStatus = 'completed'
+    const completeStepResult = workflow.completeStep(currentStep.stepId, llmPrompt, llmResult)
+    if (Result.isFailure(completeStepResult)) {
+      console.error(`${logCtx} exit failure:`, { completeStepResult, workflow })
+      return completeStepResult
+    }
 
     const executeAgentOutput = { llmSystem, llmPrompt, llmResult }
     const executeAgentResult = Result.makeSuccess(executeAgentOutput)

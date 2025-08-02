@@ -162,7 +162,7 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  nextStep(): WorkflowStep | null {
+  getCurrentStep(): WorkflowStep | null {
     return this.steps.find((step) => step.stepStatus === 'pending') || null
   }
 

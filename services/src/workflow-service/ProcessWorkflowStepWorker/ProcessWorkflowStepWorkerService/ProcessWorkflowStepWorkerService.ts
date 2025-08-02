@@ -160,8 +160,8 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     const logCtx = 'ProcessWorkflowStepWorkerService.executeAgent'
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
-    const nextStep = workflow.nextStep()
-    if (!nextStep) {
+    const currentStep = workflow.getCurrentStep()
+    if (!currentStep) {
       const message = 'No more steps to process in the workflow'
       // FIXME: Should be WorkflowAlreadyCompletedError
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
@@ -169,7 +169,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       return failure
     }
 
-    let llmPrompt = nextStep.llmPrompt
+    let llmPrompt = currentStep.llmPrompt
     if (llmPrompt.includes('<PREVIOUS_RESULT>')) {
       const lastExecutedStep = workflow.lastExecutedStep()
       if (!lastExecutedStep) {
@@ -182,7 +182,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', lastExecutedStep.llmResult)
     }
 
-    const llmSystem = nextStep.llmSystem
+    const llmSystem = currentStep.llmSystem
 
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(llmSystem, llmPrompt)
     if (Result.isFailure(invokeBedrockResult)) {
@@ -190,12 +190,12 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       return invokeBedrockResult
     }
 
-    nextStep.llmPrompt = llmPrompt
+    currentStep.llmPrompt = llmPrompt
 
     const llmResult = invokeBedrockResult.value
     // FIXME: Add workflow.completeStep(stepId, llmResult)
-    nextStep.llmResult = llmResult
-    nextStep.stepStatus = 'completed'
+    currentStep.llmResult = llmResult
+    currentStep.stepStatus = 'completed'
 
     const executeAgentOutput = { llmSystem, llmPrompt, llmResult }
     const executeAgentResult = Result.makeSuccess(executeAgentOutput)
@@ -241,7 +241,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
 
     // FIXME: Add workflow.isCompleted()
     const buildEventResult =
-      workflow.nextStep() === null
+      workflow.getCurrentStep() === null
         ? WorkflowCompletedEvent.fromData(eventData)
         : WorkflowStepProcessedEvent.fromData(eventData)
 

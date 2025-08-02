@@ -405,31 +405,31 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
-   * Test Workflow.nextStep
+   * Test Workflow.getCurrentStep
    ************************************************************/
-  describe(`Test Workflow.nextStep`, () => {
+  describe(`Test Workflow.getCurrentStep`, () => {
     it(`returns null when no steps are present`, () => {
       const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toBeNull()
+      expect(workflow.getCurrentStep()).toBeNull()
     })
 
     it(`returns the first step when no steps have been executed`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toMatchObject({ stepId: 'x0001-deploy-agents' })
+      expect(workflow.getCurrentStep()).toMatchObject({ stepId: 'x0001-deploy-agents' })
     })
 
     it(`returns the first pending step in a partially executed workflow`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toMatchObject({ stepId: 'x0003-agent-Agent-02' })
+      expect(workflow.getCurrentStep()).toMatchObject({ stepId: 'x0003-agent-Agent-02' })
     })
 
     it(`returns null when all steps are completed`, () => {
       const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.nextStep()).toBeNull()
+      expect(workflow.getCurrentStep()).toBeNull()
     })
   })
 

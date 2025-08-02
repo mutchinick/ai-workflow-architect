@@ -301,7 +301,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
    ************************************************************
    * Test internal logic processWorkflowStep
    ************************************************************/
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.nextStep includes
+  it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
       '<PREVIOUS_RESULT>' and Workflow.lastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
@@ -314,7 +314,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockEventStoreClient,
     )
     jest.spyOn(Workflow.prototype, 'lastExecutedStep').mockReturnValueOnce(null)
-    jest.spyOn(Workflow.prototype, 'nextStep').mockReturnValueOnce({
+    jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
       executionOrder: 2,
@@ -329,7 +329,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.nextStep returns
+  it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep returns
       null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
@@ -341,14 +341,14 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    jest.spyOn(Workflow.prototype, 'nextStep').mockReturnValueOnce(null)
+    jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce(null)
     const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.nextStep includes
+  it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
       '<PREVIOUS_RESULT>' and Workflow.lastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
@@ -361,7 +361,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockEventStoreClient,
     )
     jest.spyOn(Workflow.prototype, 'lastExecutedStep').mockReturnValueOnce(null)
-    jest.spyOn(Workflow.prototype, 'nextStep').mockReturnValueOnce({
+    jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
       executionOrder: 2,
@@ -490,7 +490,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       llmPrompt: mockAgents[0].prompt,
       llmResult: mockPreviousResult,
     })
-    jest.spyOn(Workflow.prototype, 'nextStep').mockReturnValueOnce({
+    jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
       executionOrder: 2,

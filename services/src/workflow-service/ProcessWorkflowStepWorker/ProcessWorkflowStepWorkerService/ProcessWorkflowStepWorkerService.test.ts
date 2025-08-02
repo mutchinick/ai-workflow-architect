@@ -216,7 +216,8 @@ function buildEventStoreClient_fails(
   }
 }
 
-describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerService tests`, () => {
+describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerService
+          tests`, () => {
   /*
    *
    *
@@ -301,8 +302,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
    ************************************************************
    * Test internal logic processWorkflowStep
    ************************************************************/
-  it(`returns a Failure of kind WorkflowInvalidStateError if Workflow.getCurrentStep includes
-      '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep returns null`, async () => {
+  it(`returns a Failure of kind WorkflowInvalidStateError if Workflow.getCurrentStep
+      includes '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep
+      returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -329,8 +331,8 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a Failure of kind WorkflowAlreadyCompletedError if Workflow.getCurrentStep returns
-      null`, async () => {
+  it(`returns a Failure of kind WorkflowAlreadyCompletedError if
+      Workflow.getCurrentStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -348,8 +350,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a Failure of kind WorkflowInvalidStateError if Workflow.getCurrentStep includes
-      '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep returns null`, async () => {
+  it(`returns a Failure of kind WorkflowInvalidStateError if Workflow.getCurrentStep
+      includes '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep
+      returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()

@@ -35,7 +35,7 @@ function buildReconstituteInput(): TypeUtilsMutable<WorkflowCreatedEvent> {
 /**
  *
  */
-describe(`Test WorkflowCreatedEvent`, () => {
+describe(`Test Workflow Service events WorkflowCreatedEvent`, () => {
   /*
    *
    *

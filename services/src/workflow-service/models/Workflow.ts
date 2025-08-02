@@ -8,18 +8,18 @@ import { WorkflowStep, workflowStepSchema } from './WorkflowStep'
 /**
  *
  */
-const instructionsSchema = z.object({
+const workflowInstructionsSchema = z.object({
   query: z.string().trim().min(6),
 })
 
-export type WorkflowInstructions = TypeUtilsPretty<z.infer<typeof instructionsSchema>>
+export type WorkflowInstructions = TypeUtilsPretty<z.infer<typeof workflowInstructionsSchema>>
 
 /**
  *
  */
 export const workflowPropsSchema = z.object({
   workflowId: z.string().trim().min(6),
-  instructions: instructionsSchema,
+  instructions: workflowInstructionsSchema,
   steps: z.array(workflowStepSchema),
 })
 
@@ -48,25 +48,49 @@ export class Workflow implements WorkflowProps {
     workflowInstructions: WorkflowInstructions,
   ): Success<Workflow> | Failure<'InvalidArgumentsError'> {
     const logCtx = 'Workflow.fromInput'
-    console.info(`${logCtx} init:`, { workflowQuery: workflowInstructions })
+    console.info(`${logCtx} init:`, { workflowInstructions })
 
-    const workflowId = KSUID.randomSync().string
-
-    const propsResult = this.parseValidateProps({
-      workflowId,
-      instructions: { ...workflowInstructions },
-      steps: [],
-    })
-    if (Result.isFailure(propsResult)) {
-      console.error(`${logCtx} exit failure:`, { propsResult })
-      return propsResult
+    const instructionsResult = this.parseValidateInstructions(workflowInstructions)
+    if (Result.isFailure(instructionsResult)) {
+      console.error(`${logCtx} exit failure:`, { propsResult: instructionsResult })
+      return instructionsResult
     }
+    const instructions = instructionsResult.value
 
-    const { instructions, steps } = propsResult.value
-    const workflow = new Workflow(workflowId, instructions, steps)
+    const workflowId = this.generateWorkflowId(instructions)
+    const workflow = new Workflow(workflowId, instructions, [])
     const workflowResult = Result.makeSuccess(workflow)
-    console.info(`${logCtx} exit success:`, { workflowResult })
+    console.info(`${logCtx} exit success:`, { workflowResult, workflowInstructions })
     return workflowResult
+  }
+
+  /**
+   *
+   */
+  private static parseValidateInstructions(
+    instructions: WorkflowInstructions,
+  ): Success<WorkflowInstructions> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'Workflow.parseValidateInstructions'
+
+    try {
+      const validInstructions = workflowInstructionsSchema.parse(instructions)
+      return Result.makeSuccess(validInstructions)
+    } catch (error) {
+      const failure = Result.makeFailure('InvalidArgumentsError', error, false)
+      console.error(`${logCtx} exit failure:`, { failure, instructions })
+      return failure
+    }
+  }
+
+  /**
+   *
+   */
+  private static generateWorkflowId(instructions: WorkflowInstructions): string {
+    const datePart = this.normalizeText(new Date().toISOString())
+    const queryPart = this.normalizeText(instructions.query.trim().slice(0, 20))
+    const ksuidPart = KSUID.randomSync().string
+    const workflowId = `workflow-${datePart}-${queryPart}-${ksuidPart}`
+    return workflowId
   }
 
   /**
@@ -96,8 +120,8 @@ export class Workflow implements WorkflowProps {
     const logCtx = 'Workflow.parseValidateProps'
 
     try {
-      const validInput = workflowPropsSchema.parse(props)
-      return Result.makeSuccess(validInput)
+      const validProps = workflowPropsSchema.parse(props)
+      return Result.makeSuccess(validProps)
     } catch (error) {
       const failure = Result.makeFailure('InvalidArgumentsError', error, false)
       console.error(`${logCtx} exit failure:`, { failure, props })
@@ -108,24 +132,13 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  public toJSON(): WorkflowProps {
-    return {
-      workflowId: this.workflowId,
-      instructions: this.instructions,
-      steps: this.steps,
-    }
-  }
-
-  /**
-   *
-   */
   getObjectKey(): string {
-    const workflowKey = `workflow-${this.workflowId}`
+    const workflowKey = `${this.workflowId}`
     const baseKey = `${workflowKey}/${workflowKey}`
 
     const executedSteps = this.steps.filter((step) => step.stepStatus === 'completed')
     if (executedSteps.length === 0) {
-      const executionOrderId = this.zeroPad(0, EXECUTION_ORDER_ID_LENGTH)
+      const executionOrderId = Workflow.zeroPad(0, EXECUTION_ORDER_ID_LENGTH)
       const createdKey = `${baseKey}-x${executionOrderId}-created.json`
       return createdKey
     }
@@ -177,7 +190,7 @@ export class Workflow implements WorkflowProps {
 
     // Populate the 'deploy_agents' steps
     {
-      const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
+      const executionOrderId = Workflow.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
       const deployStep: WorkflowStep = {
         stepId: `x${executionOrderId}-deploy-agents`,
         stepStatus: 'completed',
@@ -193,8 +206,8 @@ export class Workflow implements WorkflowProps {
     // Populate the 'agent' steps
     for (const agent of agents) {
       executionOrder++
-      const executionOrderId = this.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
-      const stepId = this.normalizeStepId(`x${executionOrderId}-agent-${agent.name}`)
+      const executionOrderId = Workflow.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
+      const stepId = Workflow.normalizeText(`x${executionOrderId}-agent-${agent.name}`)
       const step: WorkflowStep = {
         stepId,
         stepStatus: 'pending',
@@ -215,7 +228,18 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  private zeroPad(num: number, size: number): string {
+  public toJSON(): WorkflowProps {
+    return {
+      workflowId: this.workflowId,
+      instructions: this.instructions,
+      steps: this.steps,
+    }
+  }
+
+  /**
+   *
+   */
+  private static zeroPad(num: number, size: number): string {
     let s = num.toString()
     while (s.length < size) {
       s = '0' + s
@@ -224,9 +248,12 @@ export class Workflow implements WorkflowProps {
   }
 
   /**
-   * Normalizes the step ID by removing spaces and unfriendly character and replacing them with hyphens.
+   *
    */
-  private normalizeStepId(stepId: string): string {
-    return stepId.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')
+  private static normalizeText(str: string): string {
+    return str
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-]/g, '-')
+      .replace(/-+/g, '-')
   }
 }

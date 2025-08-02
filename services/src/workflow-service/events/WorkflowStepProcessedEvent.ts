@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { Failure, Result, Success } from '../errors/Result'
-import { EventStoreEvent, EventStoreEventConstructor } from '../event-store/EventStoreEvent'
-import { EventStoreEventName } from '../event-store/EventStoreEventName'
+import { Failure, Result, Success } from '../../errors/Result'
+import { EventStoreEvent, EventStoreEventConstructor } from '../../event-store/EventStoreEvent'
+import { EventStoreEventName } from '../../event-store/EventStoreEventName'
 
 /**
  *
@@ -9,11 +9,9 @@ import { EventStoreEventName } from '../event-store/EventStoreEventName'
 const dataSchema = z.object({
   workflowId: z.string().trim().min(6),
   objectKey: z.string().trim().min(6),
-  agentId: z.string().trim().min(6),
-  round: z.number().int().min(0),
 })
 
-export type WorkflowPromptEnhancedEventData = z.infer<typeof dataSchema>
+export type WorkflowStepProcessedEventData = z.infer<typeof dataSchema>
 
 const eventSchema = z.object({
   eventData: dataSchema,
@@ -24,28 +22,28 @@ const eventSchema = z.object({
 /**
  *
  */
-export class WorkflowPromptEnhancedEvent extends EventStoreEvent<WorkflowPromptEnhancedEventData> {
-  public static readonly eventName = EventStoreEventName.WORKFLOW_PROMPT_ENHANCED_EVENT
+export class WorkflowStepProcessedEvent extends EventStoreEvent<WorkflowStepProcessedEventData> {
+  public static readonly eventName = EventStoreEventName.WORKFLOW_STEP_PROCESSED_EVENT
 
   /**
    *
    */
-  private constructor(eventData: WorkflowPromptEnhancedEventData, idempotencyKey: string, createdAt: string) {
-    super(WorkflowPromptEnhancedEvent.eventName, eventData, idempotencyKey, createdAt)
+  private constructor(eventData: WorkflowStepProcessedEventData, idempotencyKey: string, createdAt: string) {
+    super(WorkflowStepProcessedEvent.eventName, eventData, idempotencyKey, createdAt)
   }
 
   /**
    *
    */
   static fromData(
-    eventData: WorkflowPromptEnhancedEventData,
-  ): Success<WorkflowPromptEnhancedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowPromptEnhancedEvent.fromData'
+    eventData: WorkflowStepProcessedEventData,
+  ): Success<WorkflowStepProcessedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'WorkflowStepProcessedEvent.fromData'
 
     try {
       const validData = dataSchema.parse(eventData)
       const idempotencyKey = this.generateIdempotencyKey(validData)
-      const event = new WorkflowPromptEnhancedEvent(validData, idempotencyKey, new Date().toISOString())
+      const event = new WorkflowStepProcessedEvent(validData, idempotencyKey, new Date().toISOString())
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -59,7 +57,7 @@ export class WorkflowPromptEnhancedEvent extends EventStoreEvent<WorkflowPromptE
   /**
    *
    */
-  private static generateIdempotencyKey(eventData: WorkflowPromptEnhancedEventData): string {
+  private static generateIdempotencyKey(eventData: WorkflowStepProcessedEventData): string {
     return `workflowId:${eventData.workflowId}:objectKey:${eventData.objectKey}`
   }
 
@@ -67,14 +65,14 @@ export class WorkflowPromptEnhancedEvent extends EventStoreEvent<WorkflowPromptE
    *
    */
   static reconstitute(
-    eventData: WorkflowPromptEnhancedEventData,
+    eventData: WorkflowStepProcessedEventData,
     idempotencyKey: string,
     createdAt: string,
-  ): Success<WorkflowPromptEnhancedEvent> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'WorkflowPromptEnhancedEvent.reconstitute'
+  ): Success<WorkflowStepProcessedEvent> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'WorkflowStepProcessedEvent.reconstitute'
     try {
       const validEvent = eventSchema.parse({ eventData, idempotencyKey, createdAt })
-      const event = new WorkflowPromptEnhancedEvent(validEvent.eventData, idempotencyKey, createdAt)
+      const event = new WorkflowStepProcessedEvent(validEvent.eventData, idempotencyKey, createdAt)
       const eventResult = Result.makeSuccess(event)
       console.info(`${logCtx} exit success:`, { eventResult, eventData })
       return eventResult
@@ -91,4 +89,4 @@ export class WorkflowPromptEnhancedEvent extends EventStoreEvent<WorkflowPromptE
  * by EventStoreEventConstructor. It will cause a compile-time error if
  * fromData or reconstitute are missing or have the wrong signature.
  */
-const _ConstructorCheck: EventStoreEventConstructor = WorkflowPromptEnhancedEvent
+const _ConstructorCheck: EventStoreEventConstructor = WorkflowStepProcessedEvent

@@ -19,8 +19,12 @@ import {
   partiallyExecutedScenario,
 } from './fixtures/from-props-fixtures'
 
-const mockWorkflowId = 'mockWorkflowId'
+jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
+
+const mockDateSafe = '2024-10-19T03-24-00-000Z'
+const mockKsuid = 'mockKsuid'
 const mockQuery = 'mockQuery'
+const mockWorkflowId = `workflow-${mockDateSafe}-${mockQuery}-${mockKsuid}`
 
 function buildMockWorkflowInstructions(): WorkflowInstructions {
   const mockValidWorkflowProps: WorkflowInstructions = {
@@ -143,7 +147,7 @@ describe(`Workflow Service models Workflow tests`, () => {
     it(`returns the expected Success<Workflow> if the execution path is successful`, () => {
       // Mock KSUID to return a fixed workflowId
       jest.spyOn(KSUID, 'randomSync').mockReturnValue({
-        string: mockWorkflowId,
+        string: mockKsuid,
       } as never)
 
       const mockWorkflowInstructions = buildMockWorkflowInstructions()
@@ -478,7 +482,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = emptyWorkflowScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
+      const baseKey = `${workflowId}/${workflowId}`
       const expectedKey = `${baseKey}-x0000-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
@@ -487,7 +491,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = noStepsExecutedScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
+      const baseKey = `${workflowId}/${workflowId}`
       const expectedKey = `${baseKey}-x0000-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
@@ -496,7 +500,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = partiallyExecutedScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
+      const baseKey = `${workflowId}/${workflowId}`
       const expectedKey = `${baseKey}-x0002-agent-Agent-01.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })

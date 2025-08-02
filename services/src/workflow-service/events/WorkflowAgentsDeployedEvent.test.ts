@@ -35,7 +35,7 @@ function buildReconstituteInput(): TypeUtilsMutable<WorkflowAgentsDeployedEvent>
 /**
  *
  */
-describe(`Test WorkflowAgentsDeployedEvent`, () => {
+describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
   /*
    *
    *
@@ -191,8 +191,8 @@ describe(`Test WorkflowAgentsDeployedEvent`, () => {
      ************************************************************
      * Test expected results
      ************************************************************/
-    it(`returns the expected Success<WorkflowAgentsDeployedEvent> if the execution path is
-        successful`, () => {
+    it(`returns the expected Success<WorkflowAgentsDeployedEvent> if the execution path
+        is successful`, () => {
       const testInput = buildTestInputData()
       const result = WorkflowAgentsDeployedEvent.fromData(testInput)
 
@@ -496,8 +496,8 @@ describe(`Test WorkflowAgentsDeployedEvent`, () => {
      ************************************************************
      * Test expected results
      ************************************************************/
-    it(`returns the expected Success<WorkflowAgentsDeployedEvent> if the execution path is
-        successful`, () => {
+    it(`returns the expected Success<WorkflowAgentsDeployedEvent> if the execution path
+        is successful`, () => {
       const testInput = buildReconstituteInput()
       const result = WorkflowAgentsDeployedEvent.reconstitute(
         testInput.eventData,

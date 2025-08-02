@@ -482,7 +482,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = emptyWorkflowScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
+      const baseKey = `${workflowId}/${workflowId}`
       const expectedKey = `${baseKey}-x0000-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
@@ -491,7 +491,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = noStepsExecutedScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
+      const baseKey = `${workflowId}/${workflowId}`
       const expectedKey = `${baseKey}-x0000-created.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
@@ -500,7 +500,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = partiallyExecutedScenario.props.workflowId
-      const baseKey = `workflow-${workflowId}/workflow-${workflowId}`
+      const baseKey = `${workflowId}/${workflowId}`
       const expectedKey = `${baseKey}-x0002-agent-Agent-01.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })

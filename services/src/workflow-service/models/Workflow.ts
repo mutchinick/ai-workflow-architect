@@ -133,7 +133,7 @@ export class Workflow implements WorkflowProps {
    *
    */
   getObjectKey(): string {
-    const workflowKey = `workflow-${this.workflowId}`
+    const workflowKey = `${this.workflowId}`
     const baseKey = `${workflowKey}/${workflowKey}`
 
     const executedSteps = this.steps.filter((step) => step.stepStatus === 'completed')

@@ -242,11 +242,9 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     const objectKey = workflow.getObjectKey()
     const eventData = { workflowId, objectKey }
 
-    // FIXME: Add workflow.isCompleted()
-    const buildEventResult =
-      workflow.getCurrentStep() === null
-        ? WorkflowCompletedEvent.fromData(eventData)
-        : WorkflowStepProcessedEvent.fromData(eventData)
+    const buildEventResult = workflow.hasCompleted()
+      ? WorkflowCompletedEvent.fromData(eventData)
+      : WorkflowStepProcessedEvent.fromData(eventData)
 
     if (Result.isFailure(buildEventResult)) {
       console.error(`${logCtx} exit failure:`, { buildEventResult, eventData })

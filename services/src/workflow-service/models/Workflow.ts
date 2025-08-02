@@ -192,6 +192,13 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
+  hasCompleted(): boolean {
+    return this.steps.length > 0 && this.steps.every((step) => step.stepStatus === 'completed')
+  }
+
+  /**
+   *
+   */
   deployAgents(
     system: string,
     prompt: string,

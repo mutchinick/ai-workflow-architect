@@ -537,6 +537,32 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
+   * Test Workflow.hasCompleted
+   ************************************************************/
+  describe(`Test Workflow.hasCompleted`, () => {
+    it(`returns true if all steps are completed`, () => {
+      const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.hasCompleted()).toBe(true)
+    })
+
+    it(`returns false if not all steps are completed`, () => {
+      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.hasCompleted()).toBe(false)
+    })
+
+    it(`returns false if no steps are present`, () => {
+      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.hasCompleted()).toBe(false)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
    * Test Workflow.deployAgents
    ************************************************************/
   describe(`Workflow.deployAgents`, () => {

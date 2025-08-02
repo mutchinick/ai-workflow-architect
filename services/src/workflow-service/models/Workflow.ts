@@ -151,7 +151,7 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  lastExecutedStep(): WorkflowStep | null {
+  getLastExecutedStep(): WorkflowStep | null {
     const executedSteps = this.steps.filter((step) => step.stepStatus === 'completed')
     if (executedSteps.length === 0) {
       return null

@@ -302,7 +302,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
    * Test internal logic processWorkflowStep
    ************************************************************/
   it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
-      '<PREVIOUS_RESULT>' and Workflow.lastExecutedStep returns null`, async () => {
+      '<PREVIOUS_RESULT>' and Workflow.getLastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -313,7 +313,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    jest.spyOn(Workflow.prototype, 'lastExecutedStep').mockReturnValueOnce(null)
+    jest.spyOn(Workflow.prototype, 'getLastExecutedStep').mockReturnValueOnce(null)
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
@@ -349,7 +349,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
   })
 
   it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
-      '<PREVIOUS_RESULT>' and Workflow.lastExecutedStep returns null`, async () => {
+      '<PREVIOUS_RESULT>' and Workflow.getLastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -360,7 +360,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    jest.spyOn(Workflow.prototype, 'lastExecutedStep').mockReturnValueOnce(null)
+    jest.spyOn(Workflow.prototype, 'getLastExecutedStep').mockReturnValueOnce(null)
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
@@ -481,7 +481,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockEventStoreClient,
     )
     const mockPreviousResult = 'mockLlmResult-Y'
-    jest.spyOn(Workflow.prototype, 'lastExecutedStep').mockReturnValueOnce({
+    jest.spyOn(Workflow.prototype, 'getLastExecutedStep').mockReturnValueOnce({
       stepId: 'mockStepId-1',
       stepStatus: 'completed',
       executionOrder: 1,

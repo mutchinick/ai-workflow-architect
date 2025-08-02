@@ -171,7 +171,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
 
     let llmPrompt = currentStep.llmPrompt
     if (llmPrompt.includes('<PREVIOUS_RESULT>')) {
-      const lastExecutedStep = workflow.lastExecutedStep()
+      const lastExecutedStep = workflow.getLastExecutedStep()
       if (!lastExecutedStep) {
         const message = 'No previous step to reference for <PREVIOUS_RESULT>'
         // FIXME: Should be WorkflowInvalidStateError

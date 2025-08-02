@@ -167,7 +167,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
 
     const userQuery = workflow.instructions.query
     const { system, prompt: rawPrompt } = AgentsDesignerAgent
-    const prompt = rawPrompt.replace('<query>{{USER_QUERY}}</query>', `<query>${userQuery}</query>`)
+    const prompt = rawPrompt.replace('<question>{{USER_QUESTION}}</question>', `<query>${userQuery}</query>`)
 
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(system, prompt)
     if (Result.isFailure(invokeBedrockResult)) {

@@ -111,7 +111,7 @@ export const AgentsDesignerAgent: Agent = {
       - Your final response MUST BE ONLY the raw JSON array of Agent Steps, starting with \`[\` and ending with \`]\`.
       `,
 
-  prompt: `Design the complete agent workflow for the following user question:\n<query>{{USER_QUERY}}</query>`,
+  prompt: `Design the complete agent workflow for the following user question:\n<question>{{USER_QUESTION}}</question>`,
 
   phaseName: 'Phase X: Architect Workflow',
 }

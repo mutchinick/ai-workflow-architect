@@ -96,6 +96,7 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
         WORKFLOW_SERVICE_BUCKET_NAME: s3Bucket.bucketName,
       },
       timeout: settings.Lambda.timeout,
+      memorySize: settings.Lambda.memorySize,
       logGroup,
       bundling: {
         externalModules: ['@aws-sdk/*'],

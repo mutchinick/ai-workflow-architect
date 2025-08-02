@@ -17,6 +17,7 @@ export interface IProcessWorkflowStepWorkerService {
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
+    | Failure<'WorkflowAlreadyCompletedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
@@ -55,6 +56,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
+    | Failure<'WorkflowAlreadyCompletedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
@@ -153,6 +155,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
   ): Promise<
     | Success<ExecuteAgentOutput>
     | Failure<'InvalidArgumentsError'>
+    | Failure<'WorkflowAlreadyCompletedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
@@ -163,8 +166,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     const currentStep = workflow.getCurrentStep()
     if (!currentStep) {
       const message = 'No more steps to process in the workflow'
-      // FIXME: Should be WorkflowAlreadyCompletedError
-      const failure = Result.makeFailure('InvalidArgumentsError', message, false)
+      const failure = Result.makeFailure('WorkflowAlreadyCompletedError', message, false)
       console.error(`${logCtx} exit failure:`, { failure, workflow })
       return failure
     }

@@ -329,7 +329,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep returns
+  it(`returns a Failure of kind WorkflowAlreadyCompletedError if Workflow.getCurrentStep returns
       null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
@@ -344,7 +344,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce(null)
     const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
     expect(Result.isFailure(result)).toBe(true)
-    expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
+    expect(Result.isFailureOfKind(result, 'WorkflowAlreadyCompletedError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 

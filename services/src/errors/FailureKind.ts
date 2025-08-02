@@ -5,5 +5,6 @@ export type FailureKind =
   | 'DuplicateWorkflowError'
   | 'WorkflowFileNotFoundError'
   | 'WorkflowFileCorruptedError'
+  | 'WorkflowAlreadyCompletedError'
   | 'BedrockInvokeTransientError'
   | 'BedrockInvokePermanentError'

@@ -105,7 +105,7 @@ export const AgentsDesignerAgent: Agent = {
 
       ## Placeholder Rules for Prompts
       - The 'prompt' for the VERY FIRST step must use the original user question.
-      - The 'prompt' for EVERY SUBSEQUENT step MUST contain "<PREVIOUS_RESULT>".
+      - The 'prompt' for EVERY SUBSEQUENT step MUST contain "<result>{{PREVIOUS_RESULT}}</result>".
 
       ## Your Final Output
       - Your final response MUST BE ONLY the raw JSON array of Agent Steps, starting with \`[\` and ending with \`]\`.

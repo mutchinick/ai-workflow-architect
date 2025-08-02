@@ -77,7 +77,7 @@ function buildMockWorkflowSteps(): WorkflowStep[] {
       agent: mockAgents[2],
       llmSystem: mockAgents[2].system,
       llmPrompt: mockAgents[2].prompt,
-      llmResult: '<PREVIOUS_RESULT>',
+      llmResult: '<result>{{PREVIOUS_RESULT}}</result>',
     },
   ]
   return workflowSteps
@@ -302,7 +302,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
    * Test internal logic processWorkflowStep
    ************************************************************/
   it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
-      '<PREVIOUS_RESULT>' and Workflow.getLastExecutedStep returns null`, async () => {
+      '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -320,7 +320,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       executionOrder: 2,
       agent: mockAgents[1],
       llmSystem: mockAgents[1].system,
-      llmPrompt: 'Test prompt with <PREVIOUS_RESULT>',
+      llmPrompt: 'Test prompt with <result>{{PREVIOUS_RESULT}}</result>',
       llmResult: '',
     })
     const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
@@ -349,7 +349,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
   })
 
   it(`returns a Failure of kind InvalidArgumentsError if Workflow.getCurrentStep includes
-      '<PREVIOUS_RESULT>' and Workflow.getLastExecutedStep returns null`, async () => {
+      '<result>{{PREVIOUS_RESULT}}</result>' and Workflow.getLastExecutedStep returns null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -367,7 +367,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       executionOrder: 2,
       agent: mockAgents[1],
       llmSystem: mockAgents[1].system,
-      llmPrompt: 'Test prompt with <PREVIOUS_RESULT>',
+      llmPrompt: 'Test prompt with <result>{{PREVIOUS_RESULT}}</result>',
       llmResult: '',
     })
     const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
@@ -469,7 +469,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
   })
 
   it(`calls InvokeBedrockClient.invoke with the expected system and prompt replacing
-      <PREVIOUS_RESULT> with the actual previous LLM result`, async () => {
+      <result>{{PREVIOUS_RESULT}}</result> with the actual previous LLM result`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -496,7 +496,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       executionOrder: 2,
       agent: mockAgents[1],
       llmSystem: mockAgents[1].system,
-      llmPrompt: `Test prompt with <PREVIOUS_RESULT>`,
+      llmPrompt: `Test prompt with <result>{{PREVIOUS_RESULT}}</result>`,
       llmResult: '',
     })
     await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)

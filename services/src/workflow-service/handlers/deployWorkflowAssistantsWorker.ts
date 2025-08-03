@@ -5,8 +5,8 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import { generateText } from 'ai'
 import { SQSBatchResponse, SQSEvent } from 'aws-lambda'
 import { EventStoreClient } from '../../event-store/EventStoreClient'
-import { DeployWorkflowAgentsWorkerController } from '../DeployWorkflowAgentsWorker/DeployWorkflowAgentsWorkerController/DeployWorkflowAgentsWorkerController'
-import { DeployWorkflowAgentsWorkerService } from '../DeployWorkflowAgentsWorker/DeployWorkflowAgentsWorkerService/DeployWorkflowAgentsWorkerService'
+import { DeployWorkflowAssistantsWorkerController } from '../DeployWorkflowAssistantsWorker/DeployWorkflowAssistantsWorkerController/DeployWorkflowAssistantsWorkerController'
+import { DeployWorkflowAssistantsWorkerService } from '../DeployWorkflowAssistantsWorker/DeployWorkflowAssistantsWorkerService/DeployWorkflowAssistantsWorkerService'
 import { InvokeBedrockClient } from '../InvokeBedrockClient/InvokeBedrockClient'
 import { ReadWorkflowClient } from '../models/ReadWorkflowClient'
 import { SaveWorkflowClient } from '../models/SaveWorkflowClient'
@@ -27,17 +27,19 @@ function createHandler(): (sqsEvent: SQSEvent) => Promise<SQSBatchResponse> {
   const ddbDocClient = DynamoDBDocumentClient.from(ddbClient)
   const eventStoreClient = new EventStoreClient(ddbDocClient)
 
-  const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+  const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
     readWorkflowClient,
     invokeBedrockClient,
     saveWorkflowClient,
     eventStoreClient,
   )
-  const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-    deployWorkflowAgentsWorkerService,
+  const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+    deployWorkflowAssistantsWorkerService,
   )
 
-  return deployWorkflowAgentsWorkerController.deployWorkflowAgents.bind(deployWorkflowAgentsWorkerController)
+  return deployWorkflowAssistantsWorkerController.deployWorkflowAssistants.bind(
+    deployWorkflowAssistantsWorkerController,
+  )
 }
 
 export const handler = createHandler()

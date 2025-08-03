@@ -1,6 +1,6 @@
 import z from 'zod'
 
-export const agentSchema = z.object({
+export const assistantSchema = z.object({
   name: z.string().trim().min(1),
   role: z.string().trim().min(1),
   directive: z.string().trim().min(1),
@@ -9,4 +9,4 @@ export const agentSchema = z.object({
   phaseName: z.string().trim().min(1),
 })
 
-export type Agent = z.infer<typeof agentSchema>
+export type Assistant = z.infer<typeof assistantSchema>

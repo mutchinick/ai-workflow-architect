@@ -6,12 +6,12 @@ import {
   IncomingEventBridgeEvent,
 } from '../../../event-store/EventStoreEventBuilder'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
-import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
+import { WorkflowAssistantsDeployedEvent } from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
-import { IDeployWorkflowAgentsWorkerService } from '../DeployWorkflowAgentsWorkerService/DeployWorkflowAgentsWorkerService'
+import { IDeployWorkflowAssistantsWorkerService } from '../DeployWorkflowAssistantsWorkerService/DeployWorkflowAssistantsWorkerService'
 
-export interface IDeployWorkflowAgentsWorkerController {
-  deployWorkflowAgents: (sqsEvent: SQSEvent) => Promise<SQSBatchResponse>
+export interface IDeployWorkflowAssistantsWorkerController {
+  deployWorkflowAssistants: (sqsEvent: SQSEvent) => Promise<SQSBatchResponse>
 }
 
 const validEventsMap: EventClassMap = {
@@ -21,17 +21,17 @@ const validEventsMap: EventClassMap = {
 /**
  *
  */
-export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgentsWorkerController {
+export class DeployWorkflowAssistantsWorkerController implements IDeployWorkflowAssistantsWorkerController {
   /**
    *
    */
-  constructor(private readonly deployWorkflowAgentsWorkerService: IDeployWorkflowAgentsWorkerService) {}
+  constructor(private readonly deployWorkflowAssistantsWorkerService: IDeployWorkflowAssistantsWorkerService) {}
 
   /**
    *
    */
-  public async deployWorkflowAgents(sqsEvent: SQSEvent): Promise<SQSBatchResponse> {
-    const logCtx = 'DeployWorkflowAgentsWorkerController.deployWorkflowAgents'
+  public async deployWorkflowAssistants(sqsEvent: SQSEvent): Promise<SQSBatchResponse> {
+    const logCtx = 'DeployWorkflowAssistantsWorkerController.deployWorkflowAssistants'
     console.info(`${logCtx} init:`, { sqsEvent })
 
     const sqsBatchResponse: SQSBatchResponse = { batchItemFailures: [] }
@@ -46,7 +46,7 @@ export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgen
     for (const record of sqsEvent.Records) {
       // If the failure is transient then we add it to the batch errors to requeue and retry
       // If the failure is non-transient then we ignore it to remove it from the queue
-      const createWorkflowResult = await this.deployWorkflowAgentsSafe(record)
+      const createWorkflowResult = await this.deployWorkflowAssistantsSafe(record)
       if (Result.isFailureTransient(createWorkflowResult)) {
         sqsBatchResponse.batchItemFailures.push({ itemIdentifier: record.messageId })
       }
@@ -59,7 +59,7 @@ export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgen
   /**
    *
    */
-  private async deployWorkflowAgentsSafe(
+  private async deployWorkflowAssistantsSafe(
     sqsRecord: SQSRecord,
   ): Promise<
     | Success<void>
@@ -72,7 +72,7 @@ export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgen
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'DeployWorkflowAgentsWorkerController.deployWorkflowAgentsSafe'
+    const logCtx = 'DeployWorkflowAssistantsWorkerController.deployWorkflowAssistantsSafe'
     console.info(`${logCtx} init:`, { sqsRecord })
 
     const parseInputEventResult = this.parseInputEvent(sqsRecord)
@@ -91,7 +91,7 @@ export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgen
     const incomingCreateWorkflowEvent = incomingCreateWorkflowEventResult.value
     if (
       incomingCreateWorkflowEvent instanceof WorkflowCreatedEvent === false &&
-      incomingCreateWorkflowEvent instanceof WorkflowAgentsDeployedEvent === false
+      incomingCreateWorkflowEvent instanceof WorkflowAssistantsDeployedEvent === false
     ) {
       const message = `Expected WorkflowCreatedEvent but got ${incomingCreateWorkflowEvent}`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
@@ -100,7 +100,7 @@ export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgen
     }
 
     const createWorkflowResult =
-      await this.deployWorkflowAgentsWorkerService.deployWorkflowAgents(incomingCreateWorkflowEvent)
+      await this.deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(incomingCreateWorkflowEvent)
     Result.isFailure(createWorkflowResult)
       ? console.error(`${logCtx} exit failure:`, { createWorkflowResult, incomingCreateWorkflowEvent })
       : console.info(`${logCtx} exit success:`, { createWorkflowResult, incomingCreateWorkflowEvent })
@@ -112,7 +112,7 @@ export class DeployWorkflowAgentsWorkerController implements IDeployWorkflowAgen
    *
    */
   private parseInputEvent(sqsRecord: SQSRecord): Success<unknown> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'DeployWorkflowAgentsWorkerController.parseInputEvent'
+    const logCtx = 'DeployWorkflowAssistantsWorkerController.parseInputEvent'
 
     try {
       const unverifiedEvent = JSON.parse(sqsRecord.body)

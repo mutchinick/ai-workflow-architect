@@ -6,7 +6,7 @@ import {
   IncomingEventBridgeEvent,
 } from '../../../event-store/EventStoreEventBuilder'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
-import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
+import { WorkflowAssistantsDeployedEvent } from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowStepProcessedEvent } from '../../events/WorkflowStepProcessedEvent'
 import { IProcessWorkflowStepWorkerService } from '../ProcessWorkflowStepWorkerService/ProcessWorkflowStepWorkerService'
 
@@ -15,7 +15,7 @@ export interface IProcessWorkflowStepWorkerController {
 }
 
 const validEventsMap: EventClassMap = {
-  [EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT]: WorkflowAgentsDeployedEvent,
+  [EventStoreEventName.WORKFLOW_ASSISTANTS_DEPLOYED_EVENT]: WorkflowAssistantsDeployedEvent,
   [EventStoreEventName.WORKFLOW_STEP_PROCESSED_EVENT]: WorkflowStepProcessedEvent,
 }
 
@@ -93,10 +93,10 @@ export class ProcessWorkflowStepWorkerController implements IProcessWorkflowStep
 
     const incomingCreateWorkflowEvent = incomingCreateWorkflowEventResult.value
     if (
-      incomingCreateWorkflowEvent instanceof WorkflowAgentsDeployedEvent === false &&
+      incomingCreateWorkflowEvent instanceof WorkflowAssistantsDeployedEvent === false &&
       incomingCreateWorkflowEvent instanceof WorkflowStepProcessedEvent === false
     ) {
-      const message = `Expected WorkflowAgentsDeployedEvent but got ${incomingCreateWorkflowEvent}`
+      const message = `Expected WorkflowAssistantsDeployedEvent but got ${incomingCreateWorkflowEvent}`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
       console.error(`${logCtx} exit failure:`, { failure, incomingCreateWorkflowEvent })
       return failure

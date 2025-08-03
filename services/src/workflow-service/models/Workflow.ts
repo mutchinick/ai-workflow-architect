@@ -2,7 +2,7 @@ import KSUID from 'ksuid'
 import z from 'zod'
 import { Failure, Result, Success } from '../../errors/Result'
 import { TypeUtilsPretty } from '../../shared/TypeUtils'
-import { Agent } from '../agents/Agent'
+import { Assistant } from '../assistants/Assistant'
 import { WorkflowStep, workflowStepSchema } from './WorkflowStep'
 
 /**
@@ -199,33 +199,33 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  deployAgents(
+  deployAssistants(
     system: string,
     prompt: string,
     result: string,
-    agent: Agent,
-    agents: Agent[],
+    assistant: Assistant,
+    assistants: Assistant[],
   ): Success<void> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'Workflow.deployAgents'
-    console.info(`${logCtx} init:`, { agents })
+    const logCtx = 'Workflow.deployAssistants'
+    console.info(`${logCtx} init:`, { assistants })
 
     if (this.steps.length > 0) {
-      const message = `Cannot deploy agents after workflow steps have been initialized`
+      const message = `Cannot deploy assistants after workflow steps have been initialized`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
-      console.error(`${logCtx} exit failure:`, { failure, agents })
+      console.error(`${logCtx} exit failure:`, { failure, assistants })
       return failure
     }
 
     let executionOrder = 1
 
-    // Populate the 'deploy_agents' steps
+    // Populate the 'deploy_assistants' steps
     {
       const executionOrderId = Workflow.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
       const deployStep: WorkflowStep = {
-        stepId: `x${executionOrderId}-deploy-agents`,
+        stepId: `x${executionOrderId}-deploy-assistants`,
         stepStatus: 'completed',
         executionOrder,
-        agent,
+        assistant,
         llmSystem: system,
         llmPrompt: prompt,
         llmResult: result,
@@ -233,26 +233,26 @@ export class Workflow implements WorkflowProps {
       this.steps.push(deployStep)
     }
 
-    // Populate the 'agent' steps
-    for (const agent of agents) {
+    // Populate the 'assistant' steps
+    for (const assistant of assistants) {
       executionOrder++
       const executionOrderId = Workflow.zeroPad(executionOrder, EXECUTION_ORDER_ID_LENGTH)
-      const stepId = Workflow.normalizeText(`x${executionOrderId}-agent-${agent.name}`)
+      const stepId = Workflow.normalizeText(`x${executionOrderId}-assistant-${assistant.name}`)
       const step: WorkflowStep = {
         stepId,
         stepStatus: 'pending',
         executionOrder,
-        agent,
-        llmSystem: agent.system,
-        llmPrompt: agent.prompt,
+        assistant,
+        llmSystem: assistant.system,
+        llmPrompt: assistant.prompt,
         llmResult: '',
       }
       this.steps.push(step)
     }
 
-    const deployAgentsResult = Result.makeSuccess()
-    console.info(`${logCtx} exit success:`, { deployAgentsResult, agents })
-    return deployAgentsResult
+    const deployAssistantsResult = Result.makeSuccess()
+    console.info(`${logCtx} exit success:`, { deployAssistantsResult, assistants })
+    return deployAssistantsResult
   }
 
   /**

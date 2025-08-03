@@ -13,7 +13,7 @@ import { Construct } from 'constructs'
 import { join } from 'path'
 import { settings } from '../settings'
 
-export interface IDeployWorkflowAgentsWorkerConstructProps {
+export interface IDeployWorkflowAssistantsWorkerConstructProps {
   dynamoDbTable: Table
   eventBus: EventBus
   s3Bucket: Bucket
@@ -22,22 +22,22 @@ export interface IDeployWorkflowAgentsWorkerConstructProps {
 /**
  *
  */
-export class DeployWorkflowAgentsWorkerConstruct extends Construct {
+export class DeployWorkflowAssistantsWorkerConstruct extends Construct {
   /**
    *
    */
-  constructor(scope: Construct, id: string, props: IDeployWorkflowAgentsWorkerConstructProps) {
+  constructor(scope: Construct, id: string, props: IDeployWorkflowAssistantsWorkerConstructProps) {
     super(scope, id)
-    const dlq = this.createDeployWorkflowAgentsWorkerDlq(scope, id)
-    const queue = this.createDeployWorkflowAgentsWorkerQueue(scope, id, dlq)
-    this.createDeployWorkflowAgentsWorkerFunction(scope, id, props.dynamoDbTable, props.s3Bucket, queue)
-    this.createDeployWorkflowAgentsWorkerRoutingRule(scope, id, props.dynamoDbTable, props.eventBus, queue)
+    const dlq = this.createDeployWorkflowAssistantsWorkerDlq(scope, id)
+    const queue = this.createDeployWorkflowAssistantsWorkerQueue(scope, id, dlq)
+    this.createDeployWorkflowAssistantsWorkerFunction(scope, id, props.dynamoDbTable, props.s3Bucket, queue)
+    this.createDeployWorkflowAssistantsWorkerRoutingRule(scope, id, props.dynamoDbTable, props.eventBus, queue)
   }
 
   /**
    *
    */
-  private createDeployWorkflowAgentsWorkerDlq(scope: Construct, id: string): Queue {
+  private createDeployWorkflowAssistantsWorkerDlq(scope: Construct, id: string): Queue {
     const dlqName = `${id}-Dlq`
     const dlq = new Queue(scope, dlqName, {
       queueName: dlqName,
@@ -49,7 +49,7 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
   /**
    *
    */
-  private createDeployWorkflowAgentsWorkerQueue(scope: Construct, id: string, dlq: Queue): Queue {
+  private createDeployWorkflowAssistantsWorkerQueue(scope: Construct, id: string, dlq: Queue): Queue {
     const queueName = `${id}-Queue`
     const { maxReceiveCount, receiveMessageWaitTime, visibilityTimeout } = settings.SQS
     const queue = new Queue(scope, queueName, {
@@ -67,7 +67,7 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
   /**
    *
    */
-  private createDeployWorkflowAgentsWorkerFunction(
+  private createDeployWorkflowAssistantsWorkerFunction(
     scope: Construct,
     id: string,
     dynamoDbTable: Table,
@@ -89,7 +89,7 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
       runtime: Runtime.NODEJS_20_X,
       projectRoot: servicesRoot,
       depsLockFilePath: join(servicesRoot, 'package-lock.json'),
-      entry: join(servicesRoot, 'src/workflow-service/handlers/deployWorkflowAgentsWorker.ts'),
+      entry: join(servicesRoot, 'src/workflow-service/handlers/deployWorkflowAssistantsWorker.ts'),
       handler: 'handler',
       environment: {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
@@ -131,7 +131,7 @@ export class DeployWorkflowAgentsWorkerConstruct extends Construct {
   /**
    *
    */
-  private createDeployWorkflowAgentsWorkerRoutingRule(
+  private createDeployWorkflowAssistantsWorkerRoutingRule(
     scope: Construct,
     id: string,
     dynamoDbTable: Table,

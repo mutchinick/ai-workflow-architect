@@ -1,5 +1,5 @@
 {
-  "name": "ai-agent-designer-deployer-service",
+  "name": "ai-workflow-architect-service",
   "version": "0.1.0",
   "scripts": {
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json}'",
@@ -21,6 +21,7 @@
     "@types/node": "22.7.9",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
+    "esbuild": "^0.25.8",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-jsdoc": "^51.2.3",

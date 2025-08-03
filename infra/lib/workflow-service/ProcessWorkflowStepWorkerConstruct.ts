@@ -151,7 +151,7 @@ export class ProcessWorkflowStepWorkerConstruct extends Construct {
           dynamodb: {
             NewImage: {
               eventName: {
-                S: ['WORKFLOW_AGENTS_DEPLOYED_EVENT', 'WORKFLOW_STEP_PROCESSED_EVENT'],
+                S: ['WORKFLOW_ASSISTANTS_DEPLOYED_EVENT', 'WORKFLOW_STEP_PROCESSED_EVENT'],
               },
             },
           },

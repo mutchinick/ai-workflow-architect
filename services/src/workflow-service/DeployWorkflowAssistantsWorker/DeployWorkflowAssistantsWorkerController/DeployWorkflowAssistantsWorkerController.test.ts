@@ -6,8 +6,8 @@ import { EventStoreEventBuilder, IncomingEventBridgeEvent } from '../../../event
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
-import { IDeployWorkflowAgentsWorkerService } from '../DeployWorkflowAgentsWorkerService/DeployWorkflowAgentsWorkerService'
-import { DeployWorkflowAgentsWorkerController } from './DeployWorkflowAgentsWorkerController'
+import { IDeployWorkflowAssistantsWorkerService } from '../DeployWorkflowAssistantsWorkerService/DeployWorkflowAssistantsWorkerService'
+import { DeployWorkflowAssistantsWorkerController } from './DeployWorkflowAssistantsWorkerController'
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
@@ -104,17 +104,17 @@ function buildMockTestObjects(ids: string[]): {
  ************************************************************
  * Mock services
  ************************************************************/
-function buildMockDeployWorkflowAgentsWorkerService_succeeds(): IDeployWorkflowAgentsWorkerService {
-  return { deployWorkflowAgents: jest.fn().mockResolvedValue(Result.makeSuccess()) }
+function buildMockDeployWorkflowAssistantsWorkerService_succeeds(): IDeployWorkflowAssistantsWorkerService {
+  return { deployWorkflowAssistants: jest.fn().mockResolvedValue(Result.makeSuccess()) }
 }
 
-function buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+function buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
   transient,
 }: {
   transient: boolean
-}): IDeployWorkflowAgentsWorkerService {
+}): IDeployWorkflowAssistantsWorkerService {
   return {
-    deployWorkflowAgents: jest.fn().mockImplementation((incomingWorkflowCreatedEvent: WorkflowCreatedEvent) => {
+    deployWorkflowAssistants: jest.fn().mockImplementation((incomingWorkflowCreatedEvent: WorkflowCreatedEvent) => {
       const shouldFail = Object.values(incomingWorkflowCreatedEvent.eventData).reduce(
         (acc, cur) => (acc = acc || String(cur).endsWith('-FAILURE')),
         false,
@@ -129,8 +129,8 @@ function buildMockDeployWorkflowAgentsWorkerService_failsOnData({
   }
 }
 
-describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorkerController
-          tests`, () => {
+describe(`Workflow Service DeployWorkflowAssistantsWorker
+          DeployWorkflowAssistantsWorkerController tests`, () => {
   /*
    *
    *
@@ -138,56 +138,56 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    * Test SQSEvent edge cases
    ************************************************************/
   it(`does not throw if the input SQSEvent is valid`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const { mockSqsEvent } = buildMockTestObjects([])
-    await expect(deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)).resolves.not.toThrow()
+    await expect(deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)).resolves.not.toThrow()
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input SQSEvent is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input SQSEvent is undefined`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = undefined as never
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSEvent is
       undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = undefined as never
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input SQSEvent is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input SQSEvent is null`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = null as never
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSEvent is
       null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = null as never
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -198,80 +198,80 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test SQSEvent.Records edge cases
    ************************************************************/
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input SQSEvent records are missing`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input SQSEvent records are missing`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = {} as never
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
       service if the input SQSEvent records are missing`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = {} as never
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
       service if the input SQSEvent records are undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = buildMockSqsEvent(undefined as never)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
       service if the input SQSEvent records are null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = buildMockSqsEvent(null as never)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
       service if the input SQSEvent records are empty`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = buildMockSqsEvent([])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
       service if the input SQSEvent records are empty`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsEvent = buildMockSqsEvent([])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   /*
@@ -280,79 +280,79 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test SQSRecord.body edge cases
    ************************************************************/
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input SQSRecord.body is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input SQSRecord.body is undefined`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsRecord = { body: undefined } as unknown as SQSRecord
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSRecord.body
       is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsRecord = { body: undefined } as unknown as SQSRecord
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input SQSRecord.body is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input SQSRecord.body is null`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsRecord = { body: null } as unknown as SQSRecord
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSRecord.body
       is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsRecord = { body: null } as unknown as SQSRecord
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input SQSRecord.body is not a valid JSON`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input SQSRecord.body is not a valid JSON`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsRecord = {} as unknown as SQSRecord
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
     mockSqsEvent.Records[0].body = 'mockInvalidValue'
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSRecord.body
       is not a valid JSON`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockSqsRecord = {} as unknown as SQSRecord
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
     mockSqsEvent.Records[0].body = 'mockInvalidValue'
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -363,38 +363,38 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test WorkflowCreatedEvent edge cases
    ************************************************************/
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent is invalid`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent is invalid`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = 'mockInvalidValue' as unknown as WorkflowCreatedEvent
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent is invalid`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = 'mockInvalidValue' as unknown as WorkflowCreatedEvent
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent is not an instance of the class`, async () => {
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent is not an instance of the class`, async () => {
     // Mocking the fromEventBridge method to return an unknown event
     jest.spyOn(EventStoreEventBuilder, 'fromEventBridge').mockImplementationOnce(() => {
       class UnknownEvent extends EventStoreEvent {
@@ -405,9 +405,9 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
       return Result.makeSuccess(UnknownEvent.create())
     })
 
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -415,8 +415,8 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent is not an
@@ -431,9 +431,9 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
       return Result.makeSuccess(UnknownEvent.create())
     })
 
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -441,7 +441,7 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -452,11 +452,11 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test WorkflowCreatedEvent.eventName edge cases
    ************************************************************/
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.eventName is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.eventName is undefined`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -464,15 +464,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent.eventName is
       undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -480,16 +480,16 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.eventName is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.eventName is null`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -497,15 +497,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent.eventName is
       null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -513,7 +513,7 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -524,11 +524,11 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test WorkflowCreatedEvent.createdAt edge cases
    ************************************************************/
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.createdAt is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.createdAt is undefined`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -536,15 +536,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent.createdAt is
       undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -552,16 +552,16 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.createdAt is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.createdAt is null`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -569,15 +569,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent.createdAt is
       null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -585,7 +585,7 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -596,11 +596,11 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test WorkflowCreatedEvent.eventData edge cases
    ************************************************************/
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.eventData is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.eventData is undefined`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -608,15 +608,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent.eventData is
       undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -624,16 +624,16 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.eventData is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.eventData is null`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -641,15 +641,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input WorkflowCreatedEvent.eventData is
       null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -657,7 +657,7 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -668,11 +668,11 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test WorkflowCreatedEvent.eventData.workflowId edge cases
    ************************************************************/
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.eventData.workflowId is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.eventData.workflowId is undefined`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -680,15 +680,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input
       WorkflowCreatedEvent.eventData.workflowId is undefined`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -696,16 +696,16 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`does not call DeployWorkflowAgentsWorkerService.deployWorkflowAgents if the
-      input WorkflowCreatedEvent.eventData.workflowId is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`does not call DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants if
+      the input WorkflowCreatedEvent.eventData.workflowId is null`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -713,15 +713,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).not.toHaveBeenCalled()
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).not.toHaveBeenCalled()
   })
 
   it(`returns no SQSBatchItemFailures if the input
       WorkflowCreatedEvent.eventData.workflowId is null`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockId = 'AA'
     const mockWorkflowCreatedEvent = buildMockWorkflowCreatedEvent(mockId)
@@ -729,7 +729,7 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockEventBridgeEvent = buildMockEventBridgeEvent(mockId, mockWorkflowCreatedEvent)
     const mockSqsRecord = buildMockSqsRecord(mockId, mockEventBridgeEvent)
     const mockSqsEvent = buildMockSqsEvent([mockSqsRecord])
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
@@ -740,48 +740,50 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test internal logic
    ************************************************************/
-  it(`calls DeployWorkflowAgentsWorkerService.deployWorkflowAgents a single time for
-      an SQSEvent with a single record`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`calls DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants a single
+      time for an SQSEvent with a single record`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA']
     const { mockSqsEvent } = buildMockTestObjects(mockIds)
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).toHaveBeenCalledTimes(1)
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).toHaveBeenCalledTimes(1)
   })
 
-  it(`calls DeployWorkflowAgentsWorkerService.deployWorkflowAgents a multiple times
-      for an SQSEvent with a multiple records`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`calls DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants a multiple
+      times for an SQSEvent with a multiple records`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA', 'BB', 'CC']
     const { mockSqsRecords, mockSqsEvent } = buildMockTestObjects(mockIds)
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).toHaveBeenCalledTimes(mockSqsRecords.length)
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).toHaveBeenCalledTimes(
+      mockSqsRecords.length,
+    )
   })
 
-  it(`calls DeployWorkflowAgentsWorkerService.deployWorkflowAgents with the expected
-      input`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`calls DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants with the
+      expected input`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA', 'BB', 'CC']
     const { mockWorkflowCreatedEvents, mockSqsEvent } = buildMockTestObjects(mockIds)
-    await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).toHaveBeenNthCalledWith(
+    await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).toHaveBeenNthCalledWith(
       1,
       mockWorkflowCreatedEvents[0],
     )
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).toHaveBeenNthCalledWith(
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).toHaveBeenNthCalledWith(
       2,
       mockWorkflowCreatedEvents[1],
     )
-    expect(mockDeployWorkflowAgentsWorkerService.deployWorkflowAgents).toHaveBeenNthCalledWith(
+    expect(mockDeployWorkflowAssistantsWorkerService.deployWorkflowAssistants).toHaveBeenNthCalledWith(
       3,
       mockWorkflowCreatedEvents[2],
     )
@@ -793,75 +795,75 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test transient/non-transient edge cases
    ************************************************************/
-  it(`returns no SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService returns
-      no Failure`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_succeeds()
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+  it(`returns no SQSBatchItemFailures if the DeployWorkflowAssistantsWorkerService
+      returns no Failure`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_succeeds()
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA', 'BB', 'CC']
     const { mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`returns no SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService returns
-      a non-transient Failure (test 1)`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+  it(`returns no SQSBatchItemFailures if the DeployWorkflowAssistantsWorkerService
+      returns a non-transient Failure (test 1)`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
       transient: false,
     })
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA-FAILURE', 'BB-FAILURE', 'CC']
     const { mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`returns no SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService returns
-      a non-transient Failure (test 2)`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+  it(`returns no SQSBatchItemFailures if the DeployWorkflowAssistantsWorkerService
+      returns a non-transient Failure (test 2)`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
       transient: false,
     })
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA', 'BB-FAILURE', 'CC', 'DD', 'EE-FAILURE']
     const { mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`returns no SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService returns
-      a non-transient Failure (test 3)`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+  it(`returns no SQSBatchItemFailures if the DeployWorkflowAssistantsWorkerService
+      returns a non-transient Failure (test 3)`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
       transient: false,
     })
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA', 'BB-FAILURE', 'CC-FAILURE', 'DD-FAILURE', 'EE-FAILURE']
     const { mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = { batchItemFailures: [] }
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`returns expected SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService
-      returns a transient Failure (test 1)`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+  it(`returns expected SQSBatchItemFailures if the
+      DeployWorkflowAssistantsWorkerService returns a transient Failure (test 1)`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
       transient: true,
     })
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA-FAILURE', 'BB-FAILURE', 'CC']
     const { mockSqsRecords, mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = {
       batchItemFailures: [
         { itemIdentifier: mockSqsRecords[0].messageId },
@@ -871,17 +873,17 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`returns expected SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService
-      returns a transient Failure (test 2)`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+  it(`returns expected SQSBatchItemFailures if the
+      DeployWorkflowAssistantsWorkerService returns a transient Failure (test 2)`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
       transient: true,
     })
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA', 'BB-FAILURE', 'CC', 'DD', 'EE-FAILURE']
     const { mockSqsRecords, mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = {
       batchItemFailures: [
         { itemIdentifier: mockSqsRecords[1].messageId },
@@ -891,17 +893,17 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`returns expected SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService
-      returns a transient Failure (test 3)`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+  it(`returns expected SQSBatchItemFailures if the
+      DeployWorkflowAssistantsWorkerService returns a transient Failure (test 3)`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
       transient: true,
     })
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA', 'BB-FAILURE', 'CC-FAILURE', 'DD-FAILURE', 'EE-FAILURE']
     const { mockSqsRecords, mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = {
       batchItemFailures: [
         { itemIdentifier: mockSqsRecords[1].messageId },
@@ -913,17 +915,17 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  it(`returns all SQSBatchItemFailures if the DeployWorkflowAgentsWorkerService throws
-      all and only transient Failure`, async () => {
-    const mockDeployWorkflowAgentsWorkerService = buildMockDeployWorkflowAgentsWorkerService_failsOnData({
+  it(`returns all SQSBatchItemFailures if the DeployWorkflowAssistantsWorkerService
+      throws all and only transient Failure`, async () => {
+    const mockDeployWorkflowAssistantsWorkerService = buildMockDeployWorkflowAssistantsWorkerService_failsOnData({
       transient: true,
     })
-    const deployWorkflowAgentsWorkerController = new DeployWorkflowAgentsWorkerController(
-      mockDeployWorkflowAgentsWorkerService,
+    const deployWorkflowAssistantsWorkerController = new DeployWorkflowAssistantsWorkerController(
+      mockDeployWorkflowAssistantsWorkerService,
     )
     const mockIds = ['AA-FAILURE', 'BB-FAILURE', 'CC-FAILURE']
     const { mockSqsRecords, mockSqsEvent } = buildMockTestObjects(mockIds)
-    const response = await deployWorkflowAgentsWorkerController.deployWorkflowAgents(mockSqsEvent)
+    const response = await deployWorkflowAssistantsWorkerController.deployWorkflowAssistants(mockSqsEvent)
     const expectedResponse: SQSBatchResponse = {
       batchItemFailures: [
         { itemIdentifier: mockSqsRecords[0].messageId },

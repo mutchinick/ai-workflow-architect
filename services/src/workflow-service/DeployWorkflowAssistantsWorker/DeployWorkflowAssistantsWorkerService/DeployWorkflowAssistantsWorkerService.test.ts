@@ -3,16 +3,16 @@ import { Result } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
-import { Agent } from '../../agents/Agent'
-import { AgentsDesignerAgent } from '../../agents/AgentsDesignerAgent'
-import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
+import { Assistant } from '../../assistants/Assistant'
+import { AssistantsDesignerAssistant } from '../../assistants/AssistantsDesignerAssistant'
+import { WorkflowAssistantsDeployedEvent } from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
 import { IReadWorkflowClient } from '../../models/ReadWorkflowClient'
 import { ISaveWorkflowClient } from '../../models/SaveWorkflowClient'
 import { Workflow } from '../../models/Workflow'
 import { WorkflowStep } from '../../models/WorkflowStep'
-import { DeployWorkflowAgentsWorkerService } from './DeployWorkflowAgentsWorkerService'
+import { DeployWorkflowAssistantsWorkerService } from './DeployWorkflowAssistantsWorkerService'
 
 jest.useFakeTimers().setSystemTime(new Date('2024-10-19T03:24:00Z'))
 
@@ -23,21 +23,21 @@ const mockObjectKeyReceived = 'mockObjectKeyReceived'
 const mockObjectKeyProduced = 'mockObjectKeyProduced'
 const mockQuery = 'mockQuery'
 
-const mockAgents: Agent[] = [
+const mockAssistants: Assistant[] = [
   {
-    role: 'mockAgentRole-1',
-    name: 'mockAgentName-1',
-    directive: 'mockAgentDirective-1',
-    system: 'mockAgentSystem-1',
-    prompt: 'mockAgentPrompt-1',
+    role: 'mockAssistantRole-1',
+    name: 'mockAssistantName-1',
+    directive: 'mockAssistantDirective-1',
+    system: 'mockAssistantSystem-1',
+    prompt: 'mockAssistantPrompt-1',
     phaseName: 'mockPhaseName-1',
   },
   {
-    role: 'mockAgentRole-2',
-    name: 'mockAgentName-2',
-    directive: 'mockAgentDirective-2',
-    system: 'mockAgentSystem-2',
-    prompt: 'mockAgentPrompt-2',
+    role: 'mockAssistantRole-2',
+    name: 'mockAssistantName-2',
+    directive: 'mockAssistantDirective-2',
+    system: 'mockAssistantSystem-2',
+    prompt: 'mockAssistantPrompt-2',
     phaseName: 'mockPhaseName-2',
   },
 ]
@@ -61,15 +61,15 @@ function buildMockIncomingWorkflowCreatedEvent(): TypeUtilsMutable<WorkflowCreat
 
 const mockIncomingWorkflowCreatedEvent = buildMockIncomingWorkflowCreatedEvent()
 
-function buildExpectedWorkflowAgentsDeployedEvent(): TypeUtilsMutable<WorkflowAgentsDeployedEvent> {
-  const mockClass = WorkflowAgentsDeployedEvent.fromData({
+function buildExpectedWorkflowAssistantsDeployedEvent(): TypeUtilsMutable<WorkflowAssistantsDeployedEvent> {
+  const mockClass = WorkflowAssistantsDeployedEvent.fromData({
     workflowId: mockWorkflowId,
     objectKey: mockObjectKeyProduced,
   })
   return Result.getSuccessValueOrThrow(mockClass)
 }
 
-const expectedWorkflowAgentsDeployedEvent = buildExpectedWorkflowAgentsDeployedEvent()
+const expectedWorkflowAssistantsDeployedEvent = buildExpectedWorkflowAssistantsDeployedEvent()
 
 /*
  *
@@ -106,9 +106,9 @@ function buildMockReadWorkflowClient_fails(
 }
 
 function buildMockInvokeBedrockClient_succeeds(value?: unknown): IInvokeBedrockClient {
-  const mockAgentsString = value ?? JSON.stringify(mockAgents)
+  const mockAssistantsString = value ?? JSON.stringify(mockAssistants)
   return {
-    invoke: jest.fn().mockResolvedValue(Result.makeSuccess(mockAgentsString)),
+    invoke: jest.fn().mockResolvedValue(Result.makeSuccess(mockAssistantsString)),
   }
 }
 
@@ -164,8 +164,8 @@ function buildEventStoreClient_fails(
   }
 }
 
-describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorkerService
-          tests`, () => {
+describe(`Workflow Service DeployWorkflowAssistantsWorker
+          DeployWorkflowAssistantsWorkerService tests`, () => {
   /*
    *
    *
@@ -177,13 +177,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     expect(Result.isFailure(result)).toBe(false)
   })
 
@@ -193,14 +195,14 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
     const mockTestEvent = undefined as never
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockTestEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
@@ -212,14 +214,14 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
     const mockTestEvent = null as never
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockTestEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
@@ -231,14 +233,14 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
     const mockTestEvent = { ...mockIncomingWorkflowCreatedEvent }
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockTestEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
@@ -248,15 +250,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    *
    *
    ************************************************************
-   * Test internal logic deployWorkflowAgents
+   * Test internal logic deployWorkflowAssistants
    ************************************************************/
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.deployAgents returns
-      a Failure`, async () => {
+  it(`returns a Failure of kind InvalidArgumentsError if Workflow.deployAssistants
+      returns a Failure`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
@@ -266,9 +268,11 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockError = 'mockError'
     const mockTransient = 'mockTransient' as never
     jest
-      .spyOn(Workflow.prototype, 'deployAgents')
+      .spyOn(Workflow.prototype, 'deployAssistants')
       .mockReturnValueOnce(Result.makeFailure(mockFailureKind, mockError, mockTransient))
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -285,13 +289,13 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
     expect(mockReadWorkflowClient.read).toHaveBeenCalledTimes(1)
   })
 
@@ -300,13 +304,13 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
     expect(mockReadWorkflowClient.read).toHaveBeenCalledWith(mockObjectKeyReceived)
   })
 
@@ -318,13 +322,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -341,13 +347,13 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
     expect(mockInvokeBedrockClient.invoke).toHaveBeenCalledTimes(1)
   })
 
@@ -356,13 +362,13 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
     expect(mockInvokeBedrockClient.invoke).toHaveBeenCalledWith(
       expect.any(String), // system
       expect.stringContaining(mockQuery),
@@ -377,13 +383,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_fails(mockFailureKind, mockError, mockTransient)
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -395,13 +403,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds('mockInvalidValue')
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'UnrecognizedError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(true)
@@ -418,13 +428,13 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
     expect(mockSaveWorkflowClient.save).toHaveBeenCalledTimes(1)
   })
 
@@ -433,13 +443,13 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
 
     expect(mockSaveWorkflowClient.save).toHaveBeenCalledWith(expect.any(Workflow))
     const workflow = (mockSaveWorkflowClient.save as jest.Mock).mock.calls[0][0]
@@ -452,8 +462,8 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
         stepId: expect.any(String),
         stepStatus: 'completed',
         executionOrder: 1,
-        agent: AgentsDesignerAgent,
-        llmSystem: AgentsDesignerAgent.system,
+        assistant: AssistantsDesignerAssistant,
+        llmSystem: AssistantsDesignerAssistant.system,
         llmPrompt: expect.stringContaining(`<query>${mockQuery}</query>`),
         llmResult: expect.any(String),
       } as WorkflowStep),
@@ -468,13 +478,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_fails(mockFailureKind, mockError, mockTransient)
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -486,12 +498,13 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
    ************************************************************
    * Test internal logic EventStoreClient.publish
    ************************************************************/
-  it(`propagates the Failure if WorkflowAgentsDeployedEvent.fromData returns a Failure`, async () => {
+  it(`propagates the Failure if WorkflowAssistantsDeployedEvent.fromData returns a
+      Failure`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
@@ -502,8 +515,10 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockError = 'mockError'
     const mockTransient = 'mockTransient' as never
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
-    jest.spyOn(WorkflowAgentsDeployedEvent, 'fromData').mockReturnValueOnce(expectedResult)
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    jest.spyOn(WorkflowAssistantsDeployedEvent, 'fromData').mockReturnValueOnce(expectedResult)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
   })
@@ -513,29 +528,29 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
     expect(mockEventStoreClient.publish).toHaveBeenCalledTimes(1)
   })
 
-  it(`calls EventStoreClient.publish with the expected WorkflowAgentsDeployedEvent`, async () => {
+  it(`calls EventStoreClient.publish with the expected WorkflowAssistantsDeployedEvent`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
-    expect(mockEventStoreClient.publish).toHaveBeenCalledWith(expectedWorkflowAgentsDeployedEvent)
+    await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(mockIncomingWorkflowCreatedEvent)
+    expect(mockEventStoreClient.publish).toHaveBeenCalledWith(expectedWorkflowAssistantsDeployedEvent)
   })
 
   it(`propagates the Failure if EventStoreClient.publish returns a Failure`, async () => {
@@ -546,13 +561,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_fails(mockFailureKind, mockError, mockTransient)
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -569,13 +586,15 @@ describe(`Workflow Service DeployWorkflowAgentsWorker DeployWorkflowAgentsWorker
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
     const mockEventStoreClient = buildEventStoreClient_succeeds()
-    const deployWorkflowAgentsWorkerService = new DeployWorkflowAgentsWorkerService(
+    const deployWorkflowAssistantsWorkerService = new DeployWorkflowAssistantsWorkerService(
       mockReadWorkflowClient,
       mockInvokeBedrockClient,
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await deployWorkflowAgentsWorkerService.deployWorkflowAgents(mockIncomingWorkflowCreatedEvent)
+    const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
+      mockIncomingWorkflowCreatedEvent,
+    )
     const expectedResult = Result.makeSuccess()
     expect(Result.isSuccess(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)

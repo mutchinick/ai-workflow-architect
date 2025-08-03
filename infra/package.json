@@ -1,8 +1,8 @@
 {
-  "name": "ai-agent-designer-deployer-infra",
+  "name": "ai-workflow-architect-infra",
   "version": "0.1.0",
   "config": {
-    "deployment_prefix": "aiAgentDesigner"
+    "deployment_prefix": "aiWorkflowArchitect"
   },
   "bin": {
     "main": "bin/main.ts"
@@ -30,7 +30,7 @@
     "@typescript-eslint/parser": "^8.35.0",
     "aws-cdk": "2.1019.2",
     "cross-env": "^7.0.3",
-    "esbuild": "^0.25.6",
+    "esbuild": "^0.25.8",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-jsdoc": "^51.2.3",

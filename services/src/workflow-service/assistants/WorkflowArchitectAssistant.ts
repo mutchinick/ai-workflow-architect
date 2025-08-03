@@ -75,7 +75,7 @@ const buildBlueprintText = (): string => {
 /**
  *
  */
-export const AssistantsDesignerAssistant: Assistant = {
+export const WorkflowArchitectAssistant: Assistant = {
   name: 'Workflow Architect Assistant',
   role: "Designs a complete, sequential workflow of GenAI assistants based on a user's question.",
   directive: `You are a GenAI Workflow Architect. Your job is to analyze a user's problem and design a complete, step-by-step execution plan as a JSON array of Assistant Steps.`,

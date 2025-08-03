@@ -1,7 +1,7 @@
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { Assistant } from '../../assistants/Assistant'
-import { AssistantsDesignerAssistant, WORKFLOW_PHASES } from '../../assistants/AssistantsDesignerAssistant'
+import { WorkflowArchitectAssistant, WORKFLOW_PHASES } from '../../assistants/WorkflowArchitectAssistant'
 import {
   WorkflowAssistantsDeployedEvent,
   WorkflowAssistantsDeployedEventData,
@@ -94,7 +94,7 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
       system,
       prompt,
       result,
-      AssistantsDesignerAssistant,
+      WorkflowArchitectAssistant,
       assistants,
     )
     if (Result.isFailure(deployAssistantsResult)) {
@@ -175,7 +175,7 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
     const userQuery = workflow.instructions.query
-    const { system, prompt: rawPrompt } = AssistantsDesignerAssistant
+    const { system, prompt: rawPrompt } = WorkflowArchitectAssistant
     const prompt = rawPrompt.replace('<question>{{USER_QUESTION}}</question>', `<query>${userQuery}</query>`)
 
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(system, prompt)

@@ -4,7 +4,7 @@ import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
 import { Assistant } from '../../assistants/Assistant'
-import { AssistantsDesignerAssistant } from '../../assistants/AssistantsDesignerAssistant'
+import { WorkflowArchitectAssistant } from '../../assistants/WorkflowArchitectAssistant'
 import { WorkflowAssistantsDeployedEvent } from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
@@ -462,8 +462,8 @@ describe(`Workflow Service DeployWorkflowAssistantsWorker
         stepId: expect.any(String),
         stepStatus: 'completed',
         executionOrder: 1,
-        assistant: AssistantsDesignerAssistant,
-        llmSystem: AssistantsDesignerAssistant.system,
+        assistant: WorkflowArchitectAssistant,
+        llmSystem: WorkflowArchitectAssistant.system,
         llmPrompt: expect.stringContaining(`<query>${mockQuery}</query>`),
         llmResult: expect.any(String),
       } as WorkflowStep),

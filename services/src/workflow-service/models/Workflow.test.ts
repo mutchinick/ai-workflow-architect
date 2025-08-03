@@ -570,7 +570,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromInstructions(singleAssistantScenario.instructions)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const mockAssistant: Assistant = {
-        name: 'mockAssistantDesigner',
+        name: 'mockAssistant',
         role: 'mockRole',
         directive: 'mockDirective',
         system: 'mockSystem',
@@ -616,7 +616,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflowResult = Workflow.fromInstructions(multiAssistantScenario.instructions)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const mockAssistant: Assistant = {
-        name: 'mockAssistantDesigner',
+        name: 'mockAssistant',
         role: 'mockRole',
         directive: 'mockDirective',
         system: 'mockSystem',
@@ -676,7 +676,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       })
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const mockAssistant: Assistant = {
-        name: 'mockAssistantDesigner',
+        name: 'mockAssistant',
         role: 'mockRole',
         directive: 'mockDirective',
         system: 'mockSystem',

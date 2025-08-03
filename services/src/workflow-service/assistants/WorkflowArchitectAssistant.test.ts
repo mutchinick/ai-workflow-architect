@@ -1,8 +1,8 @@
-import { AssistantsDesignerAssistant, WORKFLOW_PHASES } from './AssistantsDesignerAssistant'
+import { WorkflowArchitectAssistant, WORKFLOW_PHASES } from './WorkflowArchitectAssistant'
 
-describe('Workflow Service DeployWorkflowAssistantsWorker assistants AssistantsDesignerAssistant tests', () => {
+describe('Workflow Service DeployWorkflowAssistantsWorker assistants WorkflowArchitectAssistant tests', () => {
   describe('Test System Prompt Blueprint', () => {
-    const systemPrompt = AssistantsDesignerAssistant.system
+    const systemPrompt = WorkflowArchitectAssistant.system
 
     it('generates the expected blueprint from the WORKFLOW_PHASES object', () => {
       Object.values(WORKFLOW_PHASES).forEach((phase) => {

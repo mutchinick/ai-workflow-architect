@@ -187,12 +187,12 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
     try {
       const assistantsString = invokeBedrockResult.value
       const assistants: Assistant[] = JSON.parse(assistantsString)
-      const enrichedAssistants = this.getEnrichedAssistantsWithResponseRules(assistants)
+      const assistantsWithRules = this.addResponseRules(assistants)
       const designAssistantsOutput: DesignAssistantsOutput = {
         system,
         prompt,
         result: assistantsString,
-        assistants: enrichedAssistants,
+        assistants: assistantsWithRules,
       }
       const assistantsResult = Result.makeSuccess(designAssistantsOutput)
       console.info(`${logCtx} exit success:`, { assistantsResult, workflow })
@@ -208,21 +208,19 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
   /**
    *
    */
-  private getEnrichedAssistantsWithResponseRules(assistants: Assistant[]): Assistant[] {
+  private addResponseRules(assistants: Assistant[]): Assistant[] {
     const responseRulesMap: Record<string, string> = {}
     Object.values(WORKFLOW_PHASES).forEach((phase) => {
       responseRulesMap[phase.name] = phase.responseRules
     })
 
-    const enrichedAssistants = assistants.map((assistant) => {
+    const assistantsWithRules = assistants.map((assistant) => {
       const assistantPhase = assistant.phaseName || ''
       const responseRules = responseRulesMap[assistantPhase] || ''
-      return {
-        ...assistant,
-        system: `${assistant.system}\n${responseRules}`,
-      }
+      return { ...assistant, system: `${assistant.system}\n${responseRules}` }
     })
-    return enrichedAssistants
+
+    return assistantsWithRules
   }
 
   /**

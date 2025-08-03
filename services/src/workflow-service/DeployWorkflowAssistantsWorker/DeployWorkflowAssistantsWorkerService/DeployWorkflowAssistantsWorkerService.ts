@@ -22,7 +22,7 @@ export interface IDeployWorkflowAssistantsWorkerService {
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   >
@@ -61,7 +61,7 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {
@@ -223,7 +223,10 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
   private async saveWorkflow(
     workflow: Workflow,
   ): Promise<
-    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'UnrecognizedError'> | Failure<'DuplicateWorkflowError'>
+    | Success<void>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'UnrecognizedError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
   > {
     const logCtx = 'DeployWorkflowAssistantsWorkerService.saveWorkflow'
     console.info(`${logCtx} init:`, { workflow })

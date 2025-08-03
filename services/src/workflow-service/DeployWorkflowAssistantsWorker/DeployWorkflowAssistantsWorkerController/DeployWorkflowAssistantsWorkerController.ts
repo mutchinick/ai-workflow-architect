@@ -68,7 +68,7 @@ export class DeployWorkflowAssistantsWorkerController implements IDeployWorkflow
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {

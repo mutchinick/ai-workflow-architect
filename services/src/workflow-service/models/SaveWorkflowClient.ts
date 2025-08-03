@@ -6,7 +6,10 @@ export interface ISaveWorkflowClient {
   save: (
     workflow: Workflow,
   ) => Promise<
-    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateWorkflowError'> | Failure<'UnrecognizedError'>
+    | Success<void>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
+    | Failure<'UnrecognizedError'>
   >
 }
 
@@ -25,7 +28,10 @@ export class SaveWorkflowClient {
   public async save(
     workflow: Workflow,
   ): Promise<
-    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateWorkflowError'> | Failure<'UnrecognizedError'>
+    | Success<void>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
+    | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'SaveWorkflowClient.save'
     console.info(`${logCtx} init:`, { workflow })
@@ -107,7 +113,7 @@ export class SaveWorkflowClient {
    */
   private async sendS3Command(
     command: PutObjectCommand,
-  ): Promise<Success<void> | Failure<'DuplicateWorkflowError'> | Failure<'UnrecognizedError'>> {
+  ): Promise<Success<void> | Failure<'WorkflowFileSaveCollisionError'> | Failure<'UnrecognizedError'>> {
     const logCtx = 'SaveWorkflowClient.sendS3Command'
     console.info(`${logCtx} init:`)
 
@@ -119,13 +125,13 @@ export class SaveWorkflowClient {
     } catch (error) {
       if (error instanceof S3ServiceException && error.name === 'PreconditionFailed') {
         const message = `Workflow file already exists in S3`
-        const duplicationFailure = Result.makeFailure('DuplicateWorkflowError', message, false)
-        console.error(`${logCtx} exit failure:`, { failure: duplicationFailure })
-        return duplicationFailure
+        const saveFailure = Result.makeFailure('WorkflowFileSaveCollisionError', message, false)
+        console.error(`${logCtx} exit failure:`, { saveFailure })
+        return saveFailure
       }
 
       const unrecognizedFailure = Result.makeFailure('UnrecognizedError', error, true)
-      console.error(`${logCtx} exit failure:`, { failure: unrecognizedFailure })
+      console.error(`${logCtx} exit failure:`, { unrecognizedFailure })
       return unrecognizedFailure
     }
   }

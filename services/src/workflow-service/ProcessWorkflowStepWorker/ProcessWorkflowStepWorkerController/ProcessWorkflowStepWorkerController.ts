@@ -71,7 +71,7 @@ export class ProcessWorkflowStepWorkerController implements IProcessWorkflowStep
     | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {

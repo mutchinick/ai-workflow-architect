@@ -21,7 +21,7 @@ export interface IProcessWorkflowStepWorkerService {
     | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   >
@@ -61,7 +61,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {
@@ -212,7 +212,10 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
   private async saveWorkflow(
     workflow: Workflow,
   ): Promise<
-    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'UnrecognizedError'> | Failure<'DuplicateWorkflowError'>
+    | Success<void>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'UnrecognizedError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
   > {
     const logCtx = 'ProcessWorkflowStepWorkerService.saveWorkflow'
     console.info(`${logCtx} init:`, { workflow })

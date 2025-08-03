@@ -199,14 +199,14 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  deployAssistants(
+  loadAssistants(
     system: string,
     prompt: string,
     result: string,
     assistant: Assistant,
     assistants: Assistant[],
   ): Success<void> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'Workflow.deployAssistants'
+    const logCtx = 'Workflow.loadAssistants'
     console.info(`${logCtx} init:`, { assistants })
 
     if (this.steps.length > 0) {
@@ -250,9 +250,9 @@ export class Workflow implements WorkflowProps {
       this.steps.push(step)
     }
 
-    const deployAssistantsResult = Result.makeSuccess()
-    console.info(`${logCtx} exit success:`, { deployAssistantsResult, assistants })
-    return deployAssistantsResult
+    const loadAssistantsResult = Result.makeSuccess()
+    console.info(`${logCtx} exit success:`, { loadAssistantsResult, assistants })
+    return loadAssistantsResult
   }
 
   /**

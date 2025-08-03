@@ -252,7 +252,7 @@ describe(`Workflow Service DeployWorkflowAssistantsWorker
    ************************************************************
    * Test internal logic deployWorkflowAssistants
    ************************************************************/
-  it(`returns a Failure of kind InvalidArgumentsError if Workflow.deployAssistants
+  it(`returns a Failure of kind InvalidArgumentsError if Workflow.loadAssistants
       returns a Failure`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
@@ -268,7 +268,7 @@ describe(`Workflow Service DeployWorkflowAssistantsWorker
     const mockError = 'mockError'
     const mockTransient = 'mockTransient' as never
     jest
-      .spyOn(Workflow.prototype, 'deployAssistants')
+      .spyOn(Workflow.prototype, 'loadAssistants')
       .mockReturnValueOnce(Result.makeFailure(mockFailureKind, mockError, mockTransient))
     const result = await deployWorkflowAssistantsWorkerService.deployWorkflowAssistants(
       mockIncomingWorkflowCreatedEvent,

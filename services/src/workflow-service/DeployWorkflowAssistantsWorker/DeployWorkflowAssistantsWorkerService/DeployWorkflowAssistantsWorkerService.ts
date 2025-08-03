@@ -90,16 +90,10 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
     }
 
     const { system, prompt, result, assistants } = designAssistantsResult.value
-    const deployAssistantsResult = workflow.deployAssistants(
-      system,
-      prompt,
-      result,
-      WorkflowArchitectAssistant,
-      assistants,
-    )
-    if (Result.isFailure(deployAssistantsResult)) {
-      console.error(`${logCtx} exit failure:`, { deployAssistantsResult, incomingEvent })
-      return deployAssistantsResult
+    const loadAssistantsResult = workflow.loadAssistants(system, prompt, result, WorkflowArchitectAssistant, assistants)
+    if (Result.isFailure(loadAssistantsResult)) {
+      console.error(`${logCtx} exit failure:`, { loadAssistantsResult, incomingEvent })
+      return loadAssistantsResult
     }
 
     const saveWorkflowResult = await this.saveWorkflow(workflow)

@@ -563,9 +563,9 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
-   * Test Workflow.deployAssistants
+   * Test Workflow.loadAssistants
    ************************************************************/
-  describe(`Workflow.deployAssistants`, () => {
+  describe(`Workflow.loadAssistants`, () => {
     it(`generates the correct final state for a single assistant`, () => {
       const workflowResult = Workflow.fromInstructions(singleAssistantScenario.instructions)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
@@ -578,7 +578,7 @@ describe(`Workflow Service models Workflow tests`, () => {
         phaseName: 'mockPhase',
       }
       const mockResult = 'mockResult'
-      workflow.deployAssistants(
+      workflow.loadAssistants(
         mockAssistant.system,
         mockAssistant.prompt,
         mockResult,
@@ -624,7 +624,7 @@ describe(`Workflow Service models Workflow tests`, () => {
         phaseName: 'mockPhase',
       }
       const mockResult = 'mockResult'
-      workflow.deployAssistants(
+      workflow.loadAssistants(
         mockAssistant.system,
         mockAssistant.prompt,
         mockResult,
@@ -684,7 +684,7 @@ describe(`Workflow Service models Workflow tests`, () => {
         phaseName: 'mockPhase',
       }
       const mockResult = 'mockResult'
-      const result = workflow.deployAssistants(
+      const result = workflow.loadAssistants(
         mockAssistant.system,
         mockAssistant.prompt,
         mockResult,

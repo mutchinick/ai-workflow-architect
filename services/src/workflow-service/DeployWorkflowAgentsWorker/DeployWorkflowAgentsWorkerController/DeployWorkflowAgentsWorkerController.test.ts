@@ -5,7 +5,6 @@ import { EventStoreEvent } from '../../../event-store/EventStoreEvent'
 import { EventStoreEventBuilder, IncomingEventBridgeEvent } from '../../../event-store/EventStoreEventBuilder'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
-import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IDeployWorkflowAgentsWorkerService } from '../DeployWorkflowAgentsWorkerService/DeployWorkflowAgentsWorkerService'
 import { DeployWorkflowAgentsWorkerController } from './DeployWorkflowAgentsWorkerController'
@@ -26,20 +25,7 @@ function buildMockWorkflowCreatedEvent(id: string): TypeUtilsMutable<EventStoreE
     },
     createdAt: mockDate,
   }
-
-  const workflowAgentsDeployedEvent: WorkflowAgentsDeployedEvent = {
-    idempotencyKey: mockIdempotencyKey,
-    eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
-    eventData: {
-      workflowId: `${mockWorkflowId}-${id}`,
-      objectKey: `mockObjectKey-${id}`,
-    },
-    createdAt: mockDate,
-  }
-
-  // FIXME: This is a workaround to return either WorkflowAgentsDeployedEvent or WorkflowStepProcessedEvent
-  // depending on the test case. Ideally, we should have a more structured way to handle this.
-  return Math.random() > 0.5 ? workflowAgentsDeployedEvent : workflowCreatedEvent
+  return workflowCreatedEvent
 }
 
 function buildMockWorkflowCreatedEvents(ids: string[]): TypeUtilsMutable<EventStoreEvent>[] {

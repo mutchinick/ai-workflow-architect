@@ -17,6 +17,8 @@ export interface IProcessWorkflowStepWorkerService {
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
+    | Failure<'WorkflowAlreadyCompletedError'>
+    | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
@@ -55,6 +57,8 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
+    | Failure<'WorkflowAlreadyCompletedError'>
+    | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>
@@ -153,6 +157,8 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
   ): Promise<
     | Success<ExecuteAgentOutput>
     | Failure<'InvalidArgumentsError'>
+    | Failure<'WorkflowAlreadyCompletedError'>
+    | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
@@ -160,42 +166,39 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     const logCtx = 'ProcessWorkflowStepWorkerService.executeAgent'
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
-    const nextStep = workflow.nextStep()
-    if (!nextStep) {
+    const currentStep = workflow.getCurrentStep()
+    if (!currentStep) {
       const message = 'No more steps to process in the workflow'
-      // FIXME: Should be WorkflowAlreadyCompletedError
-      const failure = Result.makeFailure('InvalidArgumentsError', message, false)
+      const failure = Result.makeFailure('WorkflowAlreadyCompletedError', message, false)
       console.error(`${logCtx} exit failure:`, { failure, workflow })
       return failure
     }
 
-    let llmPrompt = nextStep.llmPrompt
+    let llmPrompt = currentStep.llmPrompt
     if (llmPrompt.includes('<PREVIOUS_RESULT>')) {
-      const lastExecutedStep = workflow.lastExecutedStep()
+      const lastExecutedStep = workflow.getLastExecutedStep()
       if (!lastExecutedStep) {
         const message = 'No previous step to reference for <PREVIOUS_RESULT>'
-        // FIXME: Should be WorkflowInvalidStateError
-        const failure = Result.makeFailure('InvalidArgumentsError', message, false)
+        const failure = Result.makeFailure('WorkflowInvalidStateError', message, false)
         console.error(`${logCtx} exit failure:`, { failure, workflow })
         return failure
       }
       llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', lastExecutedStep.llmResult)
     }
 
-    const llmSystem = nextStep.llmSystem
-
+    const llmSystem = currentStep.llmSystem
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(llmSystem, llmPrompt)
     if (Result.isFailure(invokeBedrockResult)) {
       console.error(`${logCtx} exit failure:`, { invokeBedrockResult, workflow })
       return invokeBedrockResult
     }
 
-    nextStep.llmPrompt = llmPrompt
-
     const llmResult = invokeBedrockResult.value
-    // FIXME: Add workflow.completeStep(stepId, llmResult)
-    nextStep.llmResult = llmResult
-    nextStep.stepStatus = 'completed'
+    const completeStepResult = workflow.completeStep(currentStep.stepId, llmPrompt, llmResult)
+    if (Result.isFailure(completeStepResult)) {
+      console.error(`${logCtx} exit failure:`, { completeStepResult, workflow })
+      return completeStepResult
+    }
 
     const executeAgentOutput = { llmSystem, llmPrompt, llmResult }
     const executeAgentResult = Result.makeSuccess(executeAgentOutput)
@@ -239,11 +242,9 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     const objectKey = workflow.getObjectKey()
     const eventData = { workflowId, objectKey }
 
-    // FIXME: Add workflow.isCompleted()
-    const buildEventResult =
-      workflow.nextStep() === null
-        ? WorkflowCompletedEvent.fromData(eventData)
-        : WorkflowStepProcessedEvent.fromData(eventData)
+    const buildEventResult = workflow.hasCompleted()
+      ? WorkflowCompletedEvent.fromData(eventData)
+      : WorkflowStepProcessedEvent.fromData(eventData)
 
     if (Result.isFailure(buildEventResult)) {
       console.error(`${logCtx} exit failure:`, { buildEventResult, eventData })

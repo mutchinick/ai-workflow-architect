@@ -151,7 +151,7 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  lastExecutedStep(): WorkflowStep | null {
+  getLastExecutedStep(): WorkflowStep | null {
     const executedSteps = this.steps.filter((step) => step.stepStatus === 'completed')
     if (executedSteps.length === 0) {
       return null
@@ -162,8 +162,38 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
-  nextStep(): WorkflowStep | null {
+  getCurrentStep(): WorkflowStep | null {
     return this.steps.find((step) => step.stepStatus === 'pending') || null
+  }
+
+  /**
+   *
+   */
+  completeStep(stepId: string, llmPrompt: string, llmResult: string): Success<void> | Failure<'InvalidArgumentsError'> {
+    const logCtx = 'Workflow.completeStep'
+    console.info(`${logCtx} init:`, { stepId, llmPrompt, llmResult })
+
+    const currentStep = this.getCurrentStep()
+    if (!currentStep) {
+      const message = 'No current step to complete'
+      const failure = Result.makeFailure('InvalidArgumentsError', message, false)
+      console.error(`${logCtx} exit failure:`, { failure, stepId, llmPrompt, llmResult })
+      return failure
+    }
+
+    currentStep.llmPrompt = llmPrompt
+    currentStep.llmResult = llmResult
+    currentStep.stepStatus = 'completed'
+
+    console.info(`${logCtx} exit success:`, { stepId, llmPrompt, llmResult })
+    return Result.makeSuccess()
+  }
+
+  /**
+   *
+   */
+  hasCompleted(): boolean {
+    return this.steps.length > 0 && this.steps.every((step) => step.stepStatus === 'completed')
   }
 
   /**

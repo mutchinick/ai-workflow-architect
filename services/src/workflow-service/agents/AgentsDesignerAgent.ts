@@ -13,51 +13,50 @@ export type WorkflowPhase = {
 export const WORKFLOW_PHASES: Record<string, WorkflowPhase> = {
   PROMPT_ENHANCEMENT: {
     name: 'Phase 1: Prompt Enhancement',
-    goal: 'To refine and enrich the user initial question. Agents in this phase REWRITE the question to add detail, scope, and clarity.',
-    agentRange: { min: 5, max: 8 },
+    goal: 'To refine the user initial question into a detailed, actionable prompt.',
+    agentRange: { min: 3, max: 5 },
     responseRules: `
       Your final output MUST be only the refined question.
       You must not answer the question.
-      Do not include any other text, comments, or explanations.
     `.trim(),
   },
-  FIRST_RESPONSE: {
-    name: 'Phase 2: First Response',
-    goal: 'To provide the initial, core answer to the fully enhanced prompt from the previous phase.',
+  OUTLINE_GENERATION: {
+    name: 'Phase 2: Outline Generation',
+    goal: 'To create a comprehensive, well-structured outline or table of contents for the final document. This outline will serve as the blueprint for the next phase.',
     agentRange: { min: 1, max: 1 },
     responseRules: `
-      Your response must be a direct and professional answer to the question.
-      Do not include conversational filler, commentary, or emojis.
+      Your output MUST be ONLY a detailed, well-structured outline (e.g., using Markdown headings).
+      Do not write the content for the sections, only the structure.
     `.trim(),
   },
-  CONTEXTUAL_EXPANSION: {
-    name: 'Phase 3: Contextual Expansion',
-    goal: 'To add new layers of information and different perspectives to the result.',
+  CONTENT_GENERATION: {
+    name: 'Phase 3: Content Generation',
+    goal: 'To write the detailed, high-quality content for each section of the provided outline. This forms the main body of the final document.',
+    agentRange: { min: 1, max: 1 },
+    responseRules: `
+      Your output MUST be the full, well-written text of the document, following the structure of the outline provided in <PREVIOUS_RESULT>.
+      Your response must be a direct and professional answer.
+    `.trim(),
+  },
+  CRITICAL_REVIEW_AND_DEEPENING: {
+    name: 'Phase 4: Critical Review and Deepening',
+    goal: 'To critically review the generated content, identify shallow or weak points, and add significant depth, practical examples, code snippets, and expert-level detail.',
     agentRange: { min: 10, max: 15 },
     responseRules: `
       Your final output MUST be the complete, original text immediately followed by your new, appended content.
       You are forbidden from returning only the new content.
-      You must not modify the existing text; you can only append new content.
-      You must not remove any of the content provided to you.
+      You must not modify the existing text; you can only append new, high-value content.
     `.trim(),
   },
-  RESULT_ORGANIZATION: {
-    name: 'Phase 4: Result Organization',
-    goal: 'Organize all previously generated content into a single, cohesive, and well-structured document, using sections or chapters.',
-    agentRange: { min: 4, max: 6 },
+  FINAL_UNIFICATION: {
+    name: 'Phase 5: Final Unification & Polish',
+    goal: 'To rewrite the entire document, seamlessly integrating all the added depth and critiques from the previous phase into a final, polished, and professional-grade guide.',
+    agentRange: { min: 2, max: 4 },
     responseRules: `
-      Your final output MUST be the complete, rewritten, and organized text.
-      Your final output MUST not remove any of the content provided to you.
+      Your final output MUST be the complete, rewritten, and unified text.
+      You must preserve all the detailed information and examples added in the previous step, integrating them smoothly.
     `.trim(),
   },
-  // COMPLIANCE_REVIEW: {
-  //   name: 'Phase 5: Compliance Review',
-  //   goal: 'To ensure the final output is safe and appropriate by reviewing it for Legal, PG-13, and Harmful Content compliance. This phase MUST conclude the workflow with three agents, in this order: Legal, PG-13, and Harmful Content.',
-  //   agentRange: { min: 3, max: 3 },
-  //   responseRules: `
-  //     Your final output MUST be the complete, rewritten text, ensuring it complies with your directive.
-  //   `.trim(),
-  // },
 }
 
 const buildBlueprintText = (): string => {
@@ -96,22 +95,18 @@ export const AgentsDesignerAgent: Agent = {
       - "name": A descriptive name for the agent performing the step (e.g., "Scientific Accuracy Agent 1 of 5").
       - "role": A one-sentence description of the agent's purpose.
       - "directive": The detailed instructions for the agent.
-      - "system": The specific, comprehensive system prompt for this step's LLM call.
-      - "prompt": The specific user prompt for this step's LLM call.
+      - "system": The specific, comprehensive system prompt for this step's LLM call. This prompt MUST NOT contain the "<PREVIOUS_RESULT>" placeholder.
+      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original query. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
       - "phaseName": The exact name of the workflow phase this agent belongs to (e.g., "Phase 1: Prompt Enhancement").
 
       ## **CRITICAL RULE: The Quality of Your Design**
       For each Agent Step, you MUST create a comprehensive 'system' prompt that defines the worker agent's persona and expertise. This 'system' prompt MUST state the name of the workflow phase it belongs to and include the agent's full directive.
 
-      ## Placeholder Rules for Prompts
-      - The 'prompt' for the VERY FIRST step must use the original user question.
-      - The 'prompt' for EVERY SUBSEQUENT step MUST contain "<PREVIOUS_RESULT>".
-
       ## Your Final Output
       - Your final response MUST BE ONLY the raw JSON array of Agent Steps, starting with \`[\` and ending with \`]\`.
       `,
 
-  prompt: `Design the complete agent workflow for the following user question:\n<query>{{USER_QUERY}}</query>`,
+  prompt: `Design the complete agent workflow for the following user question:\n<question>{{USER_QUESTION}}</question>`,
 
   phaseName: 'Phase X: Architect Workflow',
 }

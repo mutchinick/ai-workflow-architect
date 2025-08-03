@@ -14,6 +14,7 @@ export const settings = {
   },
   Lambda: {
     timeout: Duration.seconds(28),
+    memorySize: 256,
   },
   LambdaIntegration: {
     timeout: Duration.seconds(29),

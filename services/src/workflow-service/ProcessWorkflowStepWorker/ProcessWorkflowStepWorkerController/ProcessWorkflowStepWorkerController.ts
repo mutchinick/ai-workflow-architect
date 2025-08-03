@@ -6,8 +6,8 @@ import {
   IncomingEventBridgeEvent,
 } from '../../../event-store/EventStoreEventBuilder'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
-import { WorkflowStepProcessedEvent } from '../../events/WorkflowStepProcessedEvent'
 import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
+import { WorkflowStepProcessedEvent } from '../../events/WorkflowStepProcessedEvent'
 import { IProcessWorkflowStepWorkerService } from '../ProcessWorkflowStepWorkerService/ProcessWorkflowStepWorkerService'
 
 export interface IProcessWorkflowStepWorkerController {
@@ -67,6 +67,8 @@ export class ProcessWorkflowStepWorkerController implements IProcessWorkflowStep
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowFileNotFoundError'>
     | Failure<'WorkflowFileCorruptedError'>
+    | Failure<'WorkflowAlreadyCompletedError'>
+    | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'DuplicateWorkflowError'>

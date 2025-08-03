@@ -16,7 +16,6 @@ export interface IDeployWorkflowAgentsWorkerController {
 
 const validEventsMap: EventClassMap = {
   [EventStoreEventName.WORKFLOW_CREATED_EVENT]: WorkflowCreatedEvent,
-  [EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT]: WorkflowAgentsDeployedEvent,
 }
 
 /**

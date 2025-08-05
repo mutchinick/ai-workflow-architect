@@ -54,7 +54,7 @@ export class SendQueryApiController implements ISendQueryApiController {
   ): Promise<
     | Success<SendQueryApiServiceOutput>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {

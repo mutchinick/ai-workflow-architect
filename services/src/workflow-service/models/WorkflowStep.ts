@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { agentSchema } from '../agents/Agent'
+import { assistantSchema } from '../assistants/Assistant'
 
 /**
  *
@@ -8,7 +8,7 @@ export const workflowStepSchema = z.object({
   stepId: z.string(),
   stepStatus: z.enum(['pending', 'completed']),
   executionOrder: z.number().int(),
-  agent: agentSchema,
+  assistant: assistantSchema,
   llmSystem: z.string(),
   llmPrompt: z.string(),
   llmResult: z.string(),

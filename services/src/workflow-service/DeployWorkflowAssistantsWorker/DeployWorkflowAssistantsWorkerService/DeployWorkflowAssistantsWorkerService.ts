@@ -1,16 +1,19 @@
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
-import { Agent } from '../../agents/Agent'
-import { AgentsDesignerAgent, WORKFLOW_PHASES } from '../../agents/AgentsDesignerAgent'
-import { WorkflowAgentsDeployedEvent, WorkflowAgentsDeployedEventData } from '../../events/WorkflowAgentsDeployedEvent'
+import { Assistant } from '../../assistants/Assistant'
+import { WorkflowArchitectAssistant, WORKFLOW_PHASES } from '../../assistants/WorkflowArchitectAssistant'
+import {
+  WorkflowAssistantsDeployedEvent,
+  WorkflowAssistantsDeployedEventData,
+} from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowCreatedEvent } from '../../events/WorkflowCreatedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
 import { IReadWorkflowClient } from '../../models/ReadWorkflowClient'
 import { ISaveWorkflowClient } from '../../models/SaveWorkflowClient'
 import { Workflow } from '../../models/Workflow'
 
-export interface IDeployWorkflowAgentsWorkerService {
-  deployWorkflowAgents: (
+export interface IDeployWorkflowAssistantsWorkerService {
+  deployWorkflowAssistants: (
     incomingEvent: WorkflowCreatedEvent,
   ) => Promise<
     | Success<void>
@@ -19,23 +22,23 @@ export interface IDeployWorkflowAgentsWorkerService {
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   >
 }
 
-type DesignAgentsOutput = {
+type DesignAssistantsOutput = {
   system: string
   prompt: string
   result: string
-  agents: Agent[]
+  assistants: Assistant[]
 }
 
 /**
  *
  */
-export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsWorkerService {
+export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAssistantsWorkerService {
   /**
    *
    */
@@ -49,7 +52,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
   /**
    *
    */
-  public async deployWorkflowAgents(
+  public async deployWorkflowAssistants(
     incomingEvent: WorkflowCreatedEvent,
   ): Promise<
     | Success<void>
@@ -58,11 +61,11 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'DeployWorkflowAgentsWorkerService.deployWorkflowAgents'
+    const logCtx = 'DeployWorkflowAssistantsWorkerService.deployWorkflowAssistants'
     console.info(`${logCtx} init:`, { incomingEvent })
 
     const inputValidationResult = this.validateInput(incomingEvent)
@@ -80,17 +83,17 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     }
 
     const workflow = readWorkflowResult.value
-    const designAgentsResult = await this.designAgents(workflow)
-    if (Result.isFailure(designAgentsResult)) {
-      console.error(`${logCtx} exit failure:`, { designAgentsResult, incomingEvent })
-      return designAgentsResult
+    const designAssistantsResult = await this.designAssistants(workflow)
+    if (Result.isFailure(designAssistantsResult)) {
+      console.error(`${logCtx} exit failure:`, { designAssistantsResult, incomingEvent })
+      return designAssistantsResult
     }
 
-    const { system, prompt, result, agents } = designAgentsResult.value
-    const deployAgentsResult = workflow.deployAgents(system, prompt, result, AgentsDesignerAgent, agents)
-    if (Result.isFailure(deployAgentsResult)) {
-      console.error(`${logCtx} exit failure:`, { deployAgentsResult, incomingEvent })
-      return deployAgentsResult
+    const { system, prompt, result, assistants } = designAssistantsResult.value
+    const loadAssistantsResult = workflow.loadAssistants(system, prompt, result, WorkflowArchitectAssistant, assistants)
+    if (Result.isFailure(loadAssistantsResult)) {
+      console.error(`${logCtx} exit failure:`, { loadAssistantsResult, incomingEvent })
+      return loadAssistantsResult
     }
 
     const saveWorkflowResult = await this.saveWorkflow(workflow)
@@ -99,7 +102,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
       return saveWorkflowResult
     }
 
-    const publishEventResult = await this.publishWorkflowAgentsDeployedEvent(workflow)
+    const publishEventResult = await this.publishWorkflowAssistantsDeployedEvent(workflow)
     Result.isFailure(publishEventResult)
       ? console.error(`${logCtx} exit failure:`, { publishEventResult, incomingEvent })
       : console.info(`${logCtx} exit success:`, { publishEventResult, incomingEvent })
@@ -111,7 +114,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
    *
    */
   private validateInput(incomingEvent: WorkflowCreatedEvent): Success<void> | Failure<'InvalidArgumentsError'> {
-    const logCtx = 'DeployWorkflowAgentsWorkerService.validateInput'
+    const logCtx = 'DeployWorkflowAssistantsWorkerService.validateInput'
     console.info(`${logCtx} init:`, { incomingEvent })
 
     if (incomingEvent instanceof WorkflowCreatedEvent === false) {
@@ -137,7 +140,7 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'DeployWorkflowAgentsWorkerService.readWorkflow'
+    const logCtx = 'DeployWorkflowAssistantsWorkerService.readWorkflow'
     console.info(`${logCtx} init:`, { workflowId, objectKey })
 
     const readWorkflowResult = await this.readWorkflowClient.read(objectKey)
@@ -153,20 +156,20 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
   /**
    *
    */
-  private async designAgents(
+  private async designAssistants(
     workflow: Workflow,
   ): Promise<
-    | Success<DesignAgentsOutput>
+    | Success<DesignAssistantsOutput>
     | Failure<'InvalidArgumentsError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'DeployWorkflowAgentsWorkerService.designAgents'
+    const logCtx = 'DeployWorkflowAssistantsWorkerService.designAssistants'
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
     const userQuery = workflow.instructions.query
-    const { system, prompt: rawPrompt } = AgentsDesignerAgent
+    const { system, prompt: rawPrompt } = WorkflowArchitectAssistant
     const prompt = rawPrompt.replace('<question>{{USER_QUESTION}}</question>', `<query>${userQuery}</query>`)
 
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(system, prompt)
@@ -176,15 +179,20 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
     }
 
     try {
-      const agentsString = invokeBedrockResult.value
-      const agents: Agent[] = JSON.parse(agentsString)
-      const enrichedAgents = this.getEnrichedAgentsWithResponseRules(agents)
-      const designAgentsOutput: DesignAgentsOutput = { system, prompt, result: agentsString, agents: enrichedAgents }
-      const agentsResult = Result.makeSuccess(designAgentsOutput)
-      console.info(`${logCtx} exit success:`, { agentsResult, workflow })
-      return agentsResult
+      const assistantsString = invokeBedrockResult.value
+      const assistants: Assistant[] = JSON.parse(assistantsString)
+      const assistantsWithRules = this.addResponseRules(assistants)
+      const designAssistantsOutput: DesignAssistantsOutput = {
+        system,
+        prompt,
+        result: assistantsString,
+        assistants: assistantsWithRules,
+      }
+      const assistantsResult = Result.makeSuccess(designAssistantsOutput)
+      console.info(`${logCtx} exit success:`, { assistantsResult, workflow })
+      return assistantsResult
     } catch (error) {
-      const message = `Failed to parse agents from completion: ${error}`
+      const message = `Failed to parse assistants from completion: ${error}`
       const failure = Result.makeFailure('UnrecognizedError', message, true)
       console.error(`${logCtx} exit failure:`, { failure, invokeBedrockResult, workflow })
       return failure
@@ -194,21 +202,19 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
   /**
    *
    */
-  private getEnrichedAgentsWithResponseRules(agents: Agent[]): Agent[] {
+  private addResponseRules(assistants: Assistant[]): Assistant[] {
     const responseRulesMap: Record<string, string> = {}
     Object.values(WORKFLOW_PHASES).forEach((phase) => {
       responseRulesMap[phase.name] = phase.responseRules
     })
 
-    const enrichedAgents = agents.map((agent) => {
-      const agentPhase = agent.phaseName || ''
-      const responseRules = responseRulesMap[agentPhase] || ''
-      return {
-        ...agent,
-        system: `${agent.system}\n${responseRules}`,
-      }
+    const assistantsWithRules = assistants.map((assistant) => {
+      const assistantPhase = assistant.phaseName || ''
+      const responseRules = responseRulesMap[assistantPhase] || ''
+      return { ...assistant, system: `${assistant.system}\n${responseRules}` }
     })
-    return enrichedAgents
+
+    return assistantsWithRules
   }
 
   /**
@@ -217,9 +223,12 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
   private async saveWorkflow(
     workflow: Workflow,
   ): Promise<
-    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'UnrecognizedError'> | Failure<'DuplicateWorkflowError'>
+    | Success<void>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'UnrecognizedError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
   > {
-    const logCtx = 'DeployWorkflowAgentsWorkerService.saveWorkflow'
+    const logCtx = 'DeployWorkflowAssistantsWorkerService.saveWorkflow'
     console.info(`${logCtx} init:`, { workflow })
 
     const saveWorkflowResult = await this.saveWorkflowClient.save(workflow)
@@ -235,18 +244,18 @@ export class DeployWorkflowAgentsWorkerService implements IDeployWorkflowAgentsW
   /**
    *
    */
-  private async publishWorkflowAgentsDeployedEvent(
+  private async publishWorkflowAssistantsDeployedEvent(
     workflow: Workflow,
   ): Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'DeployWorkflowAgentsWorkerService.publishWorkflowAgentsDeployedEvent'
+    const logCtx = 'DeployWorkflowAssistantsWorkerService.publishWorkflowAssistantsDeployedEvent'
     console.info(`${logCtx} init:`, { workflow })
 
     const workflowId = workflow.workflowId
     const objectKey = workflow.getObjectKey()
-    const eventData: WorkflowAgentsDeployedEventData = { workflowId, objectKey }
-    const buildEventResult = WorkflowAgentsDeployedEvent.fromData(eventData)
+    const eventData: WorkflowAssistantsDeployedEventData = { workflowId, objectKey }
+    const buildEventResult = WorkflowAssistantsDeployedEvent.fromData(eventData)
     if (Result.isFailure(buildEventResult)) {
       console.error(`${logCtx} exit failure:`, { buildEventResult, eventData })
       return buildEventResult

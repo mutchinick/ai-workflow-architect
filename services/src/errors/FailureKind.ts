@@ -2,7 +2,7 @@ export type FailureKind =
   | 'UnrecognizedError'
   | 'InvalidArgumentsError'
   | 'DuplicateEventError'
-  | 'DuplicateWorkflowError'
+  | 'WorkflowFileSaveCollisionError'
   | 'WorkflowFileNotFoundError'
   | 'WorkflowFileCorruptedError'
   | 'WorkflowAlreadyCompletedError'

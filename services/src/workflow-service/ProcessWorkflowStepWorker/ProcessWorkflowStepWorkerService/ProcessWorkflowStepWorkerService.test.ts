@@ -3,8 +3,8 @@ import { Result } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
-import { Agent } from '../../agents/Agent'
-import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
+import { Assistant } from '../../assistants/Assistant'
+import { WorkflowAssistantsDeployedEvent } from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowCompletedEvent } from '../../events/WorkflowCompletedEvent'
 import { WorkflowStepProcessedEvent } from '../../events/WorkflowStepProcessedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
@@ -23,29 +23,29 @@ const mockObjectKeyReceived = 'mockObjectKeyReceived'
 const mockObjectKeyProduced = 'mockObjectKeyProduced'
 const mockQuery = 'mockQuery'
 
-const mockAgents: Agent[] = [
+const mockAssistants: Assistant[] = [
   {
-    role: 'mockAgentRole-1',
-    name: 'mockAgentName-1',
-    directive: 'mockAgentDirective-1',
-    system: 'mockAgentSystem-1',
-    prompt: 'mockAgentPrompt-1',
+    role: 'mockAssistantRole-1',
+    name: 'mockAssistantName-1',
+    directive: 'mockAssistantDirective-1',
+    system: 'mockAssistantSystem-1',
+    prompt: 'mockAssistantPrompt-1',
     phaseName: 'mockPhaseName-1',
   },
   {
-    role: 'mockAgentRole-2',
-    name: 'mockAgentName-2',
-    directive: 'mockAgentDirective-2',
-    system: 'mockAgentSystem-2',
-    prompt: 'mockAgentPrompt-2',
+    role: 'mockAssistantRole-2',
+    name: 'mockAssistantName-2',
+    directive: 'mockAssistantDirective-2',
+    system: 'mockAssistantSystem-2',
+    prompt: 'mockAssistantPrompt-2',
     phaseName: 'mockPhaseName-2',
   },
   {
-    role: 'mockAgentRole-3',
-    name: 'mockAgentName-3',
-    directive: 'mockAgentDirective-3',
-    system: 'mockAgentSystem-3',
-    prompt: 'mockAgentPrompt-3',
+    role: 'mockAssistantRole-3',
+    name: 'mockAssistantName-3',
+    directive: 'mockAssistantDirective-3',
+    system: 'mockAssistantSystem-3',
+    prompt: 'mockAssistantPrompt-3',
     phaseName: 'mockPhaseName-3',
   },
 ]
@@ -56,27 +56,27 @@ function buildMockWorkflowSteps(): WorkflowStep[] {
       stepId: 'mockStepId-1',
       stepStatus: 'completed',
       executionOrder: 1,
-      agent: mockAgents[0],
-      llmSystem: mockAgents[0].system,
-      llmPrompt: mockAgents[0].prompt,
+      assistant: mockAssistants[0],
+      llmSystem: mockAssistants[0].system,
+      llmPrompt: mockAssistants[0].prompt,
       llmResult: 'mockLlmResult-1',
     },
     {
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
       executionOrder: 2,
-      agent: mockAgents[1],
-      llmSystem: mockAgents[1].system,
-      llmPrompt: mockAgents[1].prompt,
+      assistant: mockAssistants[1],
+      llmSystem: mockAssistants[1].system,
+      llmPrompt: mockAssistants[1].prompt,
       llmResult: 'mockLlmResult-2',
     },
     {
       stepId: 'mockStepId-3',
       stepStatus: 'pending',
       executionOrder: 3,
-      agent: mockAgents[2],
-      llmSystem: mockAgents[2].system,
-      llmPrompt: mockAgents[2].prompt,
+      assistant: mockAssistants[2],
+      llmSystem: mockAssistants[2].system,
+      llmPrompt: mockAssistants[2].prompt,
       llmResult: '<PREVIOUS_RESULT>',
     },
   ]
@@ -86,21 +86,21 @@ function buildMockWorkflowSteps(): WorkflowStep[] {
 // Mock Workflow.getObjectKey
 jest.spyOn(Workflow.prototype, 'getObjectKey').mockReturnValue(mockObjectKeyProduced)
 
-function buildMockIncomingWorkflowAgentsDeployedEvent(): TypeUtilsMutable<WorkflowAgentsDeployedEvent> {
-  const mockClass: WorkflowAgentsDeployedEvent = {
+function buildMockIncomingWorkflowAssistantsDeployedEvent(): TypeUtilsMutable<WorkflowAssistantsDeployedEvent> {
+  const mockClass: WorkflowAssistantsDeployedEvent = {
     idempotencyKey: mockIdempotencyKey,
-    eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
+    eventName: EventStoreEventName.WORKFLOW_ASSISTANTS_DEPLOYED_EVENT,
     eventData: {
       workflowId: mockWorkflowId,
       objectKey: mockObjectKeyReceived,
     },
     createdAt: mockDate,
   }
-  Object.setPrototypeOf(mockClass, WorkflowAgentsDeployedEvent.prototype)
+  Object.setPrototypeOf(mockClass, WorkflowAssistantsDeployedEvent.prototype)
   return mockClass
 }
 
-const mockIncomingWorkflowAgentsDeployedEvent = buildMockIncomingWorkflowAgentsDeployedEvent()
+const mockIncomingWorkflowAssistantsDeployedEvent = buildMockIncomingWorkflowAssistantsDeployedEvent()
 
 function buildExpectedWorkflowStepProcessedEvent(): TypeUtilsMutable<WorkflowStepProcessedEvent> {
   const mockClass = WorkflowStepProcessedEvent.fromData({
@@ -158,9 +158,9 @@ function buildMockReadWorkflowClient_fails(
 }
 
 function buildMockInvokeBedrockClient_succeeds(value?: unknown): IInvokeBedrockClient {
-  const mockAgentsString = value ?? 'mockLlmResult-X'
+  const mockAssistantsString = value ?? 'mockLlmResult-X'
   return {
-    invoke: jest.fn().mockResolvedValue(Result.makeSuccess(mockAgentsString)),
+    invoke: jest.fn().mockResolvedValue(Result.makeSuccess(mockAssistantsString)),
   }
 }
 
@@ -222,9 +222,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
    *
    *
    ************************************************************
-   * Test WorkflowAgentsDeployedEvent edge cases
+   * Test WorkflowAssistantsDeployedEvent edge cases
    ************************************************************/
-  it(`does not return a Failure if the input WorkflowAgentsDeployedEvent is valid`, async () => {
+  it(`does not return a Failure if the input WorkflowAssistantsDeployedEvent is valid`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -235,12 +235,14 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     expect(Result.isFailure(result)).toBe(false)
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      WorkflowAgentsDeployedEvent is undefined`, async () => {
+      WorkflowAssistantsDeployedEvent is undefined`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -259,7 +261,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      WorkflowAgentsDeployedEvent is null`, async () => {
+      WorkflowAssistantsDeployedEvent is null`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -278,7 +280,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
   })
 
   it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-      WorkflowAgentsDeployedEvent is not an instance of the class`, async () => {
+      WorkflowAssistantsDeployedEvent is not an instance of the class`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
     const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
@@ -289,7 +291,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const mockTestEvent = { ...mockIncomingWorkflowAgentsDeployedEvent }
+    const mockTestEvent = { ...mockIncomingWorkflowAssistantsDeployedEvent }
     const result = await processWorkflowStepWorkerService.processWorkflowStep(mockTestEvent)
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
@@ -319,12 +321,14 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
       executionOrder: 2,
-      agent: mockAgents[1],
-      llmSystem: mockAgents[1].system,
+      assistant: mockAssistants[1],
+      llmSystem: mockAssistants[1].system,
       llmPrompt: 'Test prompt with <PREVIOUS_RESULT>',
       llmResult: '',
     })
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'WorkflowInvalidStateError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
@@ -343,7 +347,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockEventStoreClient,
     )
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce(null)
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'WorkflowAlreadyCompletedError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
@@ -366,12 +372,14 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
       executionOrder: 2,
-      agent: mockAgents[1],
-      llmSystem: mockAgents[1].system,
+      assistant: mockAssistants[1],
+      llmSystem: mockAssistants[1].system,
       llmPrompt: 'Test prompt with <PREVIOUS_RESULT>',
       llmResult: '',
     })
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     expect(Result.isFailure(result)).toBe(true)
     expect(Result.isFailureOfKind(result, 'WorkflowInvalidStateError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
@@ -394,7 +402,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockReadWorkflowClient.read).toHaveBeenCalledTimes(1)
   })
 
@@ -409,7 +417,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockReadWorkflowClient.read).toHaveBeenCalledWith(mockObjectKeyReceived)
   })
 
@@ -427,7 +435,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -450,7 +460,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockInvokeBedrockClient.invoke).toHaveBeenCalledTimes(1)
   })
 
@@ -465,8 +475,8 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
-    expect(mockInvokeBedrockClient.invoke).toHaveBeenCalledWith(mockAgents[1].system, mockAgents[1].prompt)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
+    expect(mockInvokeBedrockClient.invoke).toHaveBeenCalledWith(mockAssistants[1].system, mockAssistants[1].prompt)
   })
 
   it(`calls InvokeBedrockClient.invoke with the expected system and prompt replacing
@@ -486,23 +496,23 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       stepId: 'mockStepId-1',
       stepStatus: 'completed',
       executionOrder: 1,
-      agent: mockAgents[0],
-      llmSystem: mockAgents[0].system,
-      llmPrompt: mockAgents[0].prompt,
+      assistant: mockAssistants[0],
+      llmSystem: mockAssistants[0].system,
+      llmPrompt: mockAssistants[0].prompt,
       llmResult: mockPreviousResult,
     })
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
       executionOrder: 2,
-      agent: mockAgents[1],
-      llmSystem: mockAgents[1].system,
+      assistant: mockAssistants[1],
+      llmSystem: mockAssistants[1].system,
       llmPrompt: `Test prompt with <PREVIOUS_RESULT>`,
       llmResult: '',
     })
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockInvokeBedrockClient.invoke).toHaveBeenCalledWith(
-      mockAgents[1].system,
+      mockAssistants[1].system,
       `Test prompt with ${mockPreviousResult}`,
     )
   })
@@ -521,7 +531,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -550,7 +562,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     jest
       .spyOn(Workflow.prototype, 'completeStep')
       .mockReturnValueOnce(Result.makeFailure(mockFailureKind, mockError, mockTransient))
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -573,7 +587,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockSaveWorkflowClient.save).toHaveBeenCalledTimes(1)
   })
 
@@ -589,7 +603,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
 
     expect(mockSaveWorkflowClient.save).toHaveBeenCalledWith(expect.any(Workflow))
     const workflow = (mockSaveWorkflowClient.save as jest.Mock).mock.calls[0][0]
@@ -617,7 +631,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -646,7 +662,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
     const mockTransient = 'mockTransient' as never
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     jest.spyOn(WorkflowStepProcessedEvent, 'fromData').mockReturnValueOnce(expectedResult)
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
   })
@@ -662,7 +680,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockEventStoreClient.publish).toHaveBeenCalledTimes(1)
   })
 
@@ -677,7 +695,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockEventStoreClient.publish).toHaveBeenCalledWith(expectedWorkflowStepProcessedEvent)
   })
 
@@ -696,7 +714,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockEventStoreClient,
     )
 
-    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
     expect(mockEventStoreClient.publish).toHaveBeenCalledWith(expectedWorkflowCompletedEvent)
   })
 
@@ -714,7 +732,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     const expectedResult = Result.makeFailure(mockFailureKind, mockError, mockTransient)
     expect(Result.isFailure(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)
@@ -737,7 +757,9 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    const result = await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAgentsDeployedEvent)
+    const result = await processWorkflowStepWorkerService.processWorkflowStep(
+      mockIncomingWorkflowAssistantsDeployedEvent,
+    )
     const expectedResult = Result.makeSuccess()
     expect(Result.isSuccess(result)).toBe(true)
     expect(result).toStrictEqual(expectedResult)

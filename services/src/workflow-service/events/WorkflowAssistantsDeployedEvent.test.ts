@@ -1,7 +1,7 @@
 import { Result } from '../../errors/Result'
 import { EventStoreEventName } from '../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../shared/TypeUtils'
-import { WorkflowAgentsDeployedEvent, WorkflowAgentsDeployedEventData } from './WorkflowAgentsDeployedEvent'
+import { WorkflowAssistantsDeployedEvent, WorkflowAssistantsDeployedEventData } from './WorkflowAssistantsDeployedEvent'
 
 jest.useFakeTimers().setSystemTime(new Date('2025-01-15T12:00:00Z'))
 
@@ -13,16 +13,16 @@ const mockIdempotencyKey = `workflowId:${mockWorkflowId}:objectKey:${mockObjectK
 /**
  *
  */
-function buildTestInputData(): WorkflowAgentsDeployedEventData {
+function buildTestInputData(): WorkflowAssistantsDeployedEventData {
   return {
     workflowId: mockWorkflowId,
     objectKey: mockObjectKey,
   }
 }
 
-function buildReconstituteInput(): TypeUtilsMutable<WorkflowAgentsDeployedEvent> {
+function buildReconstituteInput(): TypeUtilsMutable<WorkflowAssistantsDeployedEvent> {
   return {
-    eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
+    eventName: EventStoreEventName.WORKFLOW_ASSISTANTS_DEPLOYED_EVENT,
     eventData: {
       workflowId: mockWorkflowId,
       objectKey: mockObjectKey,
@@ -35,39 +35,40 @@ function buildReconstituteInput(): TypeUtilsMutable<WorkflowAgentsDeployedEvent>
 /**
  *
  */
-describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
+describe(`Test Workflow Service events WorkflowAssistantsDeployedEvent`, () => {
   /*
    *
    *
    ************************************************************
-   * Test WorkflowAgentsDeployedEvent.fromData
+   * Test WorkflowAssistantsDeployedEvent.fromData
    ************************************************************/
-  describe(`Test WorkflowAgentsDeployedEvent.fromData`, () => {
+  describe(`Test WorkflowAssistantsDeployedEvent.fromData`, () => {
     /*
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEventData edge cases
+     * Test WorkflowAssistantsDeployedEventData edge cases
      ************************************************************/
-    it(`does not return a Failure if the input WorkflowAgentsDeployedEventData is valid`, () => {
+    it(`does not return a Failure if the input WorkflowAssistantsDeployedEventData is
+        valid`, () => {
       const testInput = buildTestInputData()
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData is undefined`, () => {
-      const testInput = undefined as unknown as WorkflowAgentsDeployedEventData
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+        WorkflowAssistantsDeployedEventData is undefined`, () => {
+      const testInput = undefined as unknown as WorkflowAssistantsDeployedEventData
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData is null`, () => {
-      const testInput = null as unknown as WorkflowAgentsDeployedEventData
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+        WorkflowAssistantsDeployedEventData is null`, () => {
+      const testInput = null as unknown as WorkflowAssistantsDeployedEventData
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -77,53 +78,53 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEventData.workflowId edge cases
+     * Test WorkflowAssistantsDeployedEventData.workflowId edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.workflowId is undefined`, () => {
+        WorkflowAssistantsDeployedEventData.workflowId is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = undefined as never
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.workflowId is null`, () => {
+        WorkflowAssistantsDeployedEventData.workflowId is null`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = null as never
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.workflowId is empty`, () => {
+        WorkflowAssistantsDeployedEventData.workflowId is empty`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = ''
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.workflowId is blank`, () => {
+        WorkflowAssistantsDeployedEventData.workflowId is blank`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = '      '
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.workflowId length < 6`, () => {
+        WorkflowAssistantsDeployedEventData.workflowId length < 6`, () => {
       const testInput = buildTestInputData()
       testInput.workflowId = '12345'
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -133,53 +134,53 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEventData.objectKey edge cases
+     * Test WorkflowAssistantsDeployedEventData.objectKey edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.objectKey is undefined`, () => {
+        WorkflowAssistantsDeployedEventData.objectKey is undefined`, () => {
       const testInput = buildTestInputData()
       testInput.objectKey = undefined as never
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.objectKey is null`, () => {
+        WorkflowAssistantsDeployedEventData.objectKey is null`, () => {
       const testInput = buildTestInputData()
       testInput.objectKey = null as never
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.objectKey is empty`, () => {
+        WorkflowAssistantsDeployedEventData.objectKey is empty`, () => {
       const testInput = buildTestInputData()
       testInput.objectKey = ''
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.objectKey is blank`, () => {
+        WorkflowAssistantsDeployedEventData.objectKey is blank`, () => {
       const testInput = buildTestInputData()
       testInput.objectKey = '      '
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEventData.objectKey length < 6`, () => {
+        WorkflowAssistantsDeployedEventData.objectKey length < 6`, () => {
       const testInput = buildTestInputData()
       testInput.objectKey = '12345'
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)
       expect(Result.isFailureTransient(result)).toBe(false)
@@ -191,21 +192,21 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      ************************************************************
      * Test expected results
      ************************************************************/
-    it(`returns the expected Success<WorkflowAgentsDeployedEvent> if the execution path
-        is successful`, () => {
+    it(`returns the expected Success<WorkflowAssistantsDeployedEvent> if the execution
+        path is successful`, () => {
       const testInput = buildTestInputData()
-      const result = WorkflowAgentsDeployedEvent.fromData(testInput)
+      const result = WorkflowAssistantsDeployedEvent.fromData(testInput)
 
-      const expectedEvent: WorkflowAgentsDeployedEvent = {
+      const expectedEvent: WorkflowAssistantsDeployedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
+        eventName: EventStoreEventName.WORKFLOW_ASSISTANTS_DEPLOYED_EVENT,
         eventData: {
           workflowId: testInput.workflowId,
           objectKey: testInput.objectKey,
         },
         createdAt: mockDate,
       }
-      Object.setPrototypeOf(expectedEvent, WorkflowAgentsDeployedEvent.prototype)
+      Object.setPrototypeOf(expectedEvent, WorkflowAssistantsDeployedEvent.prototype)
       const expectedResult = Result.makeSuccess(expectedEvent)
 
       expect(Result.isSuccess(result)).toBe(true)
@@ -217,18 +218,18 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
    *
    *
    ************************************************************
-   * Test WorkflowAgentsDeployedEvent.reconstitute
+   * Test WorkflowAssistantsDeployedEvent.reconstitute
    ************************************************************/
-  describe(`Test WorkflowAgentsDeployedEvent.reconstitute`, () => {
+  describe(`Test WorkflowAssistantsDeployedEvent.reconstitute`, () => {
     /*
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEvent edge cases
+     * Test WorkflowAssistantsDeployedEvent edge cases
      ************************************************************/
-    it(`does not return a Failure if the input WorkflowAgentsDeployedEvent is valid`, () => {
+    it(`does not return a Failure if the input WorkflowAssistantsDeployedEvent is valid`, () => {
       const testInput = buildReconstituteInput()
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -240,13 +241,13 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEvent.idempotencyKey edge cases
+     * Test WorkflowAssistantsDeployedEvent.idempotencyKey edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.idempotencyKey is undefined`, () => {
+        WorkflowAssistantsDeployedEvent.idempotencyKey is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = undefined as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -257,10 +258,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.idempotencyKey is null`, () => {
+        WorkflowAssistantsDeployedEvent.idempotencyKey is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.idempotencyKey = null as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -274,13 +275,13 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEvent.createdAt edge cases
+     * Test WorkflowAssistantsDeployedEvent.createdAt edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.createdAt is undefined`, () => {
+        WorkflowAssistantsDeployedEvent.createdAt is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = undefined as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -291,10 +292,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.createdAt is null`, () => {
+        WorkflowAssistantsDeployedEvent.createdAt is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.createdAt = null as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -308,13 +309,13 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      *
      *
      * ************************************************************
-     * Test WorkflowAgentsDeployedEvent.eventData edge cases
+     * Test WorkflowAssistantsDeployedEvent.eventData edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData is undefined`, () => {
+        WorkflowAssistantsDeployedEvent.eventData is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = undefined as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -325,10 +326,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData is null`, () => {
+        WorkflowAssistantsDeployedEvent.eventData is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData = null as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -342,13 +343,13 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEvent.eventData.workflowId edge cases
+     * Test WorkflowAssistantsDeployedEvent.eventData.workflowId edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.workflowId is undefined`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.workflowId is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = undefined as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -359,10 +360,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.workflowId is null`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.workflowId is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = null as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -373,10 +374,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.workflowId is empty`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.workflowId is empty`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = ''
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -387,10 +388,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.workflowId is blank`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.workflowId is blank`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = '      '
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -401,10 +402,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.workflowId length < 6`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.workflowId length < 6`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.workflowId = '12345'
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -418,13 +419,13 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      *
      *
      ************************************************************
-     * Test WorkflowAgentsDeployedEvent.eventData.objectKey edge cases
+     * Test WorkflowAssistantsDeployedEvent.eventData.objectKey edge cases
      ************************************************************/
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.objectKey is undefined`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.objectKey is undefined`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = undefined as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -435,10 +436,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.objectKey is null`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.objectKey is null`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = null as never
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -449,10 +450,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.objectKey is empty`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.objectKey is empty`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = ''
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -463,10 +464,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.objectKey is blank`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.objectKey is blank`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = '      '
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -477,10 +478,10 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
     })
 
     it(`returns a non-transient Failure of kind InvalidArgumentsError if the input
-        WorkflowAgentsDeployedEvent.eventData.objectKey length < 6`, () => {
+        WorkflowAssistantsDeployedEvent.eventData.objectKey length < 6`, () => {
       const testInput = buildReconstituteInput()
       testInput.eventData.objectKey = '12345'
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
@@ -496,25 +497,25 @@ describe(`Test Workflow Service events WorkflowAgentsDeployedEvent`, () => {
      ************************************************************
      * Test expected results
      ************************************************************/
-    it(`returns the expected Success<WorkflowAgentsDeployedEvent> if the execution path
-        is successful`, () => {
+    it(`returns the expected Success<WorkflowAssistantsDeployedEvent> if the execution
+        path is successful`, () => {
       const testInput = buildReconstituteInput()
-      const result = WorkflowAgentsDeployedEvent.reconstitute(
+      const result = WorkflowAssistantsDeployedEvent.reconstitute(
         testInput.eventData,
         testInput.idempotencyKey,
         testInput.createdAt,
       )
 
-      const expectedEvent: WorkflowAgentsDeployedEvent = {
+      const expectedEvent: WorkflowAssistantsDeployedEvent = {
         idempotencyKey: mockIdempotencyKey,
-        eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
+        eventName: EventStoreEventName.WORKFLOW_ASSISTANTS_DEPLOYED_EVENT,
         eventData: {
           workflowId: testInput.eventData.workflowId,
           objectKey: testInput.eventData.objectKey,
         },
         createdAt: mockDate,
       }
-      Object.setPrototypeOf(expectedEvent, WorkflowAgentsDeployedEvent.prototype)
+      Object.setPrototypeOf(expectedEvent, WorkflowAssistantsDeployedEvent.prototype)
       const expectedResult = Result.makeSuccess(expectedEvent)
 
       expect(Result.isSuccess(result)).toBe(true)

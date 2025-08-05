@@ -5,7 +5,7 @@ import { EventStoreEvent } from '../../../event-store/EventStoreEvent'
 import { EventStoreEventBuilder, IncomingEventBridgeEvent } from '../../../event-store/EventStoreEventBuilder'
 import { EventStoreEventName } from '../../../event-store/EventStoreEventName'
 import { TypeUtilsMutable } from '../../../shared/TypeUtils'
-import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
+import { WorkflowAssistantsDeployedEvent } from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowStepProcessedEvent } from '../../events/WorkflowStepProcessedEvent'
 import { IProcessWorkflowStepWorkerService } from '../ProcessWorkflowStepWorkerService/ProcessWorkflowStepWorkerService'
 import { ProcessWorkflowStepWorkerController } from './ProcessWorkflowStepWorkerController'
@@ -16,10 +16,10 @@ const mockDate = new Date().toISOString()
 const mockIdempotencyKey = 'mockIdempotencyKey'
 const mockWorkflowId = 'mockWorkflowId'
 
-function buildMockWorkflowAgentsDeployedEvent(id: string): TypeUtilsMutable<WorkflowAgentsDeployedEvent> {
+function buildMockWorkflowAssistantsDeployedEvent(id: string): TypeUtilsMutable<WorkflowAssistantsDeployedEvent> {
   return {
     idempotencyKey: mockIdempotencyKey,
-    eventName: EventStoreEventName.WORKFLOW_AGENTS_DEPLOYED_EVENT,
+    eventName: EventStoreEventName.WORKFLOW_ASSISTANTS_DEPLOYED_EVENT,
     eventData: {
       workflowId: `${mockWorkflowId}-${id}`,
       objectKey: `mockObjectKey-${id}`,
@@ -144,11 +144,12 @@ function buildMockProcessWorkflowStepWorkerService_failsOnData({
   }
 }
 
-describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerController tests`, () => {
+describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerController
+          tests`, () => {
   describe.each([
     {
-      eventName: 'WorkflowAgentsDeployedEvent',
-      buildMockIncomingEvent: buildMockWorkflowAgentsDeployedEvent,
+      eventName: 'WorkflowAssistantsDeployedEvent',
+      buildMockIncomingEvent: buildMockWorkflowAssistantsDeployedEvent,
     },
     {
       eventName: 'WorkflowStepProcessedEvent',
@@ -171,7 +172,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      SQSEvent is undefined`, async () => {
+        SQSEvent is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -182,7 +183,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSEvent is
-      undefined`, async () => {
+        undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -194,7 +195,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      SQSEvent is null`, async () => {
+        SQSEvent is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -205,7 +206,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSEvent is
-      null`, async () => {
+        null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -223,7 +224,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test SQSEvent.Records edge cases
      ************************************************************/
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      SQSEvent records are missing`, async () => {
+        SQSEvent records are missing`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -234,7 +235,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
-      service if the input SQSEvent records are missing`, async () => {
+        service if the input SQSEvent records are missing`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -247,7 +248,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
-      service if the input SQSEvent records are undefined`, async () => {
+        service if the input SQSEvent records are undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -260,7 +261,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
-      service if the input SQSEvent records are null`, async () => {
+        service if the input SQSEvent records are null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -273,7 +274,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
-      service if the input SQSEvent records are empty`, async () => {
+        service if the input SQSEvent records are empty`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -286,7 +287,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures and does not call the
-      service if the input SQSEvent records are empty`, async () => {
+        service if the input SQSEvent records are empty`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -305,7 +306,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test SQSRecord.body edge cases
      ************************************************************/
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      SQSRecord.body is undefined`, async () => {
+        SQSRecord.body is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -317,7 +318,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSRecord.body
-      is undefined`, async () => {
+        is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -330,7 +331,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      SQSRecord.body is null`, async () => {
+        SQSRecord.body is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -342,7 +343,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSRecord.body
-      is null`, async () => {
+        is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -355,7 +356,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      SQSRecord.body is not a valid JSON`, async () => {
+        SQSRecord.body is not a valid JSON`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -368,7 +369,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns an empty SQSBatchResponse.batchItemFailures if the input SQSRecord.body
-      is not a valid JSON`, async () => {
+        is not a valid JSON`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -388,7 +389,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test EventStoreEvent edge cases
      ************************************************************/
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent is invalid`, async () => {
+        EventStoreEvent is invalid`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -402,8 +403,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input EventStoreEvent is
-      invalid`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent is invalid`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -419,7 +419,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent is not an instance of the class`, async () => {
+        EventStoreEvent is not an instance of the class`, async () => {
       // Mocking the fromEventBridge method to return an unknown event
       jest.spyOn(EventStoreEventBuilder, 'fromEventBridge').mockImplementationOnce(() => {
         class UnknownEvent extends EventStoreEvent {
@@ -444,8 +444,8 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input EventStoreEvent is not
-      an instance of the class`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent is not an instance
+        of the class`, async () => {
       // Mocking the fromEventBridge method to return an unknown event
       jest.spyOn(EventStoreEventBuilder, 'fromEventBridge').mockImplementationOnce(() => {
         class UnknownEvent extends EventStoreEvent {
@@ -478,7 +478,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test EventStoreEvent.eventName edge cases
      ************************************************************/
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.eventName is undefined`, async () => {
+        EventStoreEvent.eventName is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -493,8 +493,8 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.eventName is undefined`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent.eventName is
+        undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -511,7 +511,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.eventName is null`, async () => {
+        EventStoreEvent.eventName is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -526,8 +526,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.eventName is null`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent.eventName is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -550,7 +549,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test EventStoreEvent.createdAt edge cases
      ************************************************************/
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.createdAt is undefined`, async () => {
+        EventStoreEvent.createdAt is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -565,8 +564,8 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.createdAt is undefined`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent.createdAt is
+        undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -583,7 +582,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.createdAt is null`, async () => {
+        EventStoreEvent.createdAt is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -598,8 +597,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.createdAt is null`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent.createdAt is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -622,7 +620,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test EventStoreEvent.eventData edge cases
      ************************************************************/
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.eventData is undefined`, async () => {
+        EventStoreEvent.eventData is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -637,8 +635,8 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.eventData is undefined`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent.eventData is
+        undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -655,7 +653,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.eventData is null`, async () => {
+        EventStoreEvent.eventData is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -670,8 +668,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
       expect(mockProcessWorkflowStepWorkerService.processWorkflowStep).not.toHaveBeenCalled()
     })
 
-    it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.eventData is null`, async () => {
+    it(`returns no SQSBatchItemFailures if the input EventStoreEvent.eventData is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -694,7 +691,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test EventStoreEvent.eventData.workflowId edge cases
      ************************************************************/
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.eventData.workflowId is undefined`, async () => {
+        EventStoreEvent.eventData.workflowId is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -710,7 +707,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.eventData.workflowId is undefined`, async () => {
+        EventStoreEvent.eventData.workflowId is undefined`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -727,7 +724,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`does not call ProcessWorkflowStepWorkerService.processWorkflowStep if the input
-      EventStoreEvent.eventData.workflowId is null`, async () => {
+        EventStoreEvent.eventData.workflowId is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -743,7 +740,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns no SQSBatchItemFailures if the input
-      EventStoreEvent.eventData.workflowId is null`, async () => {
+        EventStoreEvent.eventData.workflowId is null`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -766,7 +763,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test internal logic
      ************************************************************/
     it(`calls ProcessWorkflowStepWorkerService.processWorkflowStep a single time for an
-      SQSEvent with a single record`, async () => {
+        SQSEvent with a single record`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -778,7 +775,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`calls ProcessWorkflowStepWorkerService.processWorkflowStep a multiple times for
-      an SQSEvent with a multiple records`, async () => {
+        an SQSEvent with a multiple records`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -790,7 +787,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`calls ProcessWorkflowStepWorkerService.processWorkflowStep with the expected
-      input`, async () => {
+        input`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -810,7 +807,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
      * Test transient/non-transient edge cases
      ************************************************************/
     it(`returns no SQSBatchItemFailures if the ProcessWorkflowStepWorkerService returns
-      no Failure`, async () => {
+        no Failure`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_succeeds()
       const processWorkflowStepWorkerController = new ProcessWorkflowStepWorkerController(
         mockProcessWorkflowStepWorkerService,
@@ -823,7 +820,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns no SQSBatchItemFailures if the ProcessWorkflowStepWorkerService returns
-      a non-transient Failure (test 1)`, async () => {
+        a non-transient Failure (test 1)`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_failsOnData({
         transient: false,
       })
@@ -838,7 +835,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns no SQSBatchItemFailures if the ProcessWorkflowStepWorkerService returns
-      a non-transient Failure (test 2)`, async () => {
+        a non-transient Failure (test 2)`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_failsOnData({
         transient: false,
       })
@@ -853,7 +850,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns no SQSBatchItemFailures if the ProcessWorkflowStepWorkerService returns
-      a non-transient Failure (test 3)`, async () => {
+        a non-transient Failure (test 3)`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_failsOnData({
         transient: false,
       })
@@ -868,7 +865,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns expected SQSBatchItemFailures if the ProcessWorkflowStepWorkerService
-      returns a transient Failure (test 1)`, async () => {
+        returns a transient Failure (test 1)`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_failsOnData({
         transient: true,
       })
@@ -888,7 +885,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns expected SQSBatchItemFailures if the ProcessWorkflowStepWorkerService
-      returns a transient Failure (test 2)`, async () => {
+        returns a transient Failure (test 2)`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_failsOnData({
         transient: true,
       })
@@ -908,7 +905,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns expected SQSBatchItemFailures if the ProcessWorkflowStepWorkerService
-      returns a transient Failure (test 3)`, async () => {
+        returns a transient Failure (test 3)`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_failsOnData({
         transient: true,
       })
@@ -930,7 +927,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerCo
     })
 
     it(`returns all SQSBatchItemFailures if the ProcessWorkflowStepWorkerService throws
-      all and only transient Failure`, async () => {
+        all and only transient Failure`, async () => {
       const mockProcessWorkflowStepWorkerService = buildMockProcessWorkflowStepWorkerService_failsOnData({
         transient: true,
       })

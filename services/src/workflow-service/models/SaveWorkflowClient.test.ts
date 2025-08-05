@@ -205,8 +205,8 @@ describe(`Workflow SaveWorkflowClient tests`, () => {
     expect(Result.isFailureTransient(result)).toBe(true)
   })
 
-  it(`returns a non-transient Failure of kind DuplicateWorkflowError if S3Client.send
-      throws a PreconditionFailed`, async () => {
+  it(`returns a non-transient Failure of kind WorkflowFileSaveCollisionError if
+      S3Client.send throws a PreconditionFailed`, async () => {
     const preconditionFailedError = new S3ServiceException({
       name: 'PreconditionFailed',
       $fault: 'server',
@@ -217,7 +217,7 @@ describe(`Workflow SaveWorkflowClient tests`, () => {
     const workflow = buildValidWorkflow()
     const result = await saveWorkflow.save(workflow)
     expect(Result.isFailure(result)).toBe(true)
-    expect(Result.isFailureOfKind(result, 'DuplicateWorkflowError')).toBe(true)
+    expect(Result.isFailureOfKind(result, 'WorkflowFileSaveCollisionError')).toBe(true)
     expect(Result.isFailureTransient(result)).toBe(false)
   })
 

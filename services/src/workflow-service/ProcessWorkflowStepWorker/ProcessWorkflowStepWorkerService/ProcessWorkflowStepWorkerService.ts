@@ -1,7 +1,7 @@
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { EventStoreEvent } from '../../../event-store/EventStoreEvent'
-import { WorkflowAgentsDeployedEvent } from '../../events/WorkflowAgentsDeployedEvent'
+import { WorkflowAssistantsDeployedEvent } from '../../events/WorkflowAssistantsDeployedEvent'
 import { WorkflowCompletedEvent } from '../../events/WorkflowCompletedEvent'
 import { WorkflowStepProcessedEvent } from '../../events/WorkflowStepProcessedEvent'
 import { IInvokeBedrockClient } from '../../InvokeBedrockClient/InvokeBedrockClient'
@@ -11,7 +11,7 @@ import { Workflow } from '../../models/Workflow'
 
 export interface IProcessWorkflowStepWorkerService {
   processWorkflowStep: (
-    incomingEvent: WorkflowAgentsDeployedEvent,
+    incomingEvent: WorkflowAssistantsDeployedEvent,
   ) => Promise<
     | Success<void>
     | Failure<'InvalidArgumentsError'>
@@ -21,13 +21,13 @@ export interface IProcessWorkflowStepWorkerService {
     | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   >
 }
 
-type ExecuteAgentOutput = {
+type ExecuteAssistantOutput = {
   llmSystem: string
   llmPrompt: string
   llmResult: string
@@ -51,7 +51,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
    *
    */
   public async processWorkflowStep(
-    incomingEvent: WorkflowAgentsDeployedEvent,
+    incomingEvent: WorkflowAssistantsDeployedEvent,
   ): Promise<
     | Success<void>
     | Failure<'InvalidArgumentsError'>
@@ -61,7 +61,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Failure<'WorkflowInvalidStateError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {
@@ -83,10 +83,10 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     }
 
     const workflow = readWorkflowResult.value
-    const executeAgentResult = await this.executeAgent(workflow)
-    if (Result.isFailure(executeAgentResult)) {
-      console.error(`${logCtx} exit failure:`, { executeAgentResult, incomingEvent })
-      return executeAgentResult
+    const executeAssistantResult = await this.executeAssistant(workflow)
+    if (Result.isFailure(executeAssistantResult)) {
+      console.error(`${logCtx} exit failure:`, { executeAssistantResult, incomingEvent })
+      return executeAssistantResult
     }
 
     const saveWorkflowResult = await this.saveWorkflow(workflow)
@@ -111,10 +111,10 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     console.info(`${logCtx} init:`, { incomingEvent })
 
     if (
-      incomingEvent instanceof WorkflowAgentsDeployedEvent === false &&
+      incomingEvent instanceof WorkflowAssistantsDeployedEvent === false &&
       incomingEvent instanceof WorkflowStepProcessedEvent === false
     ) {
-      const message = `Expected WorkflowAgentsDeployedEvent or WorkflowStepProcessedEvent but got ${incomingEvent}`
+      const message = `Expected WorkflowAssistantsDeployedEvent or WorkflowStepProcessedEvent but got ${incomingEvent}`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
       console.error(`${logCtx} exit failure:`, { failure, incomingEvent })
       return failure
@@ -152,10 +152,10 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
   /**
    *
    */
-  private async executeAgent(
+  private async executeAssistant(
     workflow: Workflow,
   ): Promise<
-    | Success<ExecuteAgentOutput>
+    | Success<ExecuteAssistantOutput>
     | Failure<'InvalidArgumentsError'>
     | Failure<'WorkflowAlreadyCompletedError'>
     | Failure<'WorkflowInvalidStateError'>
@@ -163,7 +163,7 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Failure<'BedrockInvokePermanentError'>
     | Failure<'UnrecognizedError'>
   > {
-    const logCtx = 'ProcessWorkflowStepWorkerService.executeAgent'
+    const logCtx = 'ProcessWorkflowStepWorkerService.executeAssistant'
     console.info(`${logCtx} init:`, { workflow: JSON.stringify(workflow) })
 
     const currentStep = workflow.getCurrentStep()
@@ -200,10 +200,10 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       return completeStepResult
     }
 
-    const executeAgentOutput = { llmSystem, llmPrompt, llmResult }
-    const executeAgentResult = Result.makeSuccess(executeAgentOutput)
-    console.info(`${logCtx} exit success:`, { executeAgentResult, workflow })
-    return executeAgentResult
+    const executeAssistantOutput = { llmSystem, llmPrompt, llmResult }
+    const executeAssistantResult = Result.makeSuccess(executeAssistantOutput)
+    console.info(`${logCtx} exit success:`, { executeAssistantResult, workflow })
+    return executeAssistantResult
   }
 
   /**
@@ -212,7 +212,10 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
   private async saveWorkflow(
     workflow: Workflow,
   ): Promise<
-    Success<void> | Failure<'InvalidArgumentsError'> | Failure<'UnrecognizedError'> | Failure<'DuplicateWorkflowError'>
+    | Success<void>
+    | Failure<'InvalidArgumentsError'>
+    | Failure<'UnrecognizedError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
   > {
     const logCtx = 'ProcessWorkflowStepWorkerService.saveWorkflow'
     console.info(`${logCtx} init:`, { workflow })

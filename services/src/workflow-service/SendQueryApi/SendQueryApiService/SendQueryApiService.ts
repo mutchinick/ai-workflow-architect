@@ -12,7 +12,7 @@ export interface ISendQueryApiService {
   ) => Promise<
     | Success<SendQueryApiServiceOutput>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   >
@@ -42,7 +42,7 @@ export class SendQueryApiService implements ISendQueryApiService {
   ): Promise<
     | Success<SendQueryApiServiceOutput>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {
@@ -112,7 +112,7 @@ export class SendQueryApiService implements ISendQueryApiService {
   ): Promise<
     | Success<Workflow>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'DuplicateWorkflowError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'SendQueryApiService.createWorkflow'

@@ -1,13 +1,13 @@
 import KSUID from 'ksuid'
 import { Result } from '../../errors/Result'
-import { Agent } from '../agents/Agent'
+import { Assistant } from '../assistants/Assistant'
 import { Workflow, WorkflowInstructions, WorkflowProps } from './Workflow'
 import {
-  multiAgents,
-  multiAgentScenario,
+  multiAssistants,
+  multiAssistantScenario,
   preexistingStepsScenario,
-  singleAgentScenario,
-} from './fixtures/deploy-agents-fixtures'
+  singleAssistantScenario,
+} from './fixtures/deploy-assistants-fixtures'
 import { shortQueryInstructions, standardValidInstructions } from './fixtures/from-instructions-fixures'
 import {
   emptyWorkflowScenario,
@@ -431,7 +431,7 @@ describe(`Workflow Service models Workflow tests`, () => {
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
       const workflowId = partiallyExecutedScenario.props.workflowId
       const baseKey = `${workflowId}/${workflowId}`
-      const expectedKey = `${baseKey}-x0002-agent-Agent-01.json`
+      const expectedKey = `${baseKey}-x0002-assistant-Assistant-01.json`
       expect(workflow.getObjectKey()).toBe(expectedKey)
     })
   })
@@ -458,19 +458,19 @@ describe(`Workflow Service models Workflow tests`, () => {
     it(`returns the correct step when only the initial step is completed`, () => {
       const workflowResult = Workflow.fromProps(initialStepValidScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0001-deploy-agents' })
+      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0001-deploy-assistants' })
     })
 
     it(`returns the last completed step in a partially executed workflow`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0002-agent-Agent-01' })
+      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0002-assistant-Assistant-01' })
     })
 
     it(`returns the final step in a fully executed workflow`, () => {
       const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0003-agent-Agent-02' })
+      expect(workflow.getLastExecutedStep()).toMatchObject({ stepId: 'x0003-assistant-Assistant-02' })
     })
   })
 
@@ -490,13 +490,13 @@ describe(`Workflow Service models Workflow tests`, () => {
     it(`returns the first step when no steps have been executed`, () => {
       const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getCurrentStep()).toMatchObject({ stepId: 'x0001-deploy-agents' })
+      expect(workflow.getCurrentStep()).toMatchObject({ stepId: 'x0001-deploy-assistants' })
     })
 
     it(`returns the first pending step in a partially executed workflow`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      expect(workflow.getCurrentStep()).toMatchObject({ stepId: 'x0003-agent-Agent-02' })
+      expect(workflow.getCurrentStep()).toMatchObject({ stepId: 'x0003-assistant-Assistant-02' })
     })
 
     it(`returns null when all steps are completed`, () => {
@@ -525,7 +525,7 @@ describe(`Workflow Service models Workflow tests`, () => {
     it(`completes the current step and returns Success<void>`, () => {
       const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const result = workflow.completeStep('x0003-agent-Agent-02', 'mockPrompt', 'mockResult')
+      const result = workflow.completeStep('x0003-assistant-Assistant-02', 'mockPrompt', 'mockResult')
       expect(Result.isSuccess(result)).toBe(true)
       expect(workflow.steps[2].stepStatus).toBe('completed')
       expect(workflow.steps[2].llmPrompt).toBe('mockPrompt')
@@ -563,14 +563,14 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
-   * Test Workflow.deployAgents
+   * Test Workflow.loadAssistants
    ************************************************************/
-  describe(`Workflow.deployAgents`, () => {
-    it(`generates the correct final state for a single agent`, () => {
-      const workflowResult = Workflow.fromInstructions(singleAgentScenario.instructions)
+  describe(`Workflow.loadAssistants`, () => {
+    it(`generates the correct final state for a single assistant`, () => {
+      const workflowResult = Workflow.fromInstructions(singleAssistantScenario.instructions)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const mockAgent: Agent = {
-        name: 'mockAgentDesigner',
+      const mockAssistant: Assistant = {
+        name: 'mockAssistant',
         role: 'mockRole',
         directive: 'mockDirective',
         system: 'mockSystem',
@@ -578,39 +578,45 @@ describe(`Workflow Service models Workflow tests`, () => {
         phaseName: 'mockPhase',
       }
       const mockResult = 'mockResult'
-      workflow.deployAgents(mockAgent.system, mockAgent.prompt, mockResult, mockAgent, singleAgentScenario.agents)
+      workflow.loadAssistants(
+        mockAssistant.system,
+        mockAssistant.prompt,
+        mockResult,
+        mockAssistant,
+        singleAssistantScenario.assistants,
+      )
       const expectedProps: WorkflowProps = {
         workflowId: workflow.workflowId,
-        instructions: singleAgentScenario.instructions,
+        instructions: singleAssistantScenario.instructions,
         steps: [
           {
-            stepId: 'x0001-deploy-agents',
+            stepId: 'x0001-deploy-assistants',
             stepStatus: 'completed',
             executionOrder: 1,
-            llmSystem: mockAgent.system,
-            llmPrompt: mockAgent.prompt,
+            llmSystem: mockAssistant.system,
+            llmPrompt: mockAssistant.prompt,
             llmResult: mockResult,
-            agent: mockAgent,
+            assistant: mockAssistant,
           },
           {
-            stepId: 'x0002-agent-Agent-01',
+            stepId: 'x0002-assistant-Assistant-01',
             stepStatus: 'pending',
             executionOrder: 2,
-            llmSystem: singleAgentScenario.agents[0].system,
-            llmPrompt: singleAgentScenario.agents[0].prompt,
+            llmSystem: singleAssistantScenario.assistants[0].system,
+            llmPrompt: singleAssistantScenario.assistants[0].prompt,
             llmResult: '',
-            agent: singleAgentScenario.agents[0],
+            assistant: singleAssistantScenario.assistants[0],
           },
         ],
       }
       expect(workflow.toJSON()).toStrictEqual(expectedProps)
     })
 
-    it(`generates the correct final state for multiple agents`, () => {
-      const workflowResult = Workflow.fromInstructions(multiAgentScenario.instructions)
+    it(`generates the correct final state for multiple assistants`, () => {
+      const workflowResult = Workflow.fromInstructions(multiAssistantScenario.instructions)
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const mockAgent: Agent = {
-        name: 'mockAgentDesigner',
+      const mockAssistant: Assistant = {
+        name: 'mockAssistant',
         role: 'mockRole',
         directive: 'mockDirective',
         system: 'mockSystem',
@@ -618,37 +624,43 @@ describe(`Workflow Service models Workflow tests`, () => {
         phaseName: 'mockPhase',
       }
       const mockResult = 'mockResult'
-      workflow.deployAgents(mockAgent.system, mockAgent.prompt, mockResult, mockAgent, multiAgentScenario.agents)
+      workflow.loadAssistants(
+        mockAssistant.system,
+        mockAssistant.prompt,
+        mockResult,
+        mockAssistant,
+        multiAssistantScenario.assistants,
+      )
       const expectedProps: WorkflowProps = {
         workflowId: workflow.workflowId,
-        instructions: multiAgentScenario.instructions,
+        instructions: multiAssistantScenario.instructions,
         steps: [
           {
-            stepId: 'x0001-deploy-agents',
+            stepId: 'x0001-deploy-assistants',
             stepStatus: 'completed',
             executionOrder: 1,
-            llmSystem: mockAgent.system,
-            llmPrompt: mockAgent.prompt,
+            llmSystem: mockAssistant.system,
+            llmPrompt: mockAssistant.prompt,
             llmResult: mockResult,
-            agent: mockAgent,
+            assistant: mockAssistant,
           },
           {
-            stepId: 'x0002-agent-Agent-01',
+            stepId: 'x0002-assistant-Assistant-01',
             stepStatus: 'pending',
             executionOrder: 2,
-            llmSystem: multiAgents[0].system,
-            llmPrompt: multiAgents[0].prompt,
+            llmSystem: multiAssistants[0].system,
+            llmPrompt: multiAssistants[0].prompt,
             llmResult: '',
-            agent: multiAgents[0],
+            assistant: multiAssistants[0],
           },
           {
-            stepId: 'x0003-agent-Agent-02',
+            stepId: 'x0003-assistant-Assistant-02',
             stepStatus: 'pending',
             executionOrder: 3,
-            llmSystem: multiAgents[1].system,
-            llmPrompt: multiAgents[1].prompt,
+            llmSystem: multiAssistants[1].system,
+            llmPrompt: multiAssistants[1].prompt,
             llmResult: '',
-            agent: multiAgents[1],
+            assistant: multiAssistants[1],
           },
         ],
       }
@@ -663,8 +675,8 @@ describe(`Workflow Service models Workflow tests`, () => {
         steps: preexistingStepsScenario.initialSteps,
       })
       const workflow = Result.getSuccessValueOrThrow(workflowResult)
-      const mockAgent: Agent = {
-        name: 'mockAgentDesigner',
+      const mockAssistant: Assistant = {
+        name: 'mockAssistant',
         role: 'mockRole',
         directive: 'mockDirective',
         system: 'mockSystem',
@@ -672,12 +684,12 @@ describe(`Workflow Service models Workflow tests`, () => {
         phaseName: 'mockPhase',
       }
       const mockResult = 'mockResult'
-      const result = workflow.deployAgents(
-        mockAgent.system,
-        mockAgent.prompt,
+      const result = workflow.loadAssistants(
+        mockAssistant.system,
+        mockAssistant.prompt,
         mockResult,
-        mockAgent,
-        preexistingStepsScenario.agents,
+        mockAssistant,
+        preexistingStepsScenario.assistants,
       )
       expect(Result.isFailure(result)).toBe(true)
       expect(Result.isFailureOfKind(result, 'InvalidArgumentsError')).toBe(true)

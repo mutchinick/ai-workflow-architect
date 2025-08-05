@@ -166,13 +166,17 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
     let envFileContents = ''
     envVariables.forEach(({ cdkOutputName, envVarName }) => {
       const cdkOutputValue = outputs[cdkOutputName]
-      const envVarValue = cdkOutputValue.endsWith('/') ? cdkOutputValue.slice(0, -1) : cdkOutputValue
-      envFileContents += `${envVarName}=${envVarValue}\n`
+      if (cdkOutputValue) {
+        const envVarValue = cdkOutputValue.endsWith('/') ? cdkOutputValue.slice(0, -1) : cdkOutputValue
+        envFileContents += `${envVarName}=${envVarValue}\n`
+      }
     })
 
-    const envFileFullPath = path.resolve(process.cwd(), envFilePath)
-    writeFileSync(envFileFullPath, envFileContents)
-    console.info(`cdk-runner: Created .env file: ${envFilePath}`)
+    if (envFileContents) {
+      const envFileFullPath = path.resolve(process.cwd(), envFilePath)
+      writeFileSync(envFileFullPath, envFileContents)
+      console.info(`cdk-runner: Created .env file: ${envFilePath}`)
+    }
   })
 }
 

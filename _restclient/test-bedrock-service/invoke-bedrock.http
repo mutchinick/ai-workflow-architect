@@ -21,6 +21,7 @@ Content-Type: application/json
 }
 
 ### POST ###
+### BAD REQUEST - MISSING 'system' FIELD ###
 POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
 Origin: https://localhost
 Content-Type: application/json

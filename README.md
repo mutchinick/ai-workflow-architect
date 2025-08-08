@@ -146,9 +146,14 @@ The system uses an asynchronous, event-driven architecture to manage the lifecyc
 
 The main components are:
 
-- **SendQueryApi:** An API endpoint that receives the user's query, initiates the process, and emits an event to start the workflow.
-- **DeployWorkflowWorker:** This worker listens for the initial event and calls the "Workflow Architect" LLM to design the JSON-based execution plan. Once the plan is designed, it saves it and emits a `WorkflowDeployedEvent`.
-- **ProcessWorkflowStepWorker:** This is the core execution engine. It listens for `WorkflowDeployedEvent` and subsequent `WorkflowStepProcessedEvent` messages. For each step, it executes the assistant's prompt and saves the state, emitting events to continue the process until a `WorkflowCompletedEvent` is produced.
-- **Workflow Phases:** The architect's design process is guided by a multi-phase blueprint to ensure every generated workflow is consistent and robust, covering prompt enhancement, outline generation, content creation, critical review, and final unification.
+- **WorkflowArchitect:** The "meta-assistant" or strategist LLM responsible for analyzing the user's query and designing the entire multi-step execution plan.
 
----
+- **Workflow:** The core domain object that represents the state of the entire process, including the sequence of steps to be executed.
+
+- **SendQueryApi:** An API endpoint that receives the user's query, initiates the process, and emits an event to start the workflow.
+
+- **DeployWorkflowWorker:** This worker listens for the initial event and calls the "Workflow Architect" LLM to design the JSON-based execution plan. Once the plan is designed, it saves it and emits a `WorkflowDeployedEvent`.
+
+- **ProcessWorkflowStepWorker:** This is the core execution engine. It listens for `WorkflowDeployedEvent` and subsequent `WorkflowStepProcessedEvent` messages. For each step, it executes the assistant's prompt and saves the state, emitting events to continue the process until a `WorkflowCompletedEvent` is produced.
+
+- **Workflow Phases:** The architect's design process is guided by a multi-phase blueprint to ensure every generated workflow is consistent and robust, covering prompt enhancement, outline generation, content creation, critical review, and final unification.

@@ -114,29 +114,63 @@ This is an example of the kind of JSON the architect would produce. The full res
     "system": "You are part of Phase 3: Content Generation. You are an experienced travel writer. Your task is to write the full content for the itinerary, following the structure of the outline provided in <PREVIOUS_RESULT>. Your response must be a direct and professional answer.",
     "prompt": "<PREVIOUS_RESULT>",
     "phaseName": "Phase 3: Content Generation"
-  },
-  {
-    "name": "Rome Itinerary Reviewer 1 of 10",
-    "role": "To critically review the generated content and identify shallow or weak points.",
-    "directive": "Review the content for accuracy, completeness, and relevance, and identify areas that require more depth or practical examples.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to critically review the generated content and identify shallow or weak points. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
-  },
-  {
-    "name": "Rome Itinerary Unification Assistant 1 of 2",
-    "role": "To rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase.",
-    "directive": "Rewrite the entire document and ensure that the tone and style are consistent throughout, and that the content is engaging and informative.",
-    "system": "You are part of Phase 5: Final Unification & Polish. You are an expert travel writer. Your task is to rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 5: Final Unification & Polish"
   }
 ]
 ```
 
 ---
 
-The JSON array produced by the architect is used to build a `Workflow` object. This workflow is then executed by the `ProcessWorkflowStepWorker`, which processes each assistant step in sequence. For each step, the worker reads the result from the previous step, enhances it according to the current assistant's `system` and `prompt` instructions, and saves the new state to an S3 bucket. This cycle continues until the final, comprehensive response is produced and stored
+The JSON array produced by the architect is used to build a `Workflow` object. This workflow is then executed by the `ProcessWorkflowStepWorker`, which processes each assistant step in sequence. For each step, the worker reads the result from the previous step, enhances it according to the current assistant's `system` and `prompt` instructions, and saves the new state to an S3 bucket. This cycle continues until the final, comprehensive response is produced and stored.
+
+---
+
+### Example Final Response After the Workflow has completed and all Assistants have participated
+
+```text
+**Introduction to Rome Itinerary**
+
+Rome, the Eternal City, is a destination that has been captivating travelers for centuries... This 5-day Rome itinerary is designed to provide a comprehensive and unforgettable experience, balancing iconic landmarks, cultural immersion, and leisure activities...
+
+**Overview of 5-Day Trip**
+
+This 5-day itinerary is carefully crafted to ensure that travelers experience the best of Rome, from its ancient ruins and Vatican City to its charming neighborhoods and culinary delights...
+
+...
+
+**Day 1: Ancient Rome and Local Cuisine**
+
+The first day of the itinerary is dedicated to exploring Ancient Rome... The morning begins with a visit to the **Colosseum and Roman Forum**... In the afternoon, travelers can explore the **Pantheon**... The evening is reserved for a delicious dinner at **Trattoria al Moro**...
+
+**Day 2: Vatican City and Cultural Experiences**
+
+The second day of the itinerary is focused on Vatican City... The morning begins with a **guided Vatican City tour**, including visits to the **Sistine Chapel** and **St. Peter's Basilica**...
+
+...
+
+**(Content for Day 3, 4, and 5 is abridged)**
+
+...
+
+**Budgeting and Recommendations**
+
+To make the most of this 5-day Rome itinerary, travelers should consider the following budgeting and planning recommendations:
+
+- **Accommodation options in the city center**...
+- **Affordable transportation choices**...
+- **Guided tours and budget-friendly activities**...
+
+**Conclusion**
+
+This 5-day Rome itinerary offers a comprehensive and unforgettable experience... By prioritizing must-see attractions and experiences, travelers can enjoy a well-rounded and memorable trip to Rome without overspending...
+
+...
+
+**(Additional sections on Critical Review, Recommendations, Hidden Gems, Food, Accommodation, Transportation, Sustainable Tourism, and Personalized Recommendations are abridged)**
+
+...
+
+By following these tips and recommendations, travelers can have a fantastic and unforgettable experience in Rome, even on a moderate budget. Buon viaggio!
+```
 
 ---
 
@@ -148,12 +182,29 @@ The main components are:
 
 - **WorkflowArchitect:** The "meta-assistant" or strategist LLM responsible for analyzing the user's query and designing the entire multi-step execution plan.
 
-- **Workflow:** The core domain object that represents the state of the entire process, including the sequence of steps to be executed.
+- **Workflow:** The core domain object that represents the state of the entire process.
+
+  - **WorkflowStep:** Represents a single, executable step within the workflow.
+
+- **InvokeBedrockClient:** A robust client for making calls to the Amazon Bedrock LLM.
+
+- **SaveWorkflowClient, ReadWorkflowClient, ReadLatestWorkflowClient:** Clients for persisting and retrieving workflow state from S3.
+
+- **EventStoreClient:** A client for saving events to the event store (DynamoDB).
+
+- **EventStoreEvent:** The base class for all events in the system.
+
+  - `WorkflowCreatedEvent`: Fired when a new workflow is initiated.
+  - `WorkflowAssistantsDeployedEvent`: Fired after the architect has designed the workflow.
+  - `WorkflowStepProcessedEvent`: Fired after each individual assistant step is completed.
+  - `WorkflowCompletedEvent`: Fired when the entire workflow is finished.
 
 - **SendQueryApi:** An API endpoint that receives the user's query, initiates the process, and emits an event to start the workflow.
 
-- **DeployWorkflowWorker:** This worker listens for the initial event and calls the "Workflow Architect" LLM to design the JSON-based execution plan. Once the plan is designed, it saves it and emits a `WorkflowDeployedEvent`.
+- **GetLatestWorkflowApi:** An API to query the workflow progress and retrieve the latest results.
+
+- **DeployWorkflowAssistantsWorker:** This worker listens for the initial event and calls the "Workflow Architect" LLM to design the JSON-based execution plan. Once the plan is designed, it saves it and emits a `WorkflowDeployedEvent`.
 
 - **ProcessWorkflowStepWorker:** This is the core execution engine. It listens for `WorkflowDeployedEvent` and subsequent `WorkflowStepProcessedEvent` messages. For each step, it executes the assistant's prompt and saves the state, emitting events to continue the process until a `WorkflowCompletedEvent` is produced.
 
-- **Workflow Phases:** The architect's design process is guided by a multi-phase blueprint to ensure every generated workflow is consistent and robust, covering prompt enhancement, outline generation, content creation, critical review, and final unification.
+- **WorkflowPhase:** The architect's design process is guided by a multi-phase blueprint to ensure every generated workflow is consistent and robust, covering prompt enhancement, outline generation, content creation, critical review, and final unification.

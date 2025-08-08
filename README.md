@@ -1,130 +1,154 @@
-## AI Assistant Designer Deployer
+# AI Workflow Architect
 
-POC of an AI architecture orchestrated by a GenAI Workflow Architect that, depending on the problem to solve:
+This repository contains the code for an experimental, agentic AI architecture. The system is designed to take a user's problem and, instead of answering it directly, first design a dynamic, multi-step workflow of specialized AI assistants to produce a high-quality, comprehensive response.
 
-- Designs, creates, and deploys AI assistants
-- Supports loading and deploying custom assistants
-- Event-driven, using an architecture inspired by: https://github.com/mutchinick/dynamodb-eventbridge-driven-ecomm-nodejs-result
-
-Initial features:
-
-- A health check mechanism to verify deployments and AI model connectivity
-- A query interface that initiates an AI assistants workflow
-- An assistant designer/deployer worker that either designs assistants dynamically or deploys predefined custom ones
-- An assistant coordinator worker that distributes tasks to the deployed assistants
-- A workflow status mechanism to poll for workflow status and retrieve results
-- Assistants that review the user request for safety, legality, formatting, PG-13 compliance, etc., depending on the problem to solve
-- Deployed assistants that evaluate responses based on their specific role in the broader problem
-- A consensus mechanism where deployed assistants must agree on the appropriate response
-
-Notes:
-
-- The designer can choose between different available models (initially via AWS Bedrock), e.g.:
-
-  - Anthropic Claude (e.g. Claude 3 Sonnet)
-  - Meta LLaMA 2 / LLaMA 3
-  - Amazon Titan Text
-  - Mistral 7B
-
-- Can support multi-modal inputs (text, image, sound, video, etc.)
-- Starts with AWS Bedrock
-- Assistants are not hardcoded, but defined using configuration
+The core of the project is a "Workflow Architect," a meta-agent that analyzes a user's query and designs a complete execution plan for other "worker" assistants to follow.
 
 ---
 
-## Example Assistants Designer Generation (Simplified)
+## Example Workflow Generation
 
-### Example prompt
+This example shows how the **Workflow Architect** takes a user's query and designs a multi-step plan. The output is a JSON array where each object is a complete set of instructions for a "worker" assistant.
+
+### User Query Example
+
+The user would send a query like this to the system's API:
 
 ```text
-You are a GenAI Assistant Designer for specific problems in a software system.
-
-In this system, a GenAI Assistant is defined as a JSON object with the properties: "name", "role", and "directive".
-
-The values of these properties must be designed based solely on the user's original query or stated problem. No user interaction, clarification, or prompting is allowed at any stage — neither by you nor by the assistants you design.
-
-For example, for a user planning a trip, you might design assistants like:
-
-{
-  "name": "Budget assistant",
-  "role": "Ensure that all planned activities include estimated costs",
-  "directive": "Your job and primary directive is to make sure that the response to the query and all proposed activities include an estimate of the cost, and that alternatives are provided for different budget ranges."
-}
-
-or
-
-{
-  "name": "Seasonality assistant",
-  "role": "Ensure that all planned activities are seasonally appropriate",
-  "directive": "Your job and primary directive is to make sure that the response to the query and all proposed activities are feasible for the season of travel. If the user does not specify a season, you must offer options for different vacation seasons."
-}
-
-You must:
-
-1. Carefully analyze the user's query or problem.
-2. Identify the key concerns and factors relevant to solving it responsibly and effectively.
-3. Design a collection of GenAI Assistants using the required JSON format:
-
-[
-  {
-    "name": "...",
-    "role": "...",
-    "directive": "..."
-  },
-  ...
-]
-
-Rules:
-
-* You must always include a "Safety assistant", "Legality assistant", and "PG-13 assistant".
-* You must propose at least three and at most seven additional assistants that are relevant to the user’s query.
-* All assistants must operate without user follow-up or requiring further clarification.
-* If the query lacks critical details, assistants must make reasonable assumptions and offer options.
-* Your response must be only the JSON array of assistants. Do not include any extra text, comments, or explanations.
-
-This is the user's query:
-
-"My car is making a strange noise, what should I do?"
+"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?"
 ```
 
-### Example response
+### Workflow Architect Prompt
+
+The following `system` and `prompt` are combined and sent to the Workflow Architect LLM. The `system` prompt contains the high-level blueprint and rules, while the `prompt` contains the specific user query for this task.
+
+#### System Prompt
+
+```text
+You are a GenAI Workflow Architect, a master strategist in designing AI-driven solutions. Your primary goal is to create the most effective sequence of steps to produce a high-quality answer to a user's question.
+
+## Core Task
+
+You will generate a plan as a JSON array of "Assistant Steps". Each step is a self-contained task for a worker AI, complete with its own detailed instructions.
+
+## Workflow Construction Blueprint
+
+For every user question, you MUST construct the workflow following this exact, phased blueprint. Your task is to analyze the user's question and design assistants that are experts in their field and achieve the **Goal** for each phase.
+
+### Phase 1: Prompt Enhancement
+
+- **Assistant Range:** 3 (minimum) to 5 (maximum)
+- **Goal:** To refine the user initial question into a detailed, actionable prompt.
+
+### Phase 2: Outline Generation
+
+- **Assistant Range:** 1 (fixed)
+- **Goal:** To create a comprehensive, well-structured outline or table of contents for the final document. This outline will serve as the blueprint for the next phase.
+
+### Phase 3: Content Generation
+
+- **Assistant Range:** 1 (fixed)
+- **Goal:** To write the detailed, high-quality content for each section of the provided outline. This forms the main body of the final document.
+
+### Phase 4: Critical Review and Deepening
+
+- **Assistant Range:** 10 (minimum) to 15 (maximum)
+- **Goal:** To critically review the generated content, identify shallow or weak points, and add significant depth, practical examples, code snippets, and expert-level detail.
+
+### Phase 5: Final Unification & Polish
+
+- **Assistant Range:** 2 (minimum) to 4 (maximum)
+- **Goal:** To rewrite the entire document, seamlessly integrating all the added depth and critiques from the previous phase into a final, polished, and professional-grade guide.
+
+## Assistant Step Definition (The JSON Structure You Must Create)
+
+- "name": A descriptive name for the assistant performing the step (e.g., "Scientific Accuracy Assistant 1 of 5").
+- "role": A one-sentence description of the assistant's purpose.
+- "directive": The detailed instructions for the assistant.
+- "system": The specific, comprehensive system prompt for this step's LLM call. This prompt MUST NOT contain the "<PREVIOUS_RESULT>" placeholder.
+- "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original query. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
+- "phaseName": The exact name of the workflow phase this assistant belongs to (e.g., "Phase 1: Prompt Enhancement").
+
+## **CRITICAL RULE: The Quality of Your Design**
+
+For each Assistant Step, you MUST create a comprehensive 'system' prompt that defines the worker assistant's persona and expertise. This 'system' prompt MUST state the name of the workflow phase it belongs to and include the assistant's full directive.
+
+## Your Final Output
+
+- Your final response MUST BE ONLY the raw JSON array of Assistant Steps, starting with `[` and ending with `]`.
+```
+
+#### Prompt
+
+```text
+Design the complete assistant workflow for the following user question:
+<query>I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?</query>
+```
+
+### Example Architect Response (Abridged for Readability)
+
+This is an example of the kind of JSON the architect would produce. The full response would contain many more steps, following the blueprint.
 
 ```json
 [
   {
-    "name": "Safety assistant",
-    "role": "Prioritize user safety above all else.",
-    "directive": "Your primary directive is to ensure the user's immediate safety. Advise them against operating a potentially unsafe vehicle. If the noise is loud, sudden, or accompanied by other warning signs (like smoke, warning lights, or changes in handling), instruct the user to pull over safely as soon as possible and call for professional assistance. All advice must first consider the potential for mechanical failure and the safety of the driver, passengers, and other road users."
+    "name": "Itinerary Structure Assistant (Prompt Enhancer)",
+    "role": "Refines the query to ask for a day-by-day structure.",
+    "directive": "You are a travel expert. Your job is to refine user queries to ask for a structured, day-by-day itinerary.",
+    "system": "You are part of Phase 1: Prompt Enhancement. You are a travel expert. Rewrite the user's query to explicitly ask for a day-by-day itinerary with morning, afternoon, and evening activities. Your response must be ONLY the refined question.",
+    "prompt": "I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?",
+    "phaseName": "Phase 1: Prompt Enhancement"
   },
   {
-    "name": "Legality assistant",
-    "role": "Ensure all suggestions comply with relevant laws and regulations.",
-    "directive": "Your job and primary directive is to ensure that any suggested action is legal. This includes adhering to traffic laws, local regulations about vehicle repairs, and standards for roadworthiness. Do not suggest any modifications or actions that would render the vehicle illegal to operate on public roads."
+    "name": "Outline Generation Assistant",
+    "role": "Creates a structured outline for the 5-day itinerary.",
+    "directive": "You are a travel guide author. Your job is to create a logical outline for a 5-day Rome itinerary.",
+    "system": "You are part of Phase 2: Outline Generation. You are a travel guide author. Your task is to create a detailed outline for a 5-day Rome itinerary. The outline should have a heading for each day. Your output MUST be ONLY a detailed, well-structured outline.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 2: Outline Generation"
   },
   {
-    "name": "PG-13 assistant",
-    "role": "Maintain appropriate and accessible language.",
-    "directive": "Your job and primary directive is to ensure the response is free of profanity, alarming hyperbole, or overly technical jargon. The tone should be calm, reassuring, and easy for a non-expert to understand. The goal is to inform and guide, not to frighten or confuse."
+    "name": "Content Generation Assistant",
+    "role": "Writes the main content for the itinerary based on the outline.",
+    "directive": "You are an experienced travel writer. Your job is to write a clear, engaging itinerary based on the provided outline.",
+    "system": "You are part of Phase 3: Content Generation. You are an experienced travel writer. Your task is to write the full content for the itinerary, following the structure of the outline provided in <PREVIOUS_RESULT>. Your response must be a direct and professional answer.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 3: Content Generation"
   },
   {
-    "name": "Symptom Clarification Assistant",
-    "role": "Help the user categorize the noise to better understand the potential issue.",
-    "directive": "Your job and primary directive is to provide a framework for the user to identify the characteristics of the noise, since you cannot hear it. You must generate questions for the user to consider, such as: What does the noise sound like (e.g., grinding, squealing, clicking, thumping)? When does it occur (e.g., when accelerating, braking, turning, or all the time)? Where does the sound seem to come from (e.g., wheels, engine, under the car)? This information is for the user to provide to a professional."
+    "name": "Rome Itinerary Reviewer 1 of 10",
+    "role": "To critically review the generated content and identify shallow or weak points.",
+    "directive": "Review the content for accuracy, completeness, and relevance, and identify areas that require more depth or practical examples.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to critically review the generated content and identify shallow or weak points. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
   },
   {
-    "name": "Urgency Assessment Assistant",
-    "role": "Help the user determine the severity and urgency of the problem.",
-    "directive": "Your job and primary directive is to provide a scale of urgency based on potential symptoms. You must create categories of action. For example: 'Immediate Action Required' for loud, grinding noises or noises paired with a blinking check engine light. 'Caution Advised' for noises that are consistent but not severe. 'Monitor and Schedule Service' for faint, intermittent noises. Emphasize that any new, strange noise warrants professional inspection."
-  },
-  {
-    "name": "DIY vs. Professional Assistant",
-    "role": "Advise on what a non-expert can safely check versus what requires a professional mechanic.",
-    "directive": "Your job and primary directive is to clearly distinguish between safe, simple visual inspections and dangerous, complex repairs. You may suggest safe checks a user can perform while the car is off and parked on a level surface (e.g., looking for obvious fluid leaks, checking tire condition). You must strongly advise against any hands-on repairs for a novice, especially concerning the engine, brakes, or suspension, and state that the safest and most effective course of action is to consult a qualified mechanic."
-  },
-  {
-    "name": "Financial Guidance Assistant",
-    "role": "Set realistic expectations about potential diagnosis and repair costs.",
-    "directive": "Your job and primary directive is to address the financial aspect of car repairs. You must explain that a diagnostic fee is standard for a professional inspection. You should provide general cost categories (e.g., low, moderate, high) for potential types of repairs without giving specific monetary values, as they vary widely. Your core advice must be for the user to request a detailed written estimate from a mechanic before approving any work."
+    "name": "Rome Itinerary Unification Assistant 1 of 2",
+    "role": "To rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase.",
+    "directive": "Rewrite the entire document and ensure that the tone and style are consistent throughout, and that the content is engaging and informative.",
+    "system": "You are part of Phase 5: Final Unification & Polish. You are an expert travel writer. Your task is to rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 5: Final Unification & Polish"
   }
 ]
 ```
+
+---
+
+The JSON array produced by the architect is used to build a `Workflow` object. This workflow is then executed by the `ProcessWorkflowStepWorker`, which processes each assistant step in sequence. For each step, the worker reads the result from the previous step, enhances it according to the current assistant's `system` and `prompt` instructions, and saves the new state to an S3 bucket. This cycle continues until the final, comprehensive response is produced and stored
+
+---
+
+## Core Concepts & Architecture
+
+The system uses an asynchronous, event-driven architecture to manage the lifecycle of a workflow. This design is inspired by the patterns found in the [dynamodb-eventbridge-driven-ecomm-nodejs-result](https://github.com/mutchinick/dynamodb-eventbridge-driven-ecomm-nodejs-result) repository, which allows for a decoupled and scalable orchestration of complex processes.
+
+The main components are:
+
+- **SendQueryApi:** An API endpoint that receives the user's query, initiates the process, and emits an event to start the workflow.
+- **DeployWorkflowWorker:** This worker listens for the initial event and calls the "Workflow Architect" LLM to design the JSON-based execution plan. Once the plan is designed, it saves it and emits a `WorkflowDeployedEvent`.
+- **ProcessWorkflowStepWorker:** This is the core execution engine. It listens for `WorkflowDeployedEvent` and subsequent `WorkflowStepProcessedEvent` messages. For each step, it executes the assistant's prompt and saves the state, emitting events to continue the process until a `WorkflowCompletedEvent` is produced.
+- **Workflow Phases:** The architect's design process is guided by a multi-phase blueprint to ensure every generated workflow is consistent and robust, covering prompt enhancement, outline generation, content creation, critical review, and final unification.
+
+---

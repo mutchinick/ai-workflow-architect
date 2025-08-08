@@ -170,3 +170,103 @@ The main components are:
 - **AI SDK:** Vercel AI SDK
 - **Infrastructure as Code:** AWS CDK
 - **Testing:** Jest
+
+---
+
+## Important Note for Windows Users
+
+_(If you are running Linux or MacOS you are fine, you can jump to the "How to Deploy" section just below)_
+
+My most sincere apologies. This repository uses long file paths which can exceed the default > 260-character limit on Windows. This might cause a "Filename too long" error during `git clone` or `npm install`. To fix this permanently, you should enable long path support for both Git and the Windows OS. To do this please perform the following steps.
+
+**Configure Git:** Open a regular command prompt or terminal and run this command:
+
+```bash
+git config --global core.longpaths true
+```
+
+**Configure Windows:** Open **PowerShell as an Administrator** and run this command. You may need to restart for the change to take full effect.
+
+```powershell
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+```
+
+---
+
+## How to Deploy
+
+The infrastructure is defined using the AWS CDK and is located in the `infra` folder.
+
+#### 1. Install Dependencies
+
+First, navigate to the `services` directory and install the Node.js dependencies for the Lambda functions.
+
+```bash
+cd services
+npm install
+```
+
+#### 2. Configure Deployment ID
+
+_Only if you want to change it. It's not required and should work out of the box. If you do change it, just be mindful with the length because some AWS resources impose limits_
+
+Inside the `infra/package.json` file, there is a `deployment_prefix` property. This value will be prepended to all AWS resources created by the CDK (APIs, Lambdas, Queues, etc.). Think of it as a unique ID for your deployment stack.
+
+_Example `infra/package.json`:_
+
+```json
+"config": {
+  "deployment_prefix": "aiWorkflowArchitect"
+},
+```
+
+#### 3. Set up AWS Credentials
+
+The deployment script constructs an AWS profile name using the pattern `<deployment_prefix>-<stage>`. You need to set up a corresponding profile in your `~/.aws/credentials` file.
+
+For a `deployment_prefix` of `aiWorkflowArchitect` and a `stage` of `dev`, the profile name would be `aiWorkflowArchitect-dev`.
+
+_Example `~/.aws/credentials`:_
+
+```ini
+[aiWorkflowArchitect-dev]
+aws_access_key_id = AKIA...
+aws_secret_access_key = SeHzc6...
+region = us-east-1
+```
+
+> Choose the AWS region you want to deploy to. The example uses `us-east-1` (N. Virginia).
+
+#### 4. Deploy the Stack
+
+Navigate to the `infra` folder, install its dependencies, and run the deploy command, passing the desired stage name as an argument.
+
+```bash
+# If you are in the services folder
+cd ../infra
+
+# Install infra dependencies
+npm install
+
+# Deploy to the 'dev' stage
+npm run deploy dev
+```
+
+You can use any stage name you like, which is great for spinning up ephemeral test environments (e.g., `npm run deploy my-test`). Just make sure the profile for that stage is set correctly in the AWS credentials file.
+
+The CDK will synthesize the stack and may prompt you to approve the creation of IAM roles and policies. Accept the changes to proceed. The deployment typically takes 4-5 minutes.
+
+> **NOTE:** After a successful deployment, the script automatically writes the necessary environment variables (like API base URLs) into `.env` files. This makes it easy to start testing the system immediately. These files are configured for the two testing methods detailed in the upcoming sections: one for the VSCode REST Client and another for an automated script.
+
+---
+
+## How to Teardown
+
+If you want to teardown the deployed infrastructure in AWS just run the following command from the `infra` folder.
+
+```bash
+# Assuming you have deployed to the 'dev' stage
+npm run destroy dev
+```
+
+---

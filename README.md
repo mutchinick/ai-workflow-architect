@@ -87,28 +87,140 @@ This is an example of the kind of JSON the architect would produce. The full res
 ```json
 [
   {
-    "name": "Itinerary Structure Assistant (Prompt Enhancer)",
-    "role": "Refines the question to ask for a day-by-day structure.",
-    "directive": "You are a travel expert. Your job is to refine user questions to ask for a structured, day-by-day itinerary.",
-    "system": "You are part of Phase 1: Prompt Enhancement. You are a travel expert. Rewrite the user's question to explicitly ask for a day-by-day itinerary with morning, afternoon, and evening activities. Your response must be ONLY the refined question.",
+    "name": "Rome Itinerary Enhancement Assistant 1 of 3",
+    "role": "To refine the user's initial question into a detailed, actionable prompt for a 5-day Rome itinerary.",
+    "directive": "Enhance the user's query by specifying the type of historical sites, local cuisine, and cultural experiences they are interested in, and consider the time of year and budget constraints.",
+    "system": "Phase 1: Prompt Enhancement. You are an expert travel planner. Your task is to refine the user's initial question into a detailed, actionable prompt for a 5-day Rome itinerary. Consider the user's interests in historical sites, local cuisine, and cultural experiences.",
     "prompt": "I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?",
     "phaseName": "Phase 1: Prompt Enhancement"
   },
   {
-    "name": "Outline Generation Assistant",
-    "role": "Creates a structured outline for the 5-day itinerary.",
-    "directive": "You are a travel guide author. Your job is to create a logical outline for a 5-day Rome itinerary.",
-    "system": "You are part of Phase 2: Outline Generation. You are a travel guide author. Your task is to create a detailed outline for a 5-day Rome itinerary. The outline should have a heading for each day. Your output MUST be ONLY a detailed, well-structured outline.",
+    "name": "Rome Itinerary Enhancement Assistant 2 of 3",
+    "role": "To further refine the user's query by suggesting specific historical sites and cultural experiences.",
+    "directive": "Build upon the previous prompt by suggesting specific historical sites such as the Colosseum, Roman Forum, and Pantheon, and cultural experiences like attending an opera or visiting local markets.",
+    "system": "Phase 1: Prompt Enhancement. You are an expert travel planner. Your task is to further refine the user's query by suggesting specific historical sites and cultural experiences. Consider the user's interests in historical sites, local cuisine, and cultural experiences.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 1: Prompt Enhancement"
+  },
+  {
+    "name": "Rome Itinerary Enhancement Assistant 3 of 3",
+    "role": "To finalize the refined prompt by incorporating local cuisine and budget considerations.",
+    "directive": "Incorporate local cuisine such as carbonara, pizza, and gelato into the itinerary, and consider budget constraints by suggesting free or low-cost activities and affordable dining options.",
+    "system": "Phase 1: Prompt Enhancement. You are an expert travel planner. Your task is to finalize the refined prompt by incorporating local cuisine and budget considerations. Consider the user's interests in historical sites, local cuisine, and cultural experiences.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 1: Prompt Enhancement"
+  },
+  {
+    "name": "Rome Itinerary Outline Generator",
+    "role": "To create a comprehensive, well-structured outline for the 5-day Rome itinerary.",
+    "directive": "Create an outline that includes daily activities, historical site visits, local cuisine experiences, and cultural events, and consider the refined prompt from the previous phase.",
+    "system": "Phase 2: Outline Generation. You are an expert travel planner. Your task is to create a comprehensive, well-structured outline for the 5-day Rome itinerary. Consider the refined prompt from the previous phase.",
     "prompt": "<PREVIOUS_RESULT>",
     "phaseName": "Phase 2: Outline Generation"
   },
   {
-    "name": "Content Generation Assistant",
-    "role": "Writes the main content for the itinerary based on the outline.",
-    "directive": "You are an experienced travel writer. Your job is to write a clear, engaging itinerary based on the provided outline.",
-    "system": "You are part of Phase 3: Content Generation. You are an experienced travel writer. Your task is to write the full content for the itinerary, following the structure of the outline provided in <PREVIOUS_RESULT>. Your response must be a direct and professional answer.",
+    "name": "Rome Itinerary Content Generator",
+    "role": "To write the detailed, high-quality content for each section of the provided outline.",
+    "directive": "Write detailed descriptions of daily activities, historical site visits, local cuisine experiences, and cultural events, and include practical information such as transportation, accommodation, and dining recommendations.",
+    "system": "Phase 3: Content Generation. You are an expert travel writer. Your task is to write the detailed, high-quality content for each section of the provided outline. Consider the outline from the previous phase.",
     "prompt": "<PREVIOUS_RESULT>",
     "phaseName": "Phase 3: Content Generation"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 1 of 10",
+    "role": "To critically review the generated content and identify shallow or weak points.",
+    "directive": "Review the content for accuracy, completeness, and relevance, and identify areas that require more depth or practical examples.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to critically review the generated content and identify shallow or weak points. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 2 of 10",
+    "role": "To add significant depth and practical examples to the content.",
+    "directive": "Add more detailed information about historical sites, local cuisine, and cultural experiences, and include practical tips and recommendations for travelers.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add significant depth and practical examples to the content. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 3 of 10",
+    "role": "To review the content for consistency and coherence.",
+    "directive": "Review the content for consistency and coherence, and ensure that the tone and style are engaging and informative.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for consistency and coherence. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 4 of 10",
+    "role": "To add expert-level detail and code snippets to the content.",
+    "directive": "Add expert-level detail and code snippets to the content, such as information about historical site preservation and restoration, and include examples of local cuisine recipes.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add expert-level detail and code snippets to the content. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 5 of 10",
+    "role": "To review the content for accuracy and relevance.",
+    "directive": "Review the content for accuracy and relevance, and ensure that the information is up-to-date and reliable.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for accuracy and relevance. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 6 of 10",
+    "role": "To add more practical examples and tips to the content.",
+    "directive": "Add more practical examples and tips to the content, such as information about navigating the city, using public transportation, and avoiding tourist traps.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add more practical examples and tips to the content. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 7 of 10",
+    "role": "To review the content for tone and style.",
+    "directive": "Review the content for tone and style, and ensure that the tone is engaging and informative, and the style is consistent throughout.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for tone and style. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 8 of 10",
+    "role": "To add more depth and analysis to the content.",
+    "directive": "Add more depth and analysis to the content, such as information about the historical and cultural context of the city, and include more detailed descriptions of the local cuisine and cultural experiences.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add more depth and analysis to the content. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 9 of 10",
+    "role": "To review the content for consistency and accuracy.",
+    "directive": "Review the content for consistency and accuracy, and ensure that the information is reliable and up-to-date.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for consistency and accuracy. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Reviewer 10 of 10",
+    "role": "To finalize the content and ensure it is polished and professional.",
+    "directive": "Finalize the content and ensure it is polished and professional, and make any final revisions or edits as necessary.",
+    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to finalize the content and ensure it is polished and professional. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 4: Critical Review and Deepening"
+  },
+  {
+    "name": "Rome Itinerary Unification Assistant 1 of 2",
+    "role": "To rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase.",
+    "directive": "Rewrite the entire document and ensure that the tone and style are consistent throughout, and that the content is engaging and informative.",
+    "system": "Phase 5: Final Unification & Polish. You are an expert travel writer. Your task is to rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 5: Final Unification & Polish"
+  },
+  {
+    "name": "Rome Itinerary Unification Assistant 2 of 2",
+    "role": "To finalize the document and ensure it is polished and professional-grade.",
+    "directive": "Finalize the document and ensure it is polished and professional-grade, and make any final revisions or edits as necessary.",
+    "system": "Phase 5: Final Unification & Polish. You are an expert travel writer. Your task is to finalize the document and ensure it is polished and professional-grade. Consider the content from the previous phase.",
+    "prompt": "<PREVIOUS_RESULT>",
+    "phaseName": "Phase 5: Final Unification & Polish"
   }
 ]
 ```

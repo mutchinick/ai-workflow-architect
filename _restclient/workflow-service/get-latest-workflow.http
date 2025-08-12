@@ -27,6 +27,16 @@ Content-Type: application/json
   "workflowId": "{{workflowId}}"
 }
 
+### Passing a hardcoded workflow ID for testing purposes
+### POST
+POST {{baseUrl}}/api/v1/workflow-service/getLatestWorkflow
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "workflowId": "workflow-2025-08-12T01-50-53-981Z-I-am-planning-a-trip-31AOY7obtHu6GRua0lvEloiQEwh"
+}
+
 
 ### CORS QUERY
 ### OPTIONS ###

@@ -1,3 +1,6 @@
+// TODO: This is not really good practice, to "read the latest workflow by getting the latest file in S3",
+// but it is a simple solution for now. In the future, we might want to use a database or a more sophisticated
+// method to track the latest workflow.
 import { GetObjectCommand, ListObjectsV2Command, S3Client, S3ServiceException } from '@aws-sdk/client-s3'
 import { Failure, Result, Success } from '../../errors/Result'
 import { Workflow } from './Workflow'

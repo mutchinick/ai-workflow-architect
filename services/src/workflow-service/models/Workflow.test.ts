@@ -572,7 +572,6 @@ describe(`Workflow Service models Workflow tests`, () => {
       const mockAssistant: Assistant = {
         name: 'mockAssistant',
         role: 'mockRole',
-        directive: 'mockDirective',
         system: 'mockSystem',
         prompt: 'mockPrompt',
         phaseName: 'mockPhase',
@@ -618,7 +617,6 @@ describe(`Workflow Service models Workflow tests`, () => {
       const mockAssistant: Assistant = {
         name: 'mockAssistant',
         role: 'mockRole',
-        directive: 'mockDirective',
         system: 'mockSystem',
         prompt: 'mockPrompt',
         phaseName: 'mockPhase',
@@ -678,7 +676,6 @@ describe(`Workflow Service models Workflow tests`, () => {
       const mockAssistant: Assistant = {
         name: 'mockAssistant',
         role: 'mockRole',
-        directive: 'mockDirective',
         system: 'mockSystem',
         prompt: 'mockPrompt',
         phaseName: 'mockPhase',

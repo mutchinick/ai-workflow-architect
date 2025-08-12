@@ -5,7 +5,6 @@ const mockAssistants: Assistant[] = [
   {
     name: 'Assistant-01',
     role: 'Assistant-01-Role',
-    directive: 'Assistant-01-Directive',
     system: 'Assistant-01-System',
     prompt: 'Assistant-01-Prompt',
     phaseName: 'Assistant-01-Phase',
@@ -13,7 +12,6 @@ const mockAssistants: Assistant[] = [
   {
     name: 'Assistant-02',
     role: 'Assistant-02-Role',
-    directive: 'Assistant-02-Directive',
     system: 'Assistant-02-System',
     prompt: 'Assistant-02-Prompt',
     phaseName: 'Assistant-02-Phase',

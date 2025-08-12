@@ -4,6 +4,7 @@ import { Assistant } from './Assistant'
 export type WorkflowPhase = {
   name: string
   goal: string
+  // Replaced rigid min/max with a flexible string for guidance.
   assistantGuideline: string
   responseRules: string
 }
@@ -45,6 +46,7 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase> = {
   CRITICAL_REVIEW_AND_DEEPENING: {
     name: 'Phase 4: Expert Review & Deepening',
     goal: "To critically review the draft, correct errors, and add significant depth and value that aligns with the user's goal.",
+    // The guideline now emphasizes quality and relevance over quantity.
     assistantGuideline: '2-5 specialized assistants relevant to the topic',
     responseRules: `
       Your final output MUST be the complete, original text immediately followed by your new, appended content.
@@ -74,20 +76,20 @@ const buildBlueprintText = (): string => {
 
 /**
  * WorkflowArchitectAssistant
- * The main system prompt has been updated to reflect the new "v2.1" logic.
- * It now explicitly instructs the architect to diagnose user intent first
- * and to create specialized, role-based assistants.
+ * The main system prompt has been updated to consolidate all instructions into the "system" field.
+
  */
 export const WorkflowArchitectAssistant: Assistant = {
   name: 'Workflow Architect Assistant',
   role: "Designs a complete, sequential workflow of GenAI assistants based on a user's question.",
-  directive: `You are a GenAI Workflow Architect. Your job is to analyze a user's problem and design a complete, step-by-step execution plan as a JSON array of Assistant Steps.`,
 
   system: `
-      You are a GenAI Workflow Architect, a master strategist in designing efficient, context-aware, AI-driven solutions. Your primary goal is to create the most effective and streamlined sequence of steps to produce a high-quality answer to a user's question. Your design must prioritize quality and eliminate redundancy.
+      You are a GenAI Workflow Architect. Your job is to analyze a user's problem and design a complete, step-by-step execution plan as a JSON array of Assistant Steps.
+
+      As a master strategist in designing efficient, context-aware, AI-driven solutions, your primary goal is to create the most effective sequence of steps to produce a high-quality answer to a user's question. Your design must prioritize quality and eliminate redundancy.
 
       ## Core Task
-      You will generate a plan as a JSON array of "Assistant Steps". Each step is a self-contained task for a worker AI, complete with its own detailed, context-specific instructions.
+      You will generate a plan as a JSON array of "Assistant Steps". Each step is a self-contained task for a worker AI, complete with its own detailed instructions.
 
       ## Guiding Principles
       1. **Diagnose User Intent First:** Before designing any steps, analyze the user's query to determine their likely goal. Are they a novice seeking a broad overview (breadth) or an expert looking for specific details (depth)? Is the goal to create something practical (actionable) or to expand knowledge (informative)? The entire workflow design must be tailored to this initial diagnosis.
@@ -101,12 +103,11 @@ export const WorkflowArchitectAssistant: Assistant = {
       ${buildBlueprintText()}
 
       ## Assistant Step Definition (The JSON Structure You Must Create)
-      - "name": A descriptive, role-based name.
+      - "name": A descriptive, role-based name for the assistant performing the step.
       - "role": A one-sentence description of the assistant's purpose.
-      - "directive": Detailed, context-aware instructions.
-      - "system": The comprehensive system prompt for this step's LLM call.
-      - "prompt": The user prompt for the LLM call ("<PREVIOUS_RESULT>" for subsequent steps).
-      - "phaseName": The name of the workflow phase.
+      - "system": The complete and detailed system prompt for this step's LLM call. This is the most critical field. It must define the assistant's expert persona, its goal, and provide comprehensive, step-by-step instructions for completing its task.
+      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
+      - "phaseName": The exact name of the workflow phase this assistant belongs to.
 
       ## Your Final Output
       - Your final response MUST BE ONLY the raw JSON array of Assistant Steps, starting with \`[\` and ending with \`]\`.
@@ -116,4 +117,3 @@ export const WorkflowArchitectAssistant: Assistant = {
 
   phaseName: 'Phase X: Architect Workflow',
 }
-//

@@ -7,16 +7,8 @@ describe('Workflow Service DeployWorkflowAssistantsWorker assistants WorkflowArc
     it('generates the expected blueprint from the WORKFLOW_PHASES object', () => {
       Object.values(WORKFLOW_PHASES).forEach((phase) => {
         expect(systemPrompt).toContain(`### ${phase.name}`)
-
-        if (phase.assistantRange.min === phase.assistantRange.max) {
-          expect(systemPrompt).toContain(`- **Assistant Range:** ${phase.assistantRange.min} (fixed)`)
-        } else {
-          expect(systemPrompt).toContain(
-            `- **Assistant Range:** ${phase.assistantRange.min} (minimum) to ${phase.assistantRange.max} (maximum)`,
-          )
-        }
-
         expect(systemPrompt).toContain(`- **Goal:** ${phase.goal}`)
+        expect(systemPrompt).toContain(`- **Assistant Guideline:** ${phase.assistantGuideline}`)
       })
     })
   })

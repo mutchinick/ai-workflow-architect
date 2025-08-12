@@ -40,6 +40,16 @@ Content-Type: application/json
   "query": "I am writing a TypeScript with Next.js application. I need to implement a feature that allows users to upload images and display them in a gallery. Can you help me with that? Please provide step by step instructions and commands to execute."
 }
 
+### WORKFLOW_CREATED_EVENT
+### POST ###
+POST {{baseUrl}}/api/v1/workflow-service/sendQuery
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "query": "I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?"
+}
+
 ### CORS QUERY
 ### OPTIONS ###
 OPTIONS {{baseUrl}}/api/v1/workflow-service/sendQuery

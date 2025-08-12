@@ -1,10 +1,15 @@
 import { HttpResponse } from './HttpResponse'
 
+const headers = {
+  'Content-Type': 'application/json',
+}
+
 describe(`Shared HttpResponse tests`, () => {
   test(`HttpResponse.OK returns the expected 200 OK APIGatewayProxyStructuredResultV2
         response`, () => {
     const mockResponseBody = { mockItem1: 1, mockItem2: 'mockItem2' }
     const expectedResponse = {
+      headers,
       statusCode: 200,
       body: JSON.stringify(mockResponseBody),
     }
@@ -16,6 +21,7 @@ describe(`Shared HttpResponse tests`, () => {
         APIGatewayProxyStructuredResultV2 response`, () => {
     const mockResponseBody = { mockItem1: 1, mockItem2: 'mockItem2' }
     const expectedResponse = {
+      headers,
       statusCode: 201,
       body: JSON.stringify(mockResponseBody),
     }
@@ -27,6 +33,7 @@ describe(`Shared HttpResponse tests`, () => {
         APIGatewayProxyStructuredResultV2 response`, () => {
     const mockResponseBody = { mockItem1: 1, mockItem2: 'mockItem2' }
     const expectedResponse = {
+      headers,
       statusCode: 202,
       body: JSON.stringify(mockResponseBody),
     }
@@ -38,6 +45,7 @@ describe(`Shared HttpResponse tests`, () => {
         APIGatewayProxyStructuredResultV2 response`, () => {
     const mockResponseBody = { message: 'Internal Server Error' }
     const expectedResponse = {
+      headers,
       statusCode: 500,
       body: JSON.stringify(mockResponseBody),
     }
@@ -49,6 +57,7 @@ describe(`Shared HttpResponse tests`, () => {
         APIGatewayProxyStructuredResultV2 response`, () => {
     const mockResponseBody = { message: 'Bad Request' }
     const expectedResponse = {
+      headers,
       statusCode: 400,
       body: JSON.stringify(mockResponseBody),
     }

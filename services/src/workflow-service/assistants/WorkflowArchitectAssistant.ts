@@ -96,7 +96,7 @@ export const WorkflowArchitectAssistant: Assistant = {
       - "role": A one-sentence description of the assistant's purpose.
       - "directive": The detailed instructions for the assistant.
       - "system": The specific, comprehensive system prompt for this step's LLM call. This prompt MUST NOT contain the "<PREVIOUS_RESULT>" placeholder.
-      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original query. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
+      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
       - "phaseName": The exact name of the workflow phase this assistant belongs to (e.g., "Phase 1: Prompt Enhancement").
 
       ## **CRITICAL RULE: The Quality of Your Design**

@@ -2,6 +2,7 @@ import { Table } from 'aws-cdk-lib/aws-dynamodb'
 import { EventBus } from 'aws-cdk-lib/aws-events'
 import { Construct } from 'constructs'
 import { DeployWorkflowAssistantsWorkerConstruct } from './DeployWorkflowAssistantsWorkerConstruct'
+import { GetLatestWorkflowApiLambdaConstruct } from './GetLatestWorkflowApiLambdaConstruct'
 import { ProcessWorkflowStepWorkerConstruct } from './ProcessWorkflowStepWorkerConstruct'
 import { SendQueryApiLambdaConstruct } from './SendQueryApiLambdaConstruct'
 import { WorkflowServiceApiConstruct } from './WorkflowServiceApiConstruct'
@@ -31,6 +32,11 @@ export class WorkflowServiceMainConstruct extends Construct {
 
     new SendQueryApiLambdaConstruct(scope, `${id}-SendQueryApi`, {
       dynamoDbTable: props.dynamoDbTable,
+      s3Bucket: bucketConstruct.s3Bucket,
+      httpApi: workflowServiceHttpApi.httpApi,
+    })
+
+    new GetLatestWorkflowApiLambdaConstruct(scope, `${id}-GetLatestWorkflowApi`, {
       s3Bucket: bucketConstruct.s3Bucket,
       httpApi: workflowServiceHttpApi.httpApi,
     })

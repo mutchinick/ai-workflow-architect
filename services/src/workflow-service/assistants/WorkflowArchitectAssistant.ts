@@ -4,110 +4,86 @@ import { Assistant } from './Assistant'
 export type WorkflowPhase = {
   name: string
   goal: string
-  // Replaced rigid min/max with a flexible string for guidance.
   assistantGuideline: string
   responseRules: string
 }
 
 /**
  * WORKFLOW_PHASES
- * This object now acts as a set of guidelines rather than rigid rules.
- * The `assistantGuideline` provides a recommendation, but the architect
- * has the final say based on the user's query.
+ * This object has been trimmed to a single dummy phase to prevent it from
+ * influencing the architect's prompt, while maintaining its structure
+ * to avoid breaking changes in the consuming code.
  */
 export const WORKFLOW_PHASES: Record<string, WorkflowPhase> = {
-  PROMPT_ENHANCEMENT: {
-    name: 'Phase 1: Query Analysis & Refinement',
-    goal: "To analyze the user's initial question and, if necessary, enrich it into a detailed, actionable prompt that aligns with the diagnosed user intent.",
-    assistantGuideline: '1-2 assistants (e.g., "Query Analyst", "Prompt Enhancer")',
-    responseRules: `
-      Your final output MUST be only the refined question.
-      You must not answer the question.
-    `.trim(),
-  },
-  OUTLINE_GENERATION: {
-    name: 'Phase 2: Structured Content Planning',
-    goal: 'To create a comprehensive, well-structured outline or plan for the final document.',
-    assistantGuideline: '1 assistant (e.g., "Outline Architect")',
-    responseRules: `
-      Your output MUST be ONLY a detailed, well-structured outline (e.g., using Markdown headings).
-      Do not write the content for the sections, only the structure.
-    `.trim(),
-  },
-  CONTENT_GENERATION: {
-    name: 'Phase 3: Core Content Generation',
-    goal: 'To write the detailed, high-quality content for each section of the provided outline.',
-    assistantGuideline: '1 assistant (e.g., "Specialist Writer")',
-    responseRules: `
-      Your output MUST be the full, well-written text of the document, following the structure of the outline provided in <PREVIOUS_RESULT>.
-      Your response must be a direct and professional answer.
-    `.trim(),
-  },
-  CRITICAL_REVIEW_AND_DEEPENING: {
-    name: 'Phase 4: Expert Review & Deepening',
-    goal: "To critically review the draft, correct errors, and add significant depth and value that aligns with the user's goal.",
-    // The guideline now emphasizes quality and relevance over quantity.
-    assistantGuideline: '2-5 specialized assistants relevant to the topic',
-    responseRules: `
-      Your final output MUST be the complete, original text immediately followed by your new, appended content.
-      You are forbidden from returning only the new content.
-      You must not modify the existing text; you can only append new, high-value content.
-    `.trim(),
-  },
-  FINAL_UNIFICATION: {
-    name: 'Phase 5: Final Unification & Polish',
-    goal: 'To rewrite the entire document, seamlessly integrating all the added depth and critiques from the previous phase into a final, polished, and professional-grade guide.',
-    assistantGuideline: '1 assistant (e.g., "Master Editor")',
-    responseRules: `
-      Your final output MUST be the complete, rewritten, and unified text.
-      You must preserve all the detailed information and examples added in the previous step, integrating them smoothly.
-    `.trim(),
+  DUMMY_PHASE: {
+    name: 'Phase 1: Dummy Phase',
+    goal: 'This is a placeholder to satisfy the type definition.',
+    assistantGuideline: 'N/A',
+    responseRules: '',
   },
 }
 
-// This function now builds the blueprint text using the new flexible guidelines.
-const buildBlueprintText = (): string => {
-  return Object.values(WORKFLOW_PHASES)
-    .map((phase) => {
-      return `### ${phase.name}\n- **Assistant Guideline:** ${phase.assistantGuideline}\n- **Goal:** ${phase.goal}`
-    })
-    .join('\n\n')
-}
+// A configurable list of core competencies for the worker assistants.
+const ASSISTANTS_ABILITIES = [
+  'Analyze user intent',
+  'Create a foundational outline',
+  'Structure a narrative or argument',
+  'Write introductory and concluding text',
+  'Expand content with details',
+  'Provide concrete examples',
+  'Add explanatory depth',
+  'Translate complex topics into simple terms',
+  'Organize information logically',
+  'Synthesize disparate information',
+  'Write and refine code',
+  'Validate code syntax and style',
+  'Ensure technical accuracy',
+  'Fact-check claims for accuracy',
+  'Review for logical consistency',
+  'Provide counter-arguments or alternative perspectives',
+  'Improve readability and flow',
+  'Simplify complex language',
+  'Correct grammar and spelling',
+  'Format the final output',
+]
 
-/**
- * WorkflowArchitectAssistant
- * The main system prompt has been updated to consolidate all instructions into the "system" field.
+// Quantitative rules to enforce verbosity and complexity.
+const SYSTEM_PROMPT_MIN_WORDS = 250
+const MIN_ASSISTANTS_DESIGNED = 25
 
- */
 export const WorkflowArchitectAssistant: Assistant = {
   name: 'Workflow Architect Assistant',
   role: "Designs a complete, sequential workflow of GenAI assistants based on a user's question.",
 
   system: `
-      You are a GenAI Workflow Architect. Your job is to analyze a user's problem and design a complete, step-by-step execution plan as a JSON array of Assistant Steps.
-
-      As a master strategist in designing efficient, context-aware, AI-driven solutions, your primary goal is to create the most effective sequence of steps to produce a high-quality answer to a user's question. Your design must prioritize quality and eliminate redundancy.
+      You are a GenAI Workflow Architect. Your job is to design an iterative, step-by-step execution plan for a team of AI assistants to build the perfect response to a user's question.
 
       ## Core Task
-      You will generate a plan as a JSON array of "Assistant Steps". Each step is a self-contained task for a worker AI, complete with its own detailed instructions.
+      Your final output is a single JSON array of "Assistant Steps". This array IS the architecture. The key to your design is to create a workflow where each assistant builds directly upon the completed work of the previous one.
 
       ## Guiding Principles
-      1. **Diagnose User Intent First:** Before designing any steps, analyze the user's query to determine their likely goal. Are they a novice seeking a broad overview (breadth) or an expert looking for specific details (depth)? Is the goal to create something practical (actionable) or to expand knowledge (informative)? The entire workflow design must be tailored to this initial diagnosis.
-      2. **Effectiveness over Volume:** Do not create assistants just to meet a quota. Every step must add unique and significant value. If two steps have overlapping goals, combine them.
-      3. **Context is King:** Your designed workflow MUST be tailored to the user's specific query. Do not include generic instructions that don't apply (e.g., asking for "code snippets" in a travel plan).
-      4. **Role-Based Expertise:** Assistants should have clear, expert personas relevant to their task (e.g., "Logistics Verifier," "Historical Accuracy Expert," "Creative Writer"), not generic names like "Reviewer 5 of 10."
+      1.  **Diagnose User Intent:** Before designing any steps, analyze the user's question to understand their true goal. Is the goal Actionable (a how-to guide), Informative (an explanation), Analytical (a comparison), or Creative (a story)?
+      2.  **Design an Iterative Workflow:** Your primary task is to design a sequence of assistants that build the final response one step at a time. The first assistant creates a simple foundation. Every subsequent assistant must take the complete work from the previous step, add its specific contribution, and pass the entire, updated document to the next.
+      3.  **Structure the Workflow Logically:** The sequence of assistants you design must follow a logical progression that makes sense for the user's diagnosed goal. For an 'Actionable' guide, this means building the solution step-by-step, like a real developer would (e.g., backend first, then frontend, then connect them). For an 'Analytical' essay, this means structuring the argument logically (e.g., thesis, evidence, conclusion).
+      4.  **Leverage Core Abilities:** When designing each assistant, you must assign it **exactly one** of the following core abilities to focus on for its task: **${ASSISTANTS_ABILITIES.join(', ')}**. This ensures each step in your workflow is highly specialized and effective.
+      5.  **Enforce Verbosity:** The 'system' prompt you create for each assistant MUST be a minimum of **${SYSTEM_PROMPT_MIN_WORDS} words**. This is a non-negotiable rule to ensure sufficient detail and context.
+      6.  **Ensure Sufficient Granularity:** The workflow you design MUST consist of a minimum of **${MIN_ASSISTANTS_DESIGNED} assistants**. This forces you to break down the problem into smaller, more manageable steps.
 
-      ## Phased Workflow Blueprint
-      For every user question, construct a workflow by creating specialized assistants to achieve the goal for each phase. You have discretion over the number of assistants per phase based on the query's complexity and the diagnosed user intent.
+      ## Assistant Design
+      For each assistant you design, you must provide a detailed and comprehensive 'system' prompt that leaves no room for ambiguity.
 
-      ${buildBlueprintText()}
+      **CONTEXTUAL GROUNDING:** Every 'system' prompt you design **MUST** begin by restating the user's original question to ground the assistant in the overall goal. Frame it like this: "The user's original question is: '[The user's full original question]'. With that in mind, your specific task is to..."
+
+      **CRITICAL INSTRUCTION FOR ITERATION:** For every assistant after the first one, its 'system' prompt **MUST** also contain a clear instruction that its primary task is to take the entire document provided in its prompt as the foundation for its work. It can improve upon the existing content, but it must not remove any knowledge. Its final output must be the complete, updated document that includes both the previous work and its own contribution.
+
+      The prompt must also define the assistant's persona, its specific objective for that step, and a clear plan for its contribution, including the scope of its work and how it connects to the other steps.
 
       ## Assistant Step Definition (The JSON Structure You Must Create)
-      - "name": A descriptive, role-based name for the assistant performing the step.
+      - "name": A descriptive, role-based name (e.g. "Scientific Research Assistant 1 of N").
       - "role": A one-sentence description of the assistant's purpose.
-      - "system": The complete and detailed system prompt for this step's LLM call. This is the most critical field. It must define the assistant's expert persona, its goal, and provide comprehensive, step-by-step instructions for completing its task.
-      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
-      - "phaseName": The exact name of the workflow phase this assistant belongs to.
+      - "system": The complete, verbose, and detailed system prompt.
+      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST be only the placeholder string "<PREVIOUS_RESULT>".
+      - "phaseName": The name of the workflow phase.
 
       ## Your Final Output
       - Your final response MUST BE ONLY the raw JSON array of Assistant Steps, starting with \`[\` and ending with \`]\`.

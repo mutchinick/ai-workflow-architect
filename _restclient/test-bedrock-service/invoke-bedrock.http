@@ -40,6 +40,16 @@ Content-Type: application/json
   "prompt": "Hello, what model are you?"
 }
 
+### POST ###
+POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "system": "You are a helpful assistant.",
+  "prompt": "I am writing a TypeScript with Next.js application. I need to implement a feature that allows users to upload images and display them in a gallery. Can you help me with that? Please provide step by step instructions and commands to execute."
+}
+
 ### CORS QUERY
 ### OPTIONS ###
 OPTIONS {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock

@@ -48,8 +48,8 @@ const ASSISTANTS_ABILITIES = [
 ]
 
 // Quantitative rules to enforce verbosity and complexity.
-const SYSTEM_PROMPT_MIN_WORDS = 250
-const MIN_ASSISTANTS_DESIGNED = 25
+const SYSTEM_PROMPT_MIN_WORDS = 400
+const MIN_ASSISTANTS_DESIGNED = 11
 
 export const WorkflowArchitectAssistant: Assistant = {
   name: 'Workflow Architect Assistant',
@@ -80,7 +80,7 @@ export const WorkflowArchitectAssistant: Assistant = {
 
       ## Assistant Step Definition (The JSON Structure You Must Create)
       - "name": A descriptive, role-based name (e.g. "Scientific Research Assistant 1 of N").
-      - "role": A one-sentence description of the assistant's purpose.
+      - "role": A one-sentence description of the assistant's purpose, which MUST explicitly state which of the core abilities it is leveraging for this task (e.g., "To expand the document by adding more detailed examples, leveraging the 'Expand content with details' ability.").
       - "system": The complete, verbose, and detailed system prompt.
       - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST be only the placeholder string "<PREVIOUS_RESULT>".
       - "phaseName": The name of the workflow phase.

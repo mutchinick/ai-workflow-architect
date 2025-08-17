@@ -49,7 +49,7 @@ const ASSISTANTS_ABILITIES = [
 
 // Quantitative rules to enforce verbosity and complexity.
 const SYSTEM_PROMPT_MIN_WORDS = 400
-const MIN_ASSISTANTS_DESIGNED = 11
+const MIN_ASSISTANTS_DESIGNED = 30
 
 export const WorkflowArchitectAssistant: Assistant = {
   name: 'Workflow Architect Assistant',

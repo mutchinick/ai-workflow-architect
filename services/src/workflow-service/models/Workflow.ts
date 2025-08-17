@@ -162,6 +162,17 @@ export class Workflow implements WorkflowProps {
   /**
    *
    */
+  getAllCompletedResults(): string {
+    // COMBAK: This currently skips the first step which is the 'deploy_assistants' step.
+    return this.steps
+      .filter((step) => step.stepStatus === 'completed' && step.executionOrder !== 1)
+      .map((step) => step.llmResult)
+      .join('\n---\n')
+  }
+
+  /**
+   *
+   */
   getCurrentStep(): WorkflowStep | null {
     return this.steps.find((step) => step.stepStatus === 'pending') || null
   }

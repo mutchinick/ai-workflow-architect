@@ -478,6 +478,48 @@ describe(`Workflow Service models Workflow tests`, () => {
    *
    *
    ************************************************************
+   * Test Workflow.getAllCompletedResults
+   ************************************************************/
+  describe(`Test Workflow.getAllCompletedResults`, () => {
+    it(`returns an empty string when no steps are present`, () => {
+      const workflowResult = Workflow.fromProps(emptyWorkflowScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getAllCompletedResults()).toBe('')
+    })
+
+    it(`returns an empty string when no steps have been completed`, () => {
+      const workflowResult = Workflow.fromProps(noStepsExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getAllCompletedResults()).toBe('')
+    })
+
+    it(`returns an empty string when only the first 'deploy_assistants' step is completed`, () => {
+      const workflowResult = Workflow.fromProps(initialStepValidScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      expect(workflow.getAllCompletedResults()).toBe('')
+    })
+
+    it(`returns only the result of the second step in a partially executed workflow`, () => {
+      const workflowResult = Workflow.fromProps(partiallyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      // The method should skip the first completed step (executionOrder: 1)
+      const expectedResult = partiallyExecutedScenario.props.steps[1].llmResult
+      expect(workflow.getAllCompletedResults()).toBe(expectedResult)
+    })
+
+    it(`returns a concatenated string of all completed step results, excluding the first`, () => {
+      const workflowResult = Workflow.fromProps(fullyExecutedScenario.props)
+      const workflow = Result.getSuccessValueOrThrow(workflowResult)
+      const results = [fullyExecutedScenario.props.steps[1].llmResult, fullyExecutedScenario.props.steps[2].llmResult]
+      const expectedResult = results.join('\n---\n')
+      expect(workflow.getAllCompletedResults()).toBe(expectedResult)
+    })
+  })
+
+  /*
+   *
+   *
+   ************************************************************
    * Test Workflow.getCurrentStep
    ************************************************************/
   describe(`Test Workflow.getCurrentStep`, () => {

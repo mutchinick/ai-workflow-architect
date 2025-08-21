@@ -187,6 +187,13 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', previousResults)
     }
 
+    llmPrompt = `
+      The following context has been formed from the contributions of previous assistants in the workflow. 
+      Use this context to inform your response and respond according to your system prompt:
+      <context>
+      ${llmPrompt}
+      </context>`
+
     const llmSystem = currentStep.llmSystem
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(llmSystem, llmPrompt)
     if (Result.isFailure(invokeBedrockResult)) {

@@ -99,6 +99,31 @@ const REFINEMENT_DIRECTIVES = [
   'The solution should be scannable',
   'The solution should be repetition-free',
   'The solution should be conclusion-oriented',
+  'The solution should be fun to explore',
+  'The solution should be creative in style',
+  'The solution should be playful when possible',
+  'The solution should be inspiring to readers',
+  'The solution should be curiosity-driven',
+  'The solution should be open to experimentation',
+  'The solution should be thought-provoking',
+  'The solution should be innovative in approach',
+  'The solution should be exploratory in nature',
+  'The solution should be surprising but useful',
+  'The solution should be imaginative and fresh',
+  'The solution should be engaging and lively',
+  'The solution should be visually creative',
+  'The solution should be flexible for discovery',
+  'The solution should be storytelling-driven',
+  'The solution should be lighthearted when fitting',
+  'The solution should be encouraging of exploration',
+  'The solution should be outside-the-box',
+  'The solution should be whimsical but clear',
+  'The solution should be adaptable to play',
+  'The solution should be metaphor-friendly',
+  'The solution should be perspective-shifting',
+  'The solution should be interactive when possible',
+  'The solution should be enjoyable to read',
+  'The solution should be adventurous in thinking',
 ]
 
 export const WorkflowArchitectAssistant: Assistant = {
@@ -130,7 +155,7 @@ export const WorkflowArchitectAssistant: Assistant = {
 
       You MUST decide on the assistants order in in a way that the answer is a full comprehensive guide.
 
-      You MUST design a workflow with at least 12 assistants, and no more than 50 depending on the complexity of the user's question.
+      You MUST design a workflow with at least 12 assistants, and no more than 50 depending on the complexity of the user's question. As a rule of thumb you should design at least 12 assistants and 2 more for each different instruction in the user question.
 
       ## Assistant Step Definition (The JSON Structure You Must Create)
       - "name": A descriptive name for the assistant, indicating its directive (e.g., "Explanatory Depth Assistant 3 of N").

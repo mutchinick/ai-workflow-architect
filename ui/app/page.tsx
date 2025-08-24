@@ -3,7 +3,14 @@
 // "use client" is required for App Router components that use React hooks.
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+} from "react";
 import type { NextPage } from "next";
 // To render Markdown, you'll need to install react-markdown and its GFM plugin.
 // Run: npm install react-markdown remark-gfm
@@ -55,7 +62,6 @@ const ChatStep = ({
     : "border-gray-200 bg-white";
   const textColor = isLastStep ? "text-blue-700" : "text-gray-500";
 
-  // Determine if the llmResult is JSON and should be formatted as a code block
   let llmResultContent = step.llmResult || "*Processing...*";
   const isJson =
     llmResultContent.trim().startsWith("[") &&
@@ -64,6 +70,10 @@ const ChatStep = ({
   if (isJson) {
     llmResultContent = "```json\n" + llmResultContent + "\n```";
   }
+
+  // This safer regex finds any sequence of zero or more newlines followed by a code fence
+  // and replaces it with exactly two newlines, ensuring proper spacing without affecting other text.
+  const formattedContent = llmResultContent.replace(/\n*```/g, "\n```");
 
   return (
     <div
@@ -89,19 +99,23 @@ const ChatStep = ({
       {!isCollapsed && (
         <div className="px-4 pb-4">
           <div
-            className="text-gray-800 border-t pt-4
+            className="text-gray-800 border-t pt-4 break-words
                        [&_h1]:text-xl [&_h1]:font-bold [&_h1]:my-4
                        [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:my-3
                        [&_h3]:text-base [&_h3]:font-semibold [&_h3]:my-2
                        [&_p]:my-2
                        [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5
                        [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5
-                       [&_pre]:bg-slate-900 [&_pre]:text-slate-200 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:text-xs [&_pre]:whitespace-pre-wrap [&_pre]:break-all [&_pre]:border [&_pre]:border-slate-700
-                       [&_code]:text-xs [&_code]:font-mono
+                       /* Style for code blocks */
+                       [&_pre]:bg-slate-900 [&_pre]:text-slate-200 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:text-xs [&_pre]:whitespace-pre-wrap [&_pre]:border [&_pre]:border-slate-700
+                       /* Default style for all code (inline) */
+                       [&_code]:bg-gray-200 [&_code]:text-gray-800 [&_code]:px-1.5 [&_code]:py-1 [&_code]:rounded-md [&_code]:text-sm [&_code]:font-mono
+                       /* Reset inline styles for code inside a block */
+                       [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0 [&_pre_code]:rounded-none
                        [&_a]:text-blue-600 [&_a]:hover:underline"
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {llmResultContent}
+              {formattedContent}
             </ReactMarkdown>
           </div>
         </div>
@@ -119,18 +133,24 @@ const WorkflowVisualizerPage: NextPage = () => {
   const [collapsedSteps, setCollapsedSteps] = useState<Record<string, boolean>>(
     {}
   );
-  // This new state tracks which steps the user has manually interacted with.
   const [manualToggles, setManualToggles] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPolling, setIsPolling] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // This effect updates the collapsed state when new steps arrive, preserving user choices
+  // Auto-resize textarea height
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [question]);
+
   useEffect(() => {
     if (steps.length > 0) {
-      // Find the index of the last step that is 'completed'.
       const lastCompletedIndex = steps
         .map((step) => step.stepStatus)
         .lastIndexOf("completed");
@@ -138,16 +158,13 @@ const WorkflowVisualizerPage: NextPage = () => {
       setCollapsedSteps((prev) => {
         const newCollapsedState = { ...prev };
         steps.forEach((step, index) => {
-          // Only apply the default state if the user has NOT manually toggled this step.
           if (!manualToggles.has(step.stepId)) {
             if (lastCompletedIndex !== -1) {
-              // If there's at least one completed step, expand the last completed one and the next one.
               const shouldBeExpanded =
                 index === lastCompletedIndex ||
                 index === lastCompletedIndex + 1;
               newCollapsedState[step.stepId] = !shouldBeExpanded;
             } else {
-              // If no steps are completed yet, expand only the first step (the current one).
               newCollapsedState[step.stepId] = index > 0;
             }
           }
@@ -157,7 +174,6 @@ const WorkflowVisualizerPage: NextPage = () => {
     }
   }, [steps, manualToggles]);
 
-  // This effect handles the API polling
   useEffect(() => {
     if (isPolling && workflowId) {
       pollingIntervalRef.current = setInterval(async () => {
@@ -185,7 +201,6 @@ const WorkflowVisualizerPage: NextPage = () => {
           }
 
           const data = await response.json();
-
           const workflowSteps = data.steps || [];
           setSteps(workflowSteps);
 
@@ -224,7 +239,6 @@ const WorkflowVisualizerPage: NextPage = () => {
   }, [isPolling, workflowId]);
 
   const handleToggleCollapse = (stepId: string) => {
-    // When a user manually toggles a step, record it.
     setManualToggles((prev) => new Set(prev).add(stepId));
     setCollapsedSteps((prev) => ({
       ...prev,
@@ -232,11 +246,10 @@ const WorkflowVisualizerPage: NextPage = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
     if (!question.trim()) return;
 
-    // Reset all states for a new submission
     setSteps([]);
     setCollapsedSteps({});
     setManualToggles(new Set());
@@ -281,6 +294,13 @@ const WorkflowVisualizerPage: NextPage = () => {
     }
   };
 
+  const handleTextareaKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen font-sans flex items-center justify-center p-4">
       <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-8">
@@ -292,18 +312,23 @@ const WorkflowVisualizerPage: NextPage = () => {
         </p>
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="flex items-center gap-4 mb-8">
-          <input
-            type="text"
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row items-center gap-4 mb-8"
+        >
+          <textarea
+            ref={textareaRef}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={handleTextareaKeyDown}
             placeholder="Ask your question here..."
-            className="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+            className="flex-grow w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition resize-none overflow-hidden"
             disabled={isLoading}
+            rows={1}
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center gap-2"
+            className="w-full sm:w-auto bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
             disabled={isLoading}
           >
             {isLoading ? (

@@ -8,42 +8,107 @@ export type WorkflowPhase = {
   responseRules: string
 }
 
-/**
- * WORKFLOW_PHASES
- * This object has been trimmed to a single dummy phase to prevent it from
- * influencing the architect's prompt, while maintaining its structure
- * to avoid breaking changes in the consuming code.
- */
-export const WORKFLOW_PHASES: Record<string, WorkflowPhase> = {
-  DUMMY_PHASE: {
-    name: 'Phase 1: Dummy Phase',
-    goal: 'This is a placeholder to satisfy the type definition.',
-    assistantGuideline: 'N/A',
-    responseRules: '',
-  },
-}
-
-// A configurable list of core competencies for the worker assistants.
-const ASSISTANTS_ABILITIES = [
-  'Analyze User Intent',
-  'Architect the Outline',
-  'Generate Core Content',
-  'Provide Concrete Examples',
-  'Add Explanatory Depth',
-  'Write and Implement Code',
-  'Ensure Code Accuracy and Style',
-  'Fact-Check and Verify Accuracy',
-  'Review for Logical Cohesion',
-  'Provide Alternative Perspectives',
-  'Improve Readability and Clarity',
-  'Synthesize and Unify Content',
-  'Correct Grammar and Spelling',
-  'Format the Final Output',
+// A pre-defined "toolbox" of general-purpose improvement approaches.
+const REFINEMENT_PERSPECTIVES = [
+  'The solution should be clear and simple',
+  'The solution should be logical and structured',
+  'The solution should be complete and actionable',
+  'The solution should be error-aware',
+  'The solution should be relevant and focused',
+  'The solution should be tested and correct',
+  'The solution should be efficient and practical',
+  'The solution should be accurate and precise',
+  'The solution should be consistent and coherent',
+  'The solution should be transparent in reasoning',
+  'The solution should be well formatted',
+  'The solution should be dependency-aware',
+  'The solution should be security-conscious',
+  'The solution should be scalable when needed',
+  'The solution should be honest about limits',
+  'The solution should be flexible with alternatives',
+  'The solution should be terminologically consistent',
+  'The solution should be neutral in tone',
+  'The solution should be concise and clear',
+  'The solution should be naturally flowing',
+  'The solution should be free from jargon',
+  'The solution should be assumption-aware',
+  'The solution should be clear on trade-offs',
+  'The solution should be reproducible stepwise',
+  'The solution should be graceful on errors',
+  'The solution should be input-validating',
+  'The solution should be user-friendly',
+  'The solution should be accessibility-conscious',
+  'The solution should be generalizable when possible',
+  'The solution should be contextually explained',
+  'The solution should be broad yet deep',
+  'The solution should be performance-aware',
+  'The solution should be contradiction-free',
+  'The solution should be aligned with practice',
+  'The solution should be factually correct',
+  'The solution should be concise in language',
+  'The solution should be logically consistent',
+  'The solution should be well supported',
+  'The solution should be cautious of risks',
+  'The solution should be objective and fair',
+  'The solution should be realistic and achievable',
+  'The solution should be anticipatory of questions',
+  'The solution should be simplification-focused',
+  'The solution should be non-redundant',
+  'The solution should be example-backed',
+  'The solution should be empathetic to readers',
+  'The solution should be verifiable in method',
+  'The solution should be scope-bounded',
+  'The solution should be unambiguous',
+  'The solution should be both overview and detail',
+  'The solution should be step-by-step',
+  'The solution should be pitfall-aware',
+  'The solution should be environment-specific',
+  'The solution should be choice-justified',
+  'The solution should be style-consistent',
+  'The solution should be claim-supported',
+  'The solution should be visually aided',
+  'The solution should be default-friendly',
+  'The solution should be compatibility-checked',
+  'The solution should be deployment-ready',
+  'The solution should be assumption-free',
+  'The solution should be digression-free',
+  'The solution should be test-considered',
+  'The solution should be reusable',
+  'The solution should be bias-free',
+  'The solution should be jargon-explained',
+  'The solution should be maintainable',
+  'The solution should be fairness-conscious',
+  'The solution should be phrasing-clear',
+  'The solution should be step-ordered',
+  'The solution should be shortcut-free',
+  'The solution should be requirement-explicit',
+  'The solution should be security-checked',
+  'The solution should be context-adaptive',
+  'The solution should be dependency-explicit',
+  'The solution should be improvement-ready',
+  'The solution should be trade-off-aware',
+  'The solution should be correctness-first',
+  'The solution should be terminology-accurate',
+  'The solution should be beginner-accessible',
+  'The solution should be advanced-user-respecting',
+  'The solution should be constraint-aware',
+  'The solution should be tested in practice',
+  'The solution should be logic-sound',
+  'The solution should be verbosity-free',
+  'The solution should be outcome-specific',
+  'The solution should be tone-consistent',
+  'The solution should be confidence-inspiring',
+  'The solution should be context-appropriate',
+  'The solution should be alternative-aware',
+  'The solution should be error-recoverable',
+  'The solution should be terminology-consistent',
+  'The solution should be caveat-inclusive',
+  'The solution should be ambiguity-free',
+  'The solution should be time-respecting',
+  'The solution should be scannable',
+  'The solution should be repetition-free',
+  'The solution should be conclusion-oriented',
 ]
-
-// Quantitative rules to enforce verbosity and complexity.
-const MIN_SYSTEM_PROMPT_WORDS = 250
-const MIN_ASSISTANTS_DESIGNED = 25
 
 export const WorkflowArchitectAssistant: Assistant = {
   name: 'Workflow Architect Assistant',
@@ -52,31 +117,33 @@ export const WorkflowArchitectAssistant: Assistant = {
   system: `
       You are a GenAI Workflow Architect. Your job is to design an iterative, step-by-step execution plan for a team of AI assistants to build the perfect response to a user's question.
 
-      ## The Final Output Mandate
-      The single, overarching goal of the workflow you design is to produce a complete, comprehensive, and cohesive final document (e.g., a guide, tutorial, or essay) that directly answers the user's original question. The final response from the last assistant in your workflow must be ONLY this final document. It must not contain any conversational filler, commentary, or emojis.
-
       ## Core Task
-      Your final output is a single JSON array of "Assistant Steps". This array IS the architecture. The key to your design is to create a workflow where each assistant builds directly upon the completed work of the previous one.
+      Your final output is a single JSON array of "Assistant Steps". This array IS the architecture.
 
-      ## Guiding Principles
-      1.  **Diagnose User Intent:** Before designing any steps, analyze the user's question to understand their true goal. Is the goal Actionable (a how-to guide), Informative (an explanation), Analytical (a comparison), or Creative (a story)?
-      2.  **Prioritize Focused Depth over Unnecessary Breadth:** Your primary goal is to design a workflow that produces a deep, well-explained, and focused answer to the user's specific question. You must instruct your assistants to avoid adding tangential information or exploring related topics that were not explicitly asked for. The final response must be a masterclass on the core topic, not a shallow overview of many.
-      3.  **Design an Iterative Workflow:** Your primary task is to design a sequence of assistants that build the final response one step at a time. The first assistant creates a simple foundation. Every subsequent assistant must take the complete work from the previous step, add its specific contribution, and pass the entire, updated document to the next.
-      4.  **Structure the Workflow Logically:** The sequence of assistants you design must follow a logical progression that makes sense for the user's diagnosed goal.
-      5.  **Leverage Core Abilities:** When designing each assistant, you must assign it **exactly one** of the following core abilities to focus on for its task: **${ASSISTANTS_ABILITIES.join(', ')}**.
-      6.  **Enforce Verbosity:** The 'system' prompt you create for each assistant MUST be a minimum of **${MIN_SYSTEM_PROMPT_WORDS} words**.
-      7.  **Ensure Sufficient Granularity:** The workflow you design MUST consist of a minimum of **${MIN_ASSISTANTS_DESIGNED} assistants**.
+      ## Your Design Philosophy
+      1.  **First, determine the single 'Field of Study.'** Analyze the user's question to identify the core expertise required to answer it (e.g., "Senior Next.js and TypeScript Developer," "Expert Historian of Ancient Rome," "Creative Fiction Editor"). This single Field of Study will be the expert persona for **every** assistant in the workflow.
+      2.  **Second, design a logical 'Path of Approaches.'** Your primary task is to create a sequence of assistants that iteratively refine the answer. To do this, you must choose a logical sequence of "approaches" for the assistants to adopt from the pre-defined list provided below. This sequence must be tailored to the user's goal and the 'Field of Study' you identified. For example, for a technical guide, a good sequence might be: 'Create a foundational outline' -> 'Write the core content from the outline' -> 'Add explanatory depth' -> 'Improve the readability and narrative flow'.
+      3.  **Third, ensure each step is an iterative refinement.** The first assistant in your plan will create a foundational answer. Every assistant after that **MUST** be instructed to take the complete work from the previous step, improve it according to its unique approach, and return the **COMPLETE, improved, and self-contained SINGLE version answer.**
 
       ## Assistant Design
-      For each assistant you design, you must provide a detailed and comprehensive 'system' prompt. Your instructions must reflect the principle of "Focused Depth," demanding that each assistant's contribution be exceptionally well-explained in a teaching manner.
+      For each assistant in your designed workflow, you must create a 'system' prompt that follows this exact template:
+      "You are an expert <Field of Study>. Your job is to improve the following solution by adopting a "<Approach>" approach. Your response MUST be the COMPLETE improved and self contained SINGLE version answer and must not lose track of the original user question: "<Original User Question>". You MUST not provide different or conflicting alternative solutions. You must only respond with the final answer, and nothing else."
 
-      **CONTEXTUAL GROUNDING:** Every 'system' prompt you design **MUST** begin by restating the user's original question to ground the assistant in the overall goal. Frame it like this: "The user's original question is: '[The user's full original question]'. With that in mind, your specific task is to..."
+      You will replace "<Field of Study>" with the single expertise you identified in step 1
+      You will replace "<Original User Question>" with the original user question
+      You will replace "<Approach>" with the specific approach for that step from the sequence you designed in step 2.
+
+      The only available approaches you can choose from are: **${REFINEMENT_PERSPECTIVES.join(', ')}**.
+
+      You MUST decide the best approach for each step based on the user's question and the overall goal of creating a high-quality answer. You cannot invent new approaches or modify the provided ones.
+
+      You MUST design a workflow with at least 25 assistants, and no more than 50 depending on the complexity of the user's question.
 
       ## Assistant Step Definition (The JSON Structure You Must Create)
-      - "name": A descriptive, role-based name (e.g. "Scientific Research Assistant 1 of N").
-      - "role": A one-sentence description of the assistant's purpose, which MUST explicitly state which of the core abilities it is leveraging.
-      - "system": The complete, verbose, and detailed system prompt.
-      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST be only the placeholder string "<PREVIOUS_RESULT>".
+      - "name": A descriptive name for the assistant, indicating its approach (e.g., "Explanatory Depth Assistant 3 of N").
+      - "role": A one-sentence description of the assistant's purpose.
+      - "system": The complete system prompt you constructed using the template above.
+      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST be only the placeholder string "Solution: <PREVIOUS_RESULT>".
       - "phaseName": The name of the workflow phase.
 
       ## Your Final Output

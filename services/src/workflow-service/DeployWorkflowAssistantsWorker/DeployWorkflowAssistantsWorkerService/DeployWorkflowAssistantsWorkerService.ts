@@ -204,9 +204,10 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
    */
   private addResponseRules(assistants: Assistant[]): Assistant[] {
     const assistantsWithRules = assistants.map((assistant) => {
-      const responseRules = `
-        Your response must contain only the direct answer or requested content; 
-        **IT MUST NOT include any commentary, conversational filler, or emojis.**`
+      // const responseRules = `
+      //   Your response must contain only the direct answer or requested content;
+      //   **IT MUST NOT include any commentary, conversational filler, or emojis.**`
+      const responseRules = ``
       return { ...assistant, system: `${assistant.system}\n${responseRules}` }
     })
 

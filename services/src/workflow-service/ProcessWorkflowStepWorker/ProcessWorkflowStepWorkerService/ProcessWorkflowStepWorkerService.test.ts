@@ -328,7 +328,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    jest.spyOn(Workflow.prototype, 'getAllCompletedResults').mockReturnValueOnce(null as never)
+    jest.spyOn(Workflow.prototype, 'getLastExecutedStep').mockReturnValueOnce(null as never)
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
@@ -379,7 +379,7 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockSaveWorkflowClient,
       mockEventStoreClient,
     )
-    jest.spyOn(Workflow.prototype, 'getAllCompletedResults').mockReturnValueOnce(null as never)
+    jest.spyOn(Workflow.prototype, 'getLastExecutedStep').mockReturnValueOnce(null as never)
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',
@@ -504,7 +504,15 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
       mockEventStoreClient,
     )
     const mockCompletedResults = 'mockMetAllCompletedResults'
-    jest.spyOn(Workflow.prototype, 'getAllCompletedResults').mockReturnValueOnce(mockCompletedResults)
+    jest.spyOn(Workflow.prototype, 'getLastExecutedStep').mockReturnValueOnce({
+      stepId: 'mockStepId-1',
+      stepStatus: 'completed',
+      executionOrder: 1,
+      assistant: mockAssistants[0],
+      llmSystem: mockAssistants[0].system,
+      llmPrompt: mockAssistants[0].prompt,
+      llmResult: mockCompletedResults,
+    })
     jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
       stepId: 'mockStepId-2',
       stepStatus: 'pending',

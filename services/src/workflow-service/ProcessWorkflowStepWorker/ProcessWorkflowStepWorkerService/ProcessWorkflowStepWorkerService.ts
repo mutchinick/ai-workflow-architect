@@ -176,23 +176,16 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
 
     let llmPrompt = currentStep.llmPrompt
     if (llmPrompt.includes('<PREVIOUS_RESULT>')) {
-      // TODO: workflow.getAllPreviousResults() could be used to get all previous results
-      const previousResults = workflow.getAllCompletedResults()
-      if (!previousResults) {
+      const previousStep = workflow.getLastExecutedStep()
+      const previousResult = previousStep?.llmResult
+      if (!previousResult) {
         const message = 'No previous step to reference for <PREVIOUS_RESULT>'
         const failure = Result.makeFailure('WorkflowInvalidStateError', message, false)
         console.error(`${logCtx} exit failure:`, { failure, workflow })
         return failure
       }
-      llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', previousResults)
+      llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', previousResult)
     }
-
-    llmPrompt = `
-      The following context has been formed from the contributions of previous assistants in the workflow. 
-      Use this context to inform your response and respond according to your system prompt:
-      <context>
-      ${llmPrompt}
-      </context>`
 
     const llmSystem = currentStep.llmSystem
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(llmSystem, llmPrompt)

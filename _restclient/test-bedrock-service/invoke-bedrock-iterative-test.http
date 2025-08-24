@@ -1,0 +1,29 @@
+@baseUrl = {{$dotenv TEST_BEDROCK_SERVICE_API_BASE_URL}}
+
+### POST ###
+POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "system": "You are a senior software developer an architect specialized in NextJS. You job is to create the best possible answer to the following question. You must only respond with the final answer, and nothing else.",
+  "prompt": "User question: I am writing a TypeScript with Next.js application. I need to implement a feature that allows users to upload images and display them in a gallery. Can you help me with that? Please provide step by step instructions and commands to execute."
+}
+
+
+### POST ###
+POST {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "system": "You are a senior software developer an architect specialized in NextJS. You job is to improve the following solution by adopting a TEACHING perspective. Your response MUST be the COMPLETE improved and self contained SINGLE version answer. You MUST not provide different or conflicting alternative solutions. You must only respond with the final answer, and nothing else.",
+  "prompt": "Solution: "
+}
+
+
+### CORS QUERY
+### OPTIONS ###
+OPTIONS {{baseUrl}}/api/v1/test-bedrock-service/invokeBedrock
+Origin: https://localhost
+Access-Control-Request-Method: POST

@@ -137,7 +137,9 @@ export const WorkflowArchitectAssistant: Assistant = {
 
       You MUST decide the best approach for each step based on the user's question and the overall goal of creating a high-quality answer. You cannot invent new approaches or modify the provided ones.
 
-      You MUST design a workflow with at least 25 assistants, and no more than 50 depending on the complexity of the user's question.
+      You MUST decide on the assistants order in in a way that the answer is a full comprehensive guide.
+
+      You MUST design a workflow with at least 10 assistants, and no more than 50 depending on the complexity of the user's question.
 
       ## Assistant Step Definition (The JSON Structure You Must Create)
       - "name": A descriptive name for the assistant, indicating its approach (e.g., "Explanatory Depth Assistant 3 of N").

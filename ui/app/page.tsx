@@ -1,16 +1,13 @@
-// Filename: app/page.tsx
-// This single file creates a complete Next.js page to visualize your AI workflow.
-// "use client" is required for App Router components that use React hooks.
 "use client";
 
 import type { NextPage } from "next";
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
-// To render Markdown, you'll need to install react-markdown and its GFM plugin.
-// Run: npm install react-markdown remark-gfm
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-// --- Type Definitions ---
+// ==============================================
+// Type Definitions
+// ==============================================
 interface Assistant {
   name: string;
   role: string;
@@ -24,12 +21,21 @@ interface Step {
   assistant?: Assistant;
 }
 
-// --- Constants ---
+// ==============================================
+// Constants
+// ==============================================
 const POLLING_INTERVAL_MS = 10000;
 
-// --- API Helper Functions ---
+// ==============================================
+// API Helper Functions
+// ==============================================
 const apiBaseUrl = process.env.NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL;
 
+/**
+ * Starts a new workflow.
+ * @param query The query to send to the workflow.
+ * @returns The ID of the newly created workflow.
+ */
 async function startWorkflow(query: string): Promise<{ workflowId: string }> {
   if (!apiBaseUrl) {
     throw new Error(
@@ -51,6 +57,11 @@ async function startWorkflow(query: string): Promise<{ workflowId: string }> {
   return response.json();
 }
 
+/**
+ * Fetches the latest steps of a workflow.
+ * @param workflowId The ID of the workflow to fetch.
+ * @returns The steps of the workflow and its status.
+ */
 async function fetchWorkflowSteps(
   workflowId: string
 ): Promise<{ steps?: Step[]; workflowStatus?: string }> {
@@ -74,12 +85,23 @@ async function fetchWorkflowSteps(
   return response.json();
 }
 
-// --- Helper Components ---
+// ==============================================
+// Helper Components
+// ==============================================
 
+/**
+ * Spinner component displays a simple loading spinner.
+ * @returns The rendered Spinner component.
+ */
 const Spinner = () => (
   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
 );
 
+/**
+ * ChevronIcon component displays a chevron that rotates based on the isCollapsed prop.
+ * @param isCollapsed Whether the chevron is in a collapsed state.
+ * @returns The rendered ChevronIcon component.
+ */
 const ChevronIcon = ({ isCollapsed }: { isCollapsed: boolean }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -97,6 +119,14 @@ const ChevronIcon = ({ isCollapsed }: { isCollapsed: boolean }) => (
   </svg>
 );
 
+/**
+ * ChatStep component displays a single step in the chat workflow.
+ * @param step The step data to display.
+ * @param index The index of the step in the workflow.
+ * @param totalSteps The total number of steps in the workflow.
+ * @param isCollapsed Whether the step is collapsed or expanded.
+ * @returns The rendered ChatStep component.
+ */
 const ChatStep = ({
   step,
   index,
@@ -158,7 +188,10 @@ const ChatStep = ({
   );
 };
 
-// --- Main Page Component ---
+/**
+ * The main page component for the AI Workflow Visualizer.
+ * @returns The main page component for the AI Workflow Visualizer.
+ */
 const WorkflowVisualizerPage: NextPage = () => {
   const [question, setQuestion] = useState("");
   const [workflowId, setWorkflowId] = useState<string | null>(null);

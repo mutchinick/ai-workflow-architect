@@ -3,7 +3,14 @@
 // "use client" is required for App Router components that use React hooks.
 "use client";
 
-import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+} from "react";
 import type { NextPage } from "next";
 // To render Markdown, you'll need to install react-markdown and its GFM plugin.
 // Run: npm install react-markdown remark-gfm
@@ -66,7 +73,7 @@ const ChatStep = ({
 
   // This safer regex finds any sequence of zero or more newlines followed by a code fence
   // and replaces it with exactly two newlines, ensuring proper spacing without affecting other text.
-  const formattedContent = llmResultContent.replace(/\n*```/g, "\n```");
+  const formattedContent = llmResultContent.replace(/\n*```/g, "\n\n```");
 
   return (
     <div
@@ -129,6 +136,7 @@ const WorkflowVisualizerPage: NextPage = () => {
   const [manualToggles, setManualToggles] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPolling, setIsPolling] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -168,7 +176,7 @@ const WorkflowVisualizerPage: NextPage = () => {
   }, [steps, manualToggles]);
 
   useEffect(() => {
-    if (isPolling && workflowId) {
+    if (isPolling && !isPaused && workflowId) {
       pollingIntervalRef.current = setInterval(async () => {
         try {
           const apiBaseUrl =
@@ -229,7 +237,7 @@ const WorkflowVisualizerPage: NextPage = () => {
         clearInterval(pollingIntervalRef.current);
       }
     };
-  }, [isPolling, workflowId]);
+  }, [isPolling, isPaused, workflowId]);
 
   const handleToggleCollapse = (stepId: string) => {
     setManualToggles((prev) => new Set(prev).add(stepId));
@@ -239,19 +247,27 @@ const WorkflowVisualizerPage: NextPage = () => {
     }));
   };
 
-  const handleSubmit = async (e?: FormEvent) => {
-    if (e) e.preventDefault();
-    if (!question.trim()) return;
-
+  // This function now resets everything EXCEPT the question.
+  const resetForNewSubmission = () => {
     setSteps([]);
     setCollapsedSteps({});
     setManualToggles(new Set());
     setError(null);
-    setIsLoading(true);
+    setIsLoading(false);
+    setIsPolling(false);
+    setIsPaused(false);
     setWorkflowId(null);
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
     }
+  };
+
+  const handleSubmit = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
+    if (!question.trim()) return;
+
+    resetForNewSubmission();
+    setIsLoading(true); // Set loading true after reset
 
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL;
@@ -287,11 +303,10 @@ const WorkflowVisualizerPage: NextPage = () => {
     }
   };
 
-  const handleTextareaKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
+  const handleCancel = () => {
+    // Cancel calls the reset function and THEN clears the question for a full reset.
+    resetForNewSubmission();
+    setQuestion("");
   };
 
   return (
@@ -304,34 +319,56 @@ const WorkflowVisualizerPage: NextPage = () => {
           Ask a question to see the step-by-step evolution of the AI's response.
         </p>
 
-        {/* Input Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col sm:flex-row items-center gap-4 mb-8"
-        >
-          <textarea
-            ref={textareaRef}
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={handleTextareaKeyDown}
-            placeholder="Ask your question here..."
-            className="flex-grow w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition resize-none overflow-hidden"
-            disabled={isLoading}
-            rows={1}
-          />
-          <button
-            type="submit"
-            className="w-full sm:w-auto bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Spinner /> Working...
-              </>
-            ) : (
-              "Ask"
-            )}
-          </button>
+        {/* --- MODIFIED INPUT FORM --- */}
+        <form onSubmit={handleSubmit} className="mb-8">
+          <div className="flex flex-col border border-gray-300 rounded-lg transition-shadow shadow-sm">
+            <textarea
+              ref={textareaRef}
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Ask your question here..."
+              className="w-full p-3 border-none focus:outline-none resize-none overflow-hidden bg-transparent"
+              disabled={isLoading}
+              rows={1}
+            />
+            <div className="flex justify-end items-center p-2 border-t border-gray-200 bg-gray-50 rounded-b-lg gap-2">
+              {isPolling && isPaused && (
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                >
+                  Cancel
+                </button>
+              )}
+              {isPolling && (
+                <button
+                  type="button"
+                  onClick={() => setIsPaused(!isPaused)}
+                  className="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  {isPaused ? "Resume Polling" : "Pause Polling"}
+                </button>
+              )}
+              <button
+                type="submit"
+                className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  isPaused ? (
+                    "Paused"
+                  ) : (
+                    <>
+                      <Spinner /> Working...
+                    </>
+                  )
+                ) : (
+                  "Ask"
+                )}
+              </button>
+            </div>
+          </div>
         </form>
 
         {/* Results Area */}

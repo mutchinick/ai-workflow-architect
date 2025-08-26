@@ -32,7 +32,6 @@ function buildMockWorkflowProps(): WorkflowProps {
         assistant: {
           name: 'mockAssistantName-1',
           role: 'mockAssistantRole-1',
-          directive: 'mockAssistantDirective-1',
           system: 'mockAssistantSystem-1',
           prompt: 'mockAssistantPrompt-1',
           phaseName: 'mockPhaseName-1',
@@ -48,7 +47,6 @@ function buildMockWorkflowProps(): WorkflowProps {
         assistant: {
           name: 'mockAssistantName-2',
           role: 'mockAssistantRole-2',
-          directive: 'mockAssistantDirective-2',
           system: 'mockAssistantSystem-2',
           prompt: 'mockAssistantPrompt-2',
           phaseName: 'mockPhaseName-2',
@@ -64,7 +62,6 @@ function buildMockWorkflowProps(): WorkflowProps {
         assistant: {
           name: 'mockAssistantName-3',
           role: 'mockAssistantRole-3',
-          directive: 'mockAssistantDirective-3',
           system: 'mockAssistantSystem-3',
           prompt: 'mockAssistantPrompt-3',
           phaseName: 'mockPhaseName-3',

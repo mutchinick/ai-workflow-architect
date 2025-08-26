@@ -1,7 +1,7 @@
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
 import { Assistant } from '../../assistants/Assistant'
-import { WorkflowArchitectAssistant, WORKFLOW_PHASES } from '../../assistants/WorkflowArchitectAssistant'
+import { WorkflowArchitectAssistant } from '../../assistants/WorkflowArchitectAssistant'
 import {
   WorkflowAssistantsDeployedEvent,
   WorkflowAssistantsDeployedEventData,
@@ -203,14 +203,11 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
    *
    */
   private addResponseRules(assistants: Assistant[]): Assistant[] {
-    const responseRulesMap: Record<string, string> = {}
-    Object.values(WORKFLOW_PHASES).forEach((phase) => {
-      responseRulesMap[phase.name] = phase.responseRules
-    })
-
     const assistantsWithRules = assistants.map((assistant) => {
-      const assistantPhase = assistant.phaseName || ''
-      const responseRules = responseRulesMap[assistantPhase] || ''
+      // const responseRules = `
+      //   Your response must contain only the direct answer or requested content;
+      //   **IT MUST NOT include any commentary, conversational filler, or emojis.**`
+      const responseRules = ``
       return { ...assistant, system: `${assistant.system}\n${responseRules}` }
     })
 

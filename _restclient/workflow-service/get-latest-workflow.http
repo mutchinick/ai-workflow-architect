@@ -9,7 +9,7 @@ Origin: https://localhost
 Content-Type: application/json
 
 {
-  "query": "Who built Stonehenge?"
+  "query": "I am writing a TypeScript with Next.js application. I need to implement a feature that allows users to upload images and display them in a gallery. Can you help me with that? Please provide step by step instructions and commands to execute."
 }
 
 
@@ -25,6 +25,16 @@ Content-Type: application/json
 
 {
   "workflowId": "{{workflowId}}"
+}
+
+### Passing a hardcoded workflow ID for testing purposes
+### POST
+POST {{baseUrl}}/api/v1/workflow-service/getLatestWorkflow
+Origin: https://localhost
+Content-Type: application/json
+
+{
+  "workflowId": "workflow-2025-08-12T02-14-45-525Z-I-am-planning-a-trip-31ARRt1jInIFIDM6pFHrkLcrsCk"
 }
 
 

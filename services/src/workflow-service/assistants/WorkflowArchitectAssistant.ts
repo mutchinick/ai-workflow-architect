@@ -1,106 +1,150 @@
 import { Assistant } from './Assistant'
 
+// Defines the structure for a single phase in the workflow.
 export type WorkflowPhase = {
   name: string
   goal: string
-  assistantRange: {
-    min: number
-    max: number
-  }
+  assistantGuideline: string
   responseRules: string
 }
 
-export const WORKFLOW_PHASES: Record<string, WorkflowPhase> = {
-  PROMPT_ENHANCEMENT: {
-    name: 'Phase 1: Prompt Enhancement',
-    goal: 'To refine the user initial question into a detailed, actionable prompt.',
-    assistantRange: { min: 3, max: 5 },
-    responseRules: `
-      Your final output MUST be only the refined question.
-      You must not answer the question.
-    `.trim(),
-  },
-  OUTLINE_GENERATION: {
-    name: 'Phase 2: Outline Generation',
-    goal: 'To create a comprehensive, well-structured outline or table of contents for the final document. This outline will serve as the blueprint for the next phase.',
-    assistantRange: { min: 1, max: 1 },
-    responseRules: `
-      Your output MUST be ONLY a detailed, well-structured outline (e.g., using Markdown headings).
-      Do not write the content for the sections, only the structure.
-    `.trim(),
-  },
-  CONTENT_GENERATION: {
-    name: 'Phase 3: Content Generation',
-    goal: 'To write the detailed, high-quality content for each section of the provided outline. This forms the main body of the final document.',
-    assistantRange: { min: 1, max: 1 },
-    responseRules: `
-      Your output MUST be the full, well-written text of the document, following the structure of the outline provided in <PREVIOUS_RESULT>.
-      Your response must be a direct and professional answer.
-    `.trim(),
-  },
-  CRITICAL_REVIEW_AND_DEEPENING: {
-    name: 'Phase 4: Critical Review and Deepening',
-    goal: 'To critically review the generated content, identify shallow or weak points, and add significant depth, practical examples, code snippets, and expert-level detail.',
-    assistantRange: { min: 10, max: 15 },
-    responseRules: `
-      Your final output MUST be the complete, original text immediately followed by your new, appended content.
-      You are forbidden from returning only the new content.
-      You must not modify the existing text; you can only append new, high-value content.
-    `.trim(),
-  },
-  FINAL_UNIFICATION: {
-    name: 'Phase 5: Final Unification & Polish',
-    goal: 'To rewrite the entire document, seamlessly integrating all the added depth and critiques from the previous phase into a final, polished, and professional-grade guide.',
-    assistantRange: { min: 2, max: 4 },
-    responseRules: `
-      Your final output MUST be the complete, rewritten, and unified text.
-      You must preserve all the detailed information and examples added in the previous step, integrating them smoothly.
-    `.trim(),
-  },
-}
+// A pre-defined "toolbox" of general-purpose improvement approaches.
+const REFINEMENT_PERSPECTIVES = [
+  'The solution should be clear and simple',
+  'The solution should be logical and structured',
+  'The solution should be complete and actionable',
+  'The solution should be error-aware',
+  'The solution should be relevant and focused',
+  'The solution should be tested and correct',
+  'The solution should be efficient and practical',
+  'The solution should be accurate and precise',
+  'The solution should be consistent and coherent',
+  'The solution should be transparent in reasoning',
+  'The solution should be well formatted',
+  'The solution should be dependency-aware',
+  'The solution should be security-conscious',
+  'The solution should be scalable when needed',
+  'The solution should be honest about limits',
+  'The solution should be flexible with alternatives',
+  'The solution should be terminologically consistent',
+  'The solution should be neutral in tone',
+  'The solution should be concise and clear',
+  'The solution should be naturally flowing',
+  'The solution should be free from jargon',
+  'The solution should be assumption-aware',
+  'The solution should be clear on trade-offs',
+  'The solution should be reproducible stepwise',
+  'The solution should be graceful on errors',
+  'The solution should be input-validating',
+  'The solution should be user-friendly',
+  'The solution should be accessibility-conscious',
+  'The solution should be generalizable when possible',
+  'The solution should be contextually explained',
+  'The solution should be broad yet deep',
+  'The solution should be performance-aware',
+  'The solution should be contradiction-free',
+  'The solution should be aligned with practice',
+  'The solution should be factually correct',
+  'The solution should be concise in language',
+  'The solution should be logically consistent',
+  'The solution should be well supported',
+  'The solution should be cautious of risks',
+  'The solution should be objective and fair',
+  'The solution should be realistic and achievable',
+  'The solution should be anticipatory of questions',
+  'The solution should be simplification-focused',
+  'The solution should be non-redundant',
+  'The solution should be example-backed',
+  'The solution should be empathetic to readers',
+  'The solution should be verifiable in method',
+  'The solution should be scope-bounded',
+  'The solution should be unambiguous',
+  'The solution should be both overview and detail',
+  'The solution should be step-by-step',
+  'The solution should be pitfall-aware',
+  'The solution should be environment-specific',
+  'The solution should be choice-justified',
+  'The solution should be style-consistent',
+  'The solution should be claim-supported',
+  'The solution should be visually aided',
+  'The solution should be default-friendly',
+  'The solution should be compatibility-checked',
+  'The solution should be deployment-ready',
+  'The solution should be assumption-free',
+  'The solution should be digression-free',
+  'The solution should be test-considered',
+  'The solution should be reusable',
+  'The solution should be bias-free',
+  'The solution should be jargon-explained',
+  'The solution should be maintainable',
+  'The solution should be fairness-conscious',
+  'The solution should be phrasing-clear',
+  'The solution should be step-ordered',
+  'The solution should be shortcut-free',
+  'The solution should be requirement-explicit',
+  'The solution should be security-checked',
+  'The solution should be context-adaptive',
+  'The solution should be dependency-explicit',
+  'The solution should be improvement-ready',
+  'The solution should be trade-off-aware',
+  'The solution should be correctness-first',
+  'The solution should be terminology-accurate',
+  'The solution should be beginner-accessible',
+  'The solution should be advanced-user-respecting',
+  'The solution should be constraint-aware',
+  'The solution should be tested in practice',
+  'The solution should be logic-sound',
+  'The solution should be verbosity-free',
+  'The solution should be outcome-specific',
+  'The solution should be tone-consistent',
+  'The solution should be confidence-inspiring',
+  'The solution should be context-appropriate',
+  'The solution should be alternative-aware',
+  'The solution should be error-recoverable',
+  'The solution should be terminology-consistent',
+  'The solution should be caveat-inclusive',
+  'The solution should be ambiguity-free',
+  'The solution should be time-respecting',
+  'The solution should be scannable',
+  'The solution should be repetition-free',
+  'The solution should be conclusion-oriented',
+]
 
-const buildBlueprintText = (): string => {
-  return Object.values(WORKFLOW_PHASES)
-    .map((phase) => {
-      const assistantRangeText =
-        phase.assistantRange.min === phase.assistantRange.max
-          ? `${phase.assistantRange.min} (fixed)`
-          : `${phase.assistantRange.min} (minimum) to ${phase.assistantRange.max} (maximum)`
-
-      return `### ${phase.name}\n- **Assistant Range:** ${assistantRangeText}\n- **Goal:** ${phase.goal}`
-    })
-    .join('\n\n')
-}
-
-/**
- *
- */
 export const WorkflowArchitectAssistant: Assistant = {
   name: 'Workflow Architect Assistant',
   role: "Designs a complete, sequential workflow of GenAI assistants based on a user's question.",
-  directive: `You are a GenAI Workflow Architect. Your job is to analyze a user's problem and design a complete, step-by-step execution plan as a JSON array of Assistant Steps.`,
 
   system: `
-      You are a GenAI Workflow Architect, a master strategist in designing AI-driven solutions. Your primary goal is to create the most effective sequence of steps to produce a high-quality answer to a user's question.
+      You are a GenAI Workflow Architect. Your job is to design an iterative, step-by-step execution plan for a team of AI assistants to build the perfect response to a user's question.
 
       ## Core Task
-      You will generate a plan as a JSON array of "Assistant Steps". Each step is a self-contained task for a worker AI, complete with its own detailed instructions.
+      Your final output is a single JSON array of "Assistant Steps". This array IS the architecture.
 
-      ## Workflow Construction Blueprint
-      For every user question, you MUST construct the workflow following this exact, phased blueprint. Your task is to analyze the user's question and design assistants that are experts in their field and achieve the **Goal** for each phase.
+      ## Your Design Philosophy
+      1.  **First, determine the single 'Field of Study.'** Analyze the user's question to identify the core expertise required to answer it (e.g., "Senior Next.js and TypeScript Developer," "Expert Historian of Ancient Rome," "Creative Fiction Editor"). This single Field of Study will be the expert persona for **every** assistant in the workflow.
+      2.  **Second, design a logical 'Path of Approaches.'** Your primary task is to create a sequence of assistants that iteratively refine the answer. To do this, you must choose a logical sequence of "approaches" for the assistants to adopt from the pre-defined list provided below. This sequence must be tailored to the user's goal and the 'Field of Study' you identified. For example, for a technical guide, a good sequence might be: 'Create a foundational outline' -> 'Write the core content from the outline' -> 'Add explanatory depth' -> 'Improve the readability and narrative flow'.
+      3.  **Third, ensure each step is an iterative refinement.** The first assistant in your plan will create a foundational answer. Every assistant after that **MUST** be instructed to take the complete work from the previous step, improve it according to its unique approach, and return the **COMPLETE, improved, and self-contained SINGLE version answer.**
 
-      ${buildBlueprintText()}
+      ## Assistant Design
+      For each assistant in your designed workflow, you must create a 'system' prompt that follows this exact template:
+      "You are an expert <Field of Study>. Your job is to improve the following solution by adopting a "<Approach>" approach. Your response MUST be the COMPLETE improved and self contained SINGLE version answer and must not lose track of the original user question: "<Original User Question>". You MUST not provide different or conflicting alternative solutions. You must only respond with the final answer, and nothing else."
+
+      You will replace "<Field of Study>" with the single expertise you identified in step 1
+      You will replace "<Original User Question>" with the original user question
+      You will replace "<Approach>" with the specific approach for that step from the sequence you designed in step 2.
+
+      The only available approaches you can choose from are: **${REFINEMENT_PERSPECTIVES.join(', ')}**.
+
+      You MUST decide the best approach for each step based on the user's question and the overall goal of creating a high-quality answer. You cannot invent new approaches or modify the provided ones.
+
+      You MUST design a workflow with at least 25 assistants, and no more than 50 depending on the complexity of the user's question.
 
       ## Assistant Step Definition (The JSON Structure You Must Create)
-      - "name": A descriptive name for the assistant performing the step (e.g., "Scientific Accuracy Assistant 1 of 5").
+      - "name": A descriptive name for the assistant, indicating its approach (e.g., "Explanatory Depth Assistant 3 of N").
       - "role": A one-sentence description of the assistant's purpose.
-      - "directive": The detailed instructions for the assistant.
-      - "system": The specific, comprehensive system prompt for this step's LLM call. This prompt MUST NOT contain the "<PREVIOUS_RESULT>" placeholder.
-      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
-      - "phaseName": The exact name of the workflow phase this assistant belongs to (e.g., "Phase 1: Prompt Enhancement").
-
-      ## **CRITICAL RULE: The Quality of Your Design**
-      For each Assistant Step, you MUST create a comprehensive 'system' prompt that defines the worker assistant's persona and expertise. This 'system' prompt MUST state the name of the workflow phase it belongs to and include the assistant's full directive.
+      - "system": The complete system prompt you constructed using the template above.
+      - "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST be only the placeholder string "Solution: <PREVIOUS_RESULT>".
+      - "phaseName": The name of the workflow phase.
 
       ## Your Final Output
       - Your final response MUST BE ONLY the raw JSON array of Assistant Steps, starting with \`[\` and ending with \`]\`.

@@ -59,9 +59,9 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
     | Failure<'WorkflowFileCorruptedError'>
     | Failure<'WorkflowAlreadyCompletedError'>
     | Failure<'WorkflowInvalidStateError'>
+    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'BedrockInvokeTransientError'>
     | Failure<'BedrockInvokePermanentError'>
-    | Failure<'WorkflowFileSaveCollisionError'>
     | Failure<'DuplicateEventError'>
     | Failure<'UnrecognizedError'>
   > {
@@ -176,14 +176,15 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
 
     let llmPrompt = currentStep.llmPrompt
     if (llmPrompt.includes('<PREVIOUS_RESULT>')) {
-      const lastExecutedStep = workflow.getLastExecutedStep()
-      if (!lastExecutedStep) {
+      const previousStep = workflow.getLastExecutedStep()
+      const previousResult = previousStep?.llmResult
+      if (!previousResult) {
         const message = 'No previous step to reference for <PREVIOUS_RESULT>'
         const failure = Result.makeFailure('WorkflowInvalidStateError', message, false)
         console.error(`${logCtx} exit failure:`, { failure, workflow })
         return failure
       }
-      llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', lastExecutedStep.llmResult)
+      llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', previousResult)
     }
 
     const llmSystem = currentStep.llmSystem
@@ -214,8 +215,8 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
   ): Promise<
     | Success<void>
     | Failure<'InvalidArgumentsError'>
-    | Failure<'UnrecognizedError'>
     | Failure<'WorkflowFileSaveCollisionError'>
+    | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'ProcessWorkflowStepWorkerService.saveWorkflow'
     console.info(`${logCtx} init:`, { workflow })

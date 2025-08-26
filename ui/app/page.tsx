@@ -3,28 +3,83 @@
 // "use client" is required for App Router components that use React hooks.
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  ChangeEvent,
-  FormEvent,
-  KeyboardEvent,
-} from "react";
 import type { NextPage } from "next";
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 // To render Markdown, you'll need to install react-markdown and its GFM plugin.
 // Run: npm install react-markdown remark-gfm
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+// --- Type Definitions ---
+interface Assistant {
+  name: string;
+  role: string;
+  phaseName: string;
+}
+
+interface Step {
+  stepId: string;
+  stepStatus: "pending" | "completed" | "failed";
+  llmResult?: string;
+  assistant?: Assistant;
+}
+
+// --- Constants ---
+const POLLING_INTERVAL_MS = 10000;
+
+// --- API Helper Functions ---
+const apiBaseUrl = process.env.NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL;
+
+async function startWorkflow(query: string): Promise<{ workflowId: string }> {
+  if (!apiBaseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL is not defined in your .env.local file."
+    );
+  }
+  const response = await fetch(
+    `${apiBaseUrl}/api/v1/workflow-service/sendQuery`,
+    {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+async function fetchWorkflowSteps(
+  workflowId: string
+): Promise<{ steps?: Step[]; workflowStatus?: string }> {
+  if (!apiBaseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL is not defined in your .env.local file."
+    );
+  }
+  const response = await fetch(
+    `${apiBaseUrl}/api/v1/workflow-service/getLatestWorkflow`,
+    {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ workflowId }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.statusText}`);
+  }
+  return response.json();
+}
+
 // --- Helper Components ---
 
-// A simple loading spinner component
 const Spinner = () => (
   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
 );
 
-// Chevron icon for the collapsible header
 const ChevronIcon = ({ isCollapsed }: { isCollapsed: boolean }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -42,7 +97,6 @@ const ChevronIcon = ({ isCollapsed }: { isCollapsed: boolean }) => (
   </svg>
 );
 
-// Component to render a single step in the response evolution
 const ChatStep = ({
   step,
   index,
@@ -50,7 +104,7 @@ const ChatStep = ({
   isCollapsed,
   onToggleCollapse,
 }: {
-  step: any;
+  step: Step;
   index: number;
   totalSteps: number;
   isCollapsed: boolean;
@@ -71,15 +125,12 @@ const ChatStep = ({
     llmResultContent = "```json\n" + llmResultContent + "\n```";
   }
 
-  // This safer regex finds any sequence of zero or more newlines followed by a code fence
-  // and replaces it with exactly two newlines, ensuring proper spacing without affecting other text.
   const formattedContent = llmResultContent.replace(/\n*```/g, "\n\n```");
 
   return (
     <div
       className={`border-l-4 ${stepColor} rounded-r-lg mb-4 transition-all duration-500 overflow-hidden`}
     >
-      {/* The header is now a button to toggle the collapse state */}
       <button
         onClick={onToggleCollapse}
         className="w-full flex items-center justify-between p-4 text-left"
@@ -94,26 +145,9 @@ const ChatStep = ({
         </div>
         <ChevronIcon isCollapsed={isCollapsed} />
       </button>
-
-      {/* The content is conditionally rendered based on the isCollapsed state */}
       {!isCollapsed && (
         <div className="px-4 pb-4">
-          <div
-            className="text-gray-800 border-t pt-4 break-words
-                       [&_h1]:text-xl [&_h1]:font-bold [&_h1]:my-4
-                       [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:my-3
-                       [&_h3]:text-base [&_h3]:font-semibold [&_h3]:my-2
-                       [&_p]:my-2
-                       [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5
-                       [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5
-                       /* Style for code blocks */
-                       [&_pre]:bg-slate-900 [&_pre]:text-slate-200 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:text-xs [&_pre]:whitespace-pre-wrap [&_pre]:border [&_pre]:border-slate-700
-                       /* Default style for all code (inline) */
-                       [&_code]:bg-gray-200 [&_code]:text-gray-800 [&_code]:px-1.5 [&_code]:py-1 [&_code]:rounded-md [&_code]:text-sm [&_code]:font-mono
-                       /* Reset inline styles for code inside a block */
-                       [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0 [&_pre_code]:rounded-none
-                       [&_a]:text-blue-600 [&_a]:hover:underline"
-          >
+          <div className="text-gray-800 border-t pt-4 break-words [&_h1]:text-xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:my-3 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:my-2 [&_p]:my-2 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_pre]:bg-slate-900 [&_pre]:text-slate-200 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:text-xs [&_pre]:whitespace-pre-wrap [&_pre]:border [&_pre]:border-slate-700 [&_code]:bg-gray-200 [&_code]:text-gray-800 [&_code]:px-1.5 [&_code]:py-1 [&_code]:rounded-md [&_code]:text-sm [&_code]:font-mono [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0 [&_pre_code]:rounded-none [&_a]:text-blue-600 [&_a]:hover:underline">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {formattedContent}
             </ReactMarkdown>
@@ -125,24 +159,22 @@ const ChatStep = ({
 };
 
 // --- Main Page Component ---
-
 const WorkflowVisualizerPage: NextPage = () => {
-  const [question, setQuestion] = useState<string>("");
+  const [question, setQuestion] = useState("");
   const [workflowId, setWorkflowId] = useState<string | null>(null);
-  const [steps, setSteps] = useState<any[]>([]);
+  const [steps, setSteps] = useState<Step[]>([]);
   const [collapsedSteps, setCollapsedSteps] = useState<Record<string, boolean>>(
     {}
   );
   const [manualToggles, setManualToggles] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isPolling, setIsPolling] = useState<boolean>(false);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea height
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -155,7 +187,6 @@ const WorkflowVisualizerPage: NextPage = () => {
       const lastCompletedIndex = steps
         .map((step) => step.stepStatus)
         .lastIndexOf("completed");
-
       setCollapsedSteps((prev) => {
         const newCollapsedState = { ...prev };
         steps.forEach((step, index) => {
@@ -179,29 +210,7 @@ const WorkflowVisualizerPage: NextPage = () => {
     if (isPolling && !isPaused && workflowId) {
       pollingIntervalRef.current = setInterval(async () => {
         try {
-          const apiBaseUrl =
-            process.env.NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL;
-          if (!apiBaseUrl) {
-            throw new Error(
-              "NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL is not defined in your .env.local file."
-            );
-          }
-
-          const response = await fetch(
-            `${apiBaseUrl}/api/v1/workflow-service/getLatestWorkflow`,
-            {
-              method: "POST",
-              mode: "cors",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ workflowId: workflowId }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`API Error: ${response.statusText}`);
-          }
-
-          const data = await response.json();
+          const data = await fetchWorkflowSteps(workflowId);
           const workflowSteps = data.steps || [];
           setSteps(workflowSteps);
 
@@ -229,9 +238,8 @@ const WorkflowVisualizerPage: NextPage = () => {
           setIsPolling(false);
           setIsLoading(false);
         }
-      }, 10000);
+      }, POLLING_INTERVAL_MS);
     }
-
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
@@ -241,13 +249,9 @@ const WorkflowVisualizerPage: NextPage = () => {
 
   const handleToggleCollapse = (stepId: string) => {
     setManualToggles((prev) => new Set(prev).add(stepId));
-    setCollapsedSteps((prev) => ({
-      ...prev,
-      [stepId]: !prev[stepId],
-    }));
+    setCollapsedSteps((prev) => ({ ...prev, [stepId]: !prev[stepId] }));
   };
 
-  // This function now resets everything EXCEPT the question.
   const resetForNewSubmission = () => {
     setSteps([]);
     setCollapsedSteps({});
@@ -267,31 +271,10 @@ const WorkflowVisualizerPage: NextPage = () => {
     if (!question.trim()) return;
 
     resetForNewSubmission();
-    setIsLoading(true); // Set loading true after reset
+    setIsLoading(true);
 
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL;
-      if (!apiBaseUrl) {
-        throw new Error(
-          "NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL is not defined in your .env.local file."
-        );
-      }
-
-      const response = await fetch(
-        `${apiBaseUrl}/api/v1/workflow-service/sendQuery`,
-        {
-          method: "POST",
-          mode: "cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: question }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await startWorkflow(question);
       setWorkflowId(data.workflowId);
       setIsPolling(true);
     } catch (err) {
@@ -304,9 +287,15 @@ const WorkflowVisualizerPage: NextPage = () => {
   };
 
   const handleCancel = () => {
-    // Cancel calls the reset function and THEN clears the question for a full reset.
     resetForNewSubmission();
     setQuestion("");
+  };
+
+  const handleTextareaKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
   };
 
   return (
@@ -318,8 +307,6 @@ const WorkflowVisualizerPage: NextPage = () => {
         <p className="text-center text-gray-500 mb-8">
           Ask a question to see the step-by-step evolution of the AI's response.
         </p>
-
-        {/* --- MODIFIED INPUT FORM --- */}
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="flex flex-col border border-gray-300 rounded-lg transition-shadow shadow-sm">
             <textarea
@@ -370,8 +357,6 @@ const WorkflowVisualizerPage: NextPage = () => {
             </div>
           </div>
         </form>
-
-        {/* Results Area */}
         <div className="space-y-4">
           {error && (
             <div
@@ -382,7 +367,6 @@ const WorkflowVisualizerPage: NextPage = () => {
               <p>{error}</p>
             </div>
           )}
-
           {steps.length > 0 && (
             <div className="bg-gray-50 p-4 rounded-lg">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
@@ -400,7 +384,6 @@ const WorkflowVisualizerPage: NextPage = () => {
               ))}
             </div>
           )}
-
           {isLoading && steps.length === 0 && (
             <div className="text-center text-gray-500 p-8">
               <p>Starting the workflow...</p>

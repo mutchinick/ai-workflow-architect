@@ -3,14 +3,7 @@
 // "use client" is required for App Router components that use React hooks.
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  ChangeEvent,
-  FormEvent,
-  KeyboardEvent,
-} from "react";
+import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from "react";
 import type { NextPage } from "next";
 // To render Markdown, you'll need to install react-markdown and its GFM plugin.
 // Run: npm install react-markdown remark-gfm

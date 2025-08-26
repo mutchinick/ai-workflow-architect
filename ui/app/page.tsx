@@ -155,7 +155,7 @@ const ChatStep = ({
     llmResultContent = "```json\n" + llmResultContent + "\n```";
   }
 
-  const formattedContent = llmResultContent.replace(/\n*```/g, "\n\n```");
+  const formattedContent = llmResultContent.replace(/\n*```/g, "\n```");
 
   return (
     <div

@@ -158,6 +158,25 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
         },
       ],
     },
+    // UI .env file (used by ui)
+    {
+      envFilePath: '../ui/.env.local',
+      envVariables: [
+        {
+          cdkOutputName: `${outputPrefix}WorkflowServiceApiHttpApiUrl`,
+          envVarName: 'NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL',
+        },
+      ],
+    },
+    {
+      envFilePath: '../ui/.env',
+      envVariables: [
+        {
+          cdkOutputName: `${outputPrefix}WorkflowServiceApiHttpApiUrl`,
+          envVarName: 'NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL',
+        },
+      ],
+    },
   ]
 
   console.info('')

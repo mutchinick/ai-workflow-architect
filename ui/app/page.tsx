@@ -1,7 +1,8 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import type { NextPage } from "next";
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 

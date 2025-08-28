@@ -89,55 +89,14 @@ describe("WorkflowVisualizerPage", () => {
     expect(screen.getByText("Starting the workflow...")).toBeInTheDocument();
   });
 
-  // Test 3: Polling and Displaying Steps
+  // Test 3: Polling and Displaying Steps (Refactored)
   test("polls for results and displays the steps as they arrive", async () => {
     const fetchMock = global.fetch as jest.Mock;
 
-    // Mock the sequence of API calls
-    fetchMock.mockImplementation((url: string) => {
-      if (url.includes("sendQuery")) {
-        return mockFetchSuccess({ workflowId: "test-workflow-123" });
-      }
-      if (url.includes("getLatestWorkflow")) {
-        // On the first poll, return one completed step and one pending
-        if (fetchMock.mock.calls.length <= 2) {
-          return mockFetchSuccess({
-            steps: [
-              {
-                stepId: "step-1",
-                stepStatus: "completed",
-                assistant: { name: "Assistant 1" },
-                llmResult: "This is the first step.",
-              },
-              {
-                stepId: "step-2",
-                stepStatus: "pending",
-                assistant: { name: "Assistant 2" },
-                llmResult: "",
-              },
-            ],
-          });
-        }
-        // On subsequent polls, return the final completed state
-        return mockFetchSuccess({
-          steps: [
-            {
-              stepId: "step-1",
-              stepStatus: "completed",
-              assistant: { name: "Assistant 1" },
-              llmResult: "This is the first step.",
-            },
-            {
-              stepId: "step-2",
-              stepStatus: "completed",
-              assistant: { name: "Assistant 2" },
-              llmResult: "This is the second and final step.",
-            },
-          ],
-        });
-      }
-      return Promise.reject(new Error("Unhandled API call"));
-    });
+    // Mock the initial call to start the workflow
+    fetchMock.mockImplementationOnce(() =>
+      mockFetchSuccess({ workflowId: "test-workflow-123" })
+    );
 
     render(<WorkflowVisualizerPage />);
 
@@ -150,6 +109,25 @@ describe("WorkflowVisualizerPage", () => {
       fireEvent.click(screen.getByRole("button", { name: "Ask" }));
     });
 
+    // Mock the first polling response
+    const firstPollResponse = {
+      steps: [
+        {
+          stepId: "step-1",
+          stepStatus: "completed",
+          assistant: { name: "Assistant 1" },
+          llmResult: "This is the first step.",
+        },
+        {
+          stepId: "step-2",
+          stepStatus: "pending",
+          assistant: { name: "Assistant 2" },
+          llmResult: "",
+        },
+      ],
+    };
+    fetchMock.mockImplementationOnce(() => mockFetchSuccess(firstPollResponse));
+
     // Advance timers to trigger the first poll and wait for the result
     await act(async () => {
       jest.advanceTimersByTime(POLLING_INTERVAL_MS);
@@ -157,6 +135,25 @@ describe("WorkflowVisualizerPage", () => {
 
     expect(await screen.findByText("Assistant 1")).toBeInTheDocument();
     expect(screen.getByText("This is the first step.")).toBeInTheDocument();
+
+    // Mock the second (and final) polling response
+    const finalPollResponse = {
+      steps: [
+        {
+          stepId: "step-1",
+          stepStatus: "completed",
+          assistant: { name: "Assistant 1" },
+          llmResult: "This is the first step.",
+        },
+        {
+          stepId: "step-2",
+          stepStatus: "completed",
+          assistant: { name: "Assistant 2" },
+          llmResult: "This is the second and final step.",
+        },
+      ],
+    };
+    fetchMock.mockImplementationOnce(() => mockFetchSuccess(finalPollResponse));
 
     // Advance timers for the second poll
     await act(async () => {

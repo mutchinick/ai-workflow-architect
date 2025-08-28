@@ -324,13 +324,6 @@ const WorkflowVisualizerPage: NextPage = () => {
     setQuestion("");
   };
 
-  const handleTextareaKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
-
   return (
     <div className="bg-gray-100 min-h-screen font-sans flex items-center justify-center p-4">
       <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-8">

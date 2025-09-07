@@ -368,7 +368,7 @@ You can use any stage name you like, which is great for spinning up ephemeral te
 
 The CDK will synthesize the stack and may prompt you to approve the creation of IAM roles and policies. Accept the changes to proceed. The deployment typically takes 4-5 minutes.
 
-> **NOTE:** After a successful deployment, the script automatically writes the necessary environment variables (like API base URLs) into `.env` files. This makes it easy to start testing the system immediately. These files are configured for the two testing methods detailed in the upcoming sections: one for the VSCode REST Client and another for an automated script.
+> **NOTE:** After a successful deployment, the script automatically writes the necessary environment variables (like API base URLs) into `.env` files. This makes it easy to start testing the system immediately. These files are configured for the two testing methods detailed in the upcoming sections: one for the VSCode REST Client and another for the Next.js UI.
 
 ---
 
@@ -382,3 +382,22 @@ npm run destroy dev
 ```
 
 ---
+
+## How to play with it
+
+The repository also includes a simple UI for sending questions to the system and monitoring responses. It's a single-page application built with Next.js, located in the `ui` folder. This app isn't deployed to AWS, but you can easily run it locally since the required environment variables are injected by the `cdk-runner` script.
+
+To get started, navigate to the `ui` folder and install the dependencies:
+
+```bash
+# From the repository root
+cd ui
+npm install
+```
+
+Then, launch the application, open it in your browser, ask a question, and watch the workflow unfold:
+
+```bash
+# Run the app in development mode
+npm run dev
+```

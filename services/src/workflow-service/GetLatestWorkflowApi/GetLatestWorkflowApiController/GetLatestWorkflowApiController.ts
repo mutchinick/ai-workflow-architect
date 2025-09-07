@@ -33,7 +33,7 @@ export class GetLatestWorkflowApiController implements IGetLatestWorkflowApiCont
     const getLatestWorkflowResult = await this.getLatestWorkflowSafe(apiEvent)
     if (Result.isSuccess(getLatestWorkflowResult)) {
       const getLatestWorkflowOutput = getLatestWorkflowResult.value
-      const successResponse = HttpResponse.Accepted(getLatestWorkflowOutput)
+      const successResponse = HttpResponse.OK(getLatestWorkflowOutput)
       console.info(`${logCtx} exit success:`, { successResponse, apiEvent })
       return successResponse
     }

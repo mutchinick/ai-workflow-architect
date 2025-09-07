@@ -324,23 +324,23 @@ describe(`Workflow Service GetLatestWorkflowApi GetLatestWorkflowApiController t
    ************************************************************
    * Test expected results
    ************************************************************/
-  it(`responds with status code 202 Accepted`, async () => {
+  it(`responds with status code 200 OK`, async () => {
     const mockGetLatestWorkflowApiService = buildMockGetLatestWorkflowApiService_succeeds()
     const getLatestWorkflowApiController = new GetLatestWorkflowApiController(mockGetLatestWorkflowApiService)
     const mockApiEventBody = buildMockApiEventBody()
     const mockApiEvent = buildMockApiEvent(mockApiEventBody)
     const response = await getLatestWorkflowApiController.getLatestWorkflow(mockApiEvent)
-    expect(response.statusCode).toBe(202)
+    expect(response.statusCode).toBe(200)
   })
 
-  it(`responds with the expected HttpResponse.Accepted response`, async () => {
+  it(`responds with the expected HttpResponse.OK response`, async () => {
     const mockGetLatestWorkflowApiService = buildMockGetLatestWorkflowApiService_succeeds()
     const getLatestWorkflowApiController = new GetLatestWorkflowApiController(mockGetLatestWorkflowApiService)
     const mockApiEventBody = buildMockApiEventBody()
     const mockApiEvent = buildMockApiEvent(mockApiEventBody)
     const response = await getLatestWorkflowApiController.getLatestWorkflow(mockApiEvent)
     const expectedServiceOutput = buildMockWorkflowProps()
-    const expectedResponse = HttpResponse.Accepted(expectedServiceOutput)
+    const expectedResponse = HttpResponse.OK(expectedServiceOutput)
     expect(response).toStrictEqual(expectedResponse)
   })
 })

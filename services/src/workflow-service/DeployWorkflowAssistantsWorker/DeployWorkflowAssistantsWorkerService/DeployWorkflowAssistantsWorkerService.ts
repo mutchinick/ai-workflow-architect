@@ -180,12 +180,21 @@ export class DeployWorkflowAssistantsWorkerService implements IDeployWorkflowAss
 
     try {
       const assistantsString = invokeBedrockResult.value
-      const assistants: Assistant[] = JSON.parse(assistantsString)
+
+      // Sometimes the model returns a JSON array wrapped in ```json ... ```
+      // If this is the case, we need to strip the ```json and ``` markers
+      // only at the start and end of the string, respectively.
+      const assistantsStringClean = assistantsString
+        .replace(/^```json/, '')
+        .replace(/```$/, '')
+        .trim()
+
+      const assistants: Assistant[] = JSON.parse(assistantsStringClean)
       const assistantsWithRules = this.addResponseRules(assistants)
       const designAssistantsOutput: DesignAssistantsOutput = {
         system,
         prompt,
-        result: assistantsString,
+        result: assistantsStringClean,
         assistants: assistantsWithRules,
       }
       const assistantsResult = Result.makeSuccess(designAssistantsOutput)

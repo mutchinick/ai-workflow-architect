@@ -401,3 +401,7 @@ Then, launch the application, open it in your browser, ask a question, and watch
 # Run the app in development mode
 npm run dev
 ```
+
+Here is a screenshot!
+
+![AI Workflow Architect](_readme/ai-workflow-architect-ui-sample.png)

@@ -19,7 +19,7 @@ function createHandler(): (sqsEvent: SQSEvent) => Promise<SQSBatchResponse> {
   const readWorkflowClient = new ReadWorkflowClient(s3Client)
   const saveWorkflowClient = new SaveWorkflowClient(s3Client)
 
-  const modelId = 'meta.llama3-3-70b-instruct-v1:0'
+  const modelId = process.env.BEDROCK_MODEL_ID ?? '' // FIXME: Handle missing model ID
   const languageModel = bedrock.languageModel(modelId)
   const invokeBedrockClient = new InvokeBedrockClient(languageModel, generateText)
 

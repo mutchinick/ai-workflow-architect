@@ -94,6 +94,7 @@ export class ProcessWorkflowStepWorkerConstruct extends Construct {
       environment: {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
         WORKFLOW_SERVICE_BUCKET_NAME: s3Bucket.bucketName,
+        BEDROCK_MODEL_ID: settings.BedrockModelId,
       },
       timeout: settings.Lambda.timeout,
       memorySize: settings.Lambda.memorySize,
@@ -106,8 +107,12 @@ export class ProcessWorkflowStepWorkerConstruct extends Construct {
     lambdaFunc.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        actions: ['bedrock:InvokeModel'],
-        resources: ['arn:aws:bedrock:*::foundation-model/*'],
+        actions: [
+          'bedrock:InvokeModel',
+          'bedrock:InvokeModelWithResponseStream',
+          'bedrock:InvokeModelWithInferenceProfile',
+        ],
+        resources: ['arn:aws:bedrock:*:*:foundation-model/*', 'arn:aws:bedrock:*:*:inference-profile/*'],
       }),
     )
 

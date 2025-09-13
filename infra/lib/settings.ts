@@ -19,4 +19,11 @@ export const settings = {
   LambdaIntegration: {
     timeout: Duration.seconds(29),
   },
+  BedrockModelId: 'meta.llama3-3-70b-instruct-v1:0',
+  // BedrockModelId: 'us.amazon.nova-premier-v1:0',
+  // BedrockModelId: 'us.meta.llama3-3-70b-instruct-v1:0',
+  // BedrockModelId: 'us.meta.llama4-scout-17b-instruct-v1:0',
+  // BedrockModelId: 'us.deepseek.r1-v1:0',
+  // BedrockModelId: 'us.mistral.mistral-large-2402-v1:0',
+  // BedrockModelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
 }

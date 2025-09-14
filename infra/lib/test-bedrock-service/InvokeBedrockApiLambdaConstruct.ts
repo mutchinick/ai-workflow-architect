@@ -1,7 +1,7 @@
 import { RemovalPolicy } from 'aws-cdk-lib'
 import { HttpApi, HttpMethod, PayloadFormatVersion } from 'aws-cdk-lib/aws-apigatewayv2'
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations'
-import * as iam from 'aws-cdk-lib/aws-iam'
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs'
@@ -47,7 +47,9 @@ export class InvokeBedrockApiLambdaConstruct extends Construct {
       depsLockFilePath: join(servicesRoot, 'package-lock.json'),
       entry: join(servicesRoot, 'src/test-bedrock-service/handlers/invokeBedrockApi.ts'),
       handler: 'handler',
-      environment: {},
+      environment: {
+        BEDROCK_MODEL_ID: settings.BedrockModelId,
+      },
       timeout: settings.Lambda.timeout,
       logGroup,
       bundling: {
@@ -56,10 +58,14 @@ export class InvokeBedrockApiLambdaConstruct extends Construct {
     })
 
     lambdaFunc.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ['bedrock:InvokeModel'],
-        resources: ['arn:aws:bedrock:*::foundation-model/*'],
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [
+          'bedrock:InvokeModel',
+          'bedrock:InvokeModelWithResponseStream',
+          'bedrock:InvokeModelWithInferenceProfile',
+        ],
+        resources: ['arn:aws:bedrock:*:*:foundation-model/*', 'arn:aws:bedrock:*:*:inference-profile/*'],
       }),
     )
 

@@ -18,5 +18,6 @@
   },
   "explorerExclude.backup": {},
   "eslint.workingDirectories": ["services", "infra"],
-  "markdown.preview.fontSize": 12
+  "markdown.preview.fontSize": 12,
+  "cSpell.words": ["jsonrepair"]
 }

@@ -5,16 +5,11 @@ import { InvokeBedrockApiController } from '../InvokeBedrockApi/InvokeBedrockApi
 import { InvokeBedrockApiService } from '../InvokeBedrockApi/InvokeBedrockApiService/InvokeBedrockApiService'
 import { InvokeBedrockClient } from '../InvokeBedrockApi/InvokeBedrockClient/InvokeBedrockClient'
 
-// Some available models:
-// meta.llama3-3-70b-instruct-v1:0
-// meta.llama4-maverick-17b-instruct-v1:0
-// deepseek.r1-v1:0
-
 /**
  *
  */
 function createHandler(): (apiEvent: APIGatewayProxyEventV2) => Promise<APIGatewayProxyStructuredResultV2> {
-  const modelId = 'meta.llama3-3-70b-instruct-v1:0'
+  const modelId = process.env.BEDROCK_MODEL_ID ?? '' // FIXME: Handle missing model ID
   const languageModel = bedrock.languageModel(modelId)
   const invokeBedrockClient = new InvokeBedrockClient(languageModel, generateText)
   const invokeBedrockApiService = new InvokeBedrockApiService(invokeBedrockClient)

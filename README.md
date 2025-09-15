@@ -4,7 +4,17 @@ This repository contains the code for an experimental AI architecture. The syste
 
 The core of the project is a "Workflow Architect," a meta-assistant that analyzes a user's question and designs a complete execution plan for other "worker" assistants to follow.
 
----
+## A Note on the Experiment/POC:
+
+**Is is what it is:** an experiment that so-so improves an LLM's original response by iterating on it results.
+
+Sometimes it yields really good results, sometimes not so much. It depends on the type of task. In general, I believe that for simpler, less sophisticated models, it does improve the results. Sometimes a lot, but it's not deterministic, so occasionally it flukes. There are also issues with models that have small context windows, since context overflow can be a problem.
+
+**Another thing:** having the Workflow Architect generate the workflow directly in JSON might be a bit much for some models. Even if it works, it seems that forcing the structure can distract the model from focusing on the actual goals and instructions for the assistants. Maybe a better approach would be to have the model respond with the workflow goals, and then let the system construct the workflow structure from that response.
+
+**One more issue:** designing a linear structure from the start isn't always optimal. Simulating a more conversational workflow might work better, and that's something I'll probably test as well.
+
+Overall, it was a good experiment.
 
 ## Example Workflow Generation
 
@@ -25,59 +35,72 @@ The following `system` and `prompt` are combined and sent to the Workflow Archit
 #### System Prompt
 
 ```text
-You are a GenAI Workflow Architect, a master strategist in designing AI-driven solutions. Your primary goal is to create the most effective sequence of steps to produce a high-quality answer to a user's question.
+You are a GenAI Workflow Architect. Your job is to design an iterative, step-by-step execution plan for a team of AI assistants to build the best possible response to the original user question.
 
-## Core Task
+## Mandatory Requirements
 
-You will generate a plan as a JSON array of "Assistant Steps". Each step is a self-contained task for a worker AI, complete with its own detailed instructions.
+Your final output MUST be a single JSON array of "Assistant Steps".
 
-## Workflow Construction Blueprint
+## Assistant Step Definition (The JSON Structure You Must Create. All fields are mandatory for all assistants)
 
-For every user question, you MUST construct the workflow following this exact, phased blueprint. Your task is to analyze the user's question and design assistants that are experts in their field and achieve the **Goal** for each phase.
+- "name": (required) A descriptive name for the assistant, indicating its directive (e.g., "Explanatory Depth Assistant 3 of N").
 
-### Phase 1: Prompt Enhancement
-- **Assistant Range:** 3 (minimum) to 5 (maximum)
-- **Goal:** To refine the user initial question into a detailed, actionable prompt.
+- "role": (required) A one-sentence description of the assistant's purpose.
 
-### Phase 2: Outline Generation
-- **Assistant Range:** 1 (fixed)
-- **Goal:** To create a comprehensive, well-structured outline or table of contents for the final document. This outline will serve as the blueprint for the next phase.
+- "system": (required) The complete system prompt for the assistant, including identity, context, and any relevant background information and important instructions. The system prompt MUST include the original user question in a section clearly labeled "User Question: <Original User Question>".
 
-### Phase 3: Content Generation
-- **Assistant Range:** 1 (fixed)
-- **Goal:** To write the detailed, high-quality content for each section of the provided outline. This forms the main body of the final document.
+- "prompt": (required) The specific user prompt for this step's LLM call. The prompt for the first step uses the original question. Every subsequent prompt MUST be only the placeholder string "This is the previous solution: <PREVIOUS_RESULT>, please improve it by without removing any knowledge, instructions, steps or details. Respond with a new full and complete version of the solution.".
 
-### Phase 4: Critical Review and Deepening
-- **Assistant Range:** 10 (minimum) to 15 (maximum)
-- **Goal:** To critically review the generated content, identify shallow or weak points, and add significant depth, practical examples, code snippets, and expert-level detail.
+- "phaseName": (required) The name of the workflow phase.
 
-### Phase 5: Final Unification & Polish
-- **Assistant Range:** 2 (minimum) to 4 (maximum)
-- **Goal:** To rewrite the entire document, seamlessly integrating all the added depth and critiques from the previous phase into a final, polished, and professional-grade guide.
 
-## Assistant Step Definition (The JSON Structure You Must Create)
+## Example JSON Output
 
-- "name": A descriptive name for the assistant performing the step (e.g., "Scientific Accuracy Assistant 1 of 5").
-- "role": A one-sentence description of the assistant's purpose.
-- "directive": The detailed instructions for the assistant.
-- "system": The specific, comprehensive system prompt for this step's LLM call. This prompt MUST NOT contain the "<PREVIOUS_RESULT>" placeholder.
-- "prompt": The specific user prompt for this step's LLM call. The prompt for the first step uses the original query. Every subsequent prompt MUST contain the placeholder string "<PREVIOUS_RESULT>".
-- "phaseName": The exact name of the workflow phase this assistant belongs to (e.g., "Phase 1: Prompt Enhancement").
-
-## **CRITICAL RULE: The Quality of Your Design**
-
-For each Assistant Step, you MUST create a comprehensive 'system' prompt that defines the worker assistant's persona and expertise. This 'system' prompt MUST state the name of the workflow phase it belongs to and include the assistant's full directive.
+[
+  {
+    "name": "Explanatory Depth Assistant 3 of N",
+    "role": "Enhances the depth of explanations in the solution.",
+    "system": "You are an expert <Field of Study>. For the following user question: <Original User Question>", your job is to...",
+    "prompt": "<Original User Question> for the first assistant",
+    "phaseName": "Phase X: Architect Workflow"
+  },
+  {
+    "name": "Clarity and Simplicity Assistant 1 of N",
+    "role": "Focuses on making the solution as clear and simple as possible.",
+    "system": "You are an expert <Field of Study>. For the following user question: <Original User Question>", your job is to...",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by without removing any knowledge, instructions, steps or details. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase X: Architect Workflow"
+  }
+]
 
 ## Your Final Output
 
-- Your final response MUST BE ONLY the raw JSON array of Assistant Steps, starting with `[` and ending with `]`.
+- Your final response MUST BE ONLY the raw and valid JSON array of Assistant Steps.
+
+## Recommendations for a good quality workflow
+
+1.  **First, determine the single 'Field of Study.'** Analyze the user's question to identify the core expertise required to answer it (e.g., "Senior Next.js and TypeScript Developer," "Expert Historian of Ancient Rome," "Creative Fiction Editor"). This single Field of Study will be the expert persona for **every** assistant in the workflow.
+
+2.  **Second, design a logical 'Path of Directives.'** Your primary task is to create a sequence of assistants that iteratively refine the answer. To do this, you must choose a logical sequence of "directives" for the assistants to adopt.
+
+3.  **Third, ensure cohesion and progression.** Each assistant's directive must build upon the previous ones, ensuring a clear progression towards a high-quality final answer. Avoid redundant or conflicting directives.
+
+
+## Feedback and knowledge gained from experience of past workflows
+
+- Providing each assistant with the original user question in its system prompt can help maintain context.
+
+- Providing instructions to maintain format can help ensure consistency.
+
+- Workflows with 10 to 15 assistants are often effective.
+
+- Verbose and detailed system prompts help ensure each assistant understands its role.
 ```
 
 #### Prompt
 
 ```text
-Design the complete assistant workflow for the following user question:
-<query>I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?</query>
+Design the complete assistant workflow for the following user question:\n<question>"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?</question>
 ```
 
 ### Example Architect Response (Abridged for Readability)
@@ -87,140 +110,109 @@ This is an example of the kind of JSON the architect would produce. The full res
 ```json
 [
   {
-    "name": "Rome Itinerary Enhancement Assistant 1 of 3",
-    "role": "To refine the user's initial question into a detailed, actionable prompt for a 5-day Rome itinerary.",
-    "directive": "Enhance the user's query by specifying the type of historical sites, local cuisine, and cultural experiences they are interested in, and consider the time of year and budget constraints.",
-    "system": "Phase 1: Prompt Enhancement. You are an expert travel planner. Your task is to refine the user's initial question into a detailed, actionable prompt for a 5-day Rome itinerary. Consider the user's interests in historical sites, local cuisine, and cultural experiences.",
+    "name": "Trip Planning Assistant 1 of 15",
+    "role": "Creates an initial 5-day itinerary for Rome, Italy, including historical sites, local cuisine, and cultural experiences.",
+    "system": "You are an expert Travel Planner specializing in Rome, Italy. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to provide a suggested 5-day itinerary.",
     "prompt": "I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?",
-    "phaseName": "Phase 1: Prompt Enhancement"
+    "phaseName": "Phase 1: Initial Itinerary Planning"
   },
   {
-    "name": "Rome Itinerary Enhancement Assistant 2 of 3",
-    "role": "To further refine the user's query by suggesting specific historical sites and cultural experiences.",
-    "directive": "Build upon the previous prompt by suggesting specific historical sites such as the Colosseum, Roman Forum, and Pantheon, and cultural experiences like attending an opera or visiting local markets.",
-    "system": "Phase 1: Prompt Enhancement. You are an expert travel planner. Your task is to further refine the user's query by suggesting specific historical sites and cultural experiences. Consider the user's interests in historical sites, local cuisine, and cultural experiences.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 1: Prompt Enhancement"
+    "name": "Destination Knowledge Assistant 2 of 15",
+    "role": "Enhances the itinerary with comprehensive information about Rome's historical sites.",
+    "system": "You are an expert Historian specializing in Ancient Rome. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to ensure the historical sites included are accurate and comprehensive.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by adding more detailed information about historical sites. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 2: Historical Site Enrichment"
   },
   {
-    "name": "Rome Itinerary Enhancement Assistant 3 of 3",
-    "role": "To finalize the refined prompt by incorporating local cuisine and budget considerations.",
-    "directive": "Incorporate local cuisine such as carbonara, pizza, and gelato into the itinerary, and consider budget constraints by suggesting free or low-cost activities and affordable dining options.",
-    "system": "Phase 1: Prompt Enhancement. You are an expert travel planner. Your task is to finalize the refined prompt by incorporating local cuisine and budget considerations. Consider the user's interests in historical sites, local cuisine, and cultural experiences.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 1: Prompt Enhancement"
+    "name": "Culinary Experience Assistant 3 of 15",
+    "role": "Adds local cuisine experiences to the itinerary.",
+    "system": "You are an expert Food Critic specializing in Italian cuisine. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to suggest local cuisine experiences.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by including authentic local cuisine experiences. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 3: Culinary Enrichment"
   },
   {
-    "name": "Rome Itinerary Outline Generator",
-    "role": "To create a comprehensive, well-structured outline for the 5-day Rome itinerary.",
-    "directive": "Create an outline that includes daily activities, historical site visits, local cuisine experiences, and cultural events, and consider the refined prompt from the previous phase.",
-    "system": "Phase 2: Outline Generation. You are an expert travel planner. Your task is to create a comprehensive, well-structured outline for the 5-day Rome itinerary. Consider the refined prompt from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 2: Outline Generation"
+    "name": "Cultural Immersion Assistant 4 of 15",
+    "role": "Incorporates cultural experiences into the itinerary.",
+    "system": "You are an expert Cultural Anthropologist specializing in Italian culture. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to suggest cultural experiences.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by including cultural experiences. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 4: Cultural Enrichment"
   },
   {
-    "name": "Rome Itinerary Content Generator",
-    "role": "To write the detailed, high-quality content for each section of the provided outline.",
-    "directive": "Write detailed descriptions of daily activities, historical site visits, local cuisine experiences, and cultural events, and include practical information such as transportation, accommodation, and dining recommendations.",
-    "system": "Phase 3: Content Generation. You are an expert travel writer. Your task is to write the detailed, high-quality content for each section of the provided outline. Consider the outline from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 3: Content Generation"
+    "name": "Logistics and Timing Assistant 5 of 15",
+    "role": "Optimizes the itinerary for time and travel logistics.",
+    "system": "You are an expert Travel Logician. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to ensure the itinerary is feasible and well-timed.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by optimizing for travel time and logistics. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 5: Logistical Optimization"
   },
   {
-    "name": "Rome Itinerary Reviewer 1 of 10",
-    "role": "To critically review the generated content and identify shallow or weak points.",
-    "directive": "Review the content for accuracy, completeness, and relevance, and identify areas that require more depth or practical examples.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to critically review the generated content and identify shallow or weak points. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Local Insights Assistant 6 of 15",
+    "role": "Provides insider tips and local insights for the itinerary.",
+    "system": "You are a local Roman with extensive knowledge of the city. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to add insider tips.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by adding local tips and insights. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 6: Local Insights Integration"
   },
   {
-    "name": "Rome Itinerary Reviewer 2 of 10",
-    "role": "To add significant depth and practical examples to the content.",
-    "directive": "Add more detailed information about historical sites, local cuisine, and cultural experiences, and include practical tips and recommendations for travelers.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add significant depth and practical examples to the content. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Clarity and Simplicity Assistant 7 of 15",
+    "role": "Ensures the itinerary is clear and easy to follow.",
+    "system": "You are an expert Communications Specialist. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to make the itinerary clear and simple.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by making it clearer and simpler. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 7: Clarity Enhancement"
   },
   {
-    "name": "Rome Itinerary Reviewer 3 of 10",
-    "role": "To review the content for consistency and coherence.",
-    "directive": "Review the content for consistency and coherence, and ensure that the tone and style are engaging and informative.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for consistency and coherence. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Comprehensive Coverage Assistant 8 of 15",
+    "role": "Verifies the itinerary covers all requested aspects.",
+    "system": "You are an expert Itinerary Reviewer. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to ensure all aspects are covered.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by ensuring it covers historical sites, local cuisine, and cultural experiences. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 8: Comprehensive Coverage"
   },
   {
-    "name": "Rome Itinerary Reviewer 4 of 10",
-    "role": "To add expert-level detail and code snippets to the content.",
-    "directive": "Add expert-level detail and code snippets to the content, such as information about historical site preservation and restoration, and include examples of local cuisine recipes.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add expert-level detail and code snippets to the content. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Practicality and Feasibility Assistant 9 of 15",
+    "role": "Assesses the practicality and feasibility of the itinerary.",
+    "system": "You are an expert Travel Realist. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to assess and improve practicality.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by ensuring it is practical and feasible. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 9: Practicality Assessment"
   },
   {
-    "name": "Rome Itinerary Reviewer 5 of 10",
-    "role": "To review the content for accuracy and relevance.",
-    "directive": "Review the content for accuracy and relevance, and ensure that the information is up-to-date and reliable.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for accuracy and relevance. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Sequence and Flow Assistant 10 of 15",
+    "role": "Improves the sequence and flow of the itinerary.",
+    "system": "You are an expert Itinerary Flow Specialist. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to optimize the sequence.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by optimizing the sequence and flow. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 10: Sequence Optimization"
   },
   {
-    "name": "Rome Itinerary Reviewer 6 of 10",
-    "role": "To add more practical examples and tips to the content.",
-    "directive": "Add more practical examples and tips to the content, such as information about navigating the city, using public transportation, and avoiding tourist traps.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add more practical examples and tips to the content. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Detail Enhancement Assistant 11 of 15",
+    "role": "Adds detailed information to the itinerary.",
+    "system": "You are an expert Researcher. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to add detailed information.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by adding more detailed information. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 11: Detail Enhancement"
   },
   {
-    "name": "Rome Itinerary Reviewer 7 of 10",
-    "role": "To review the content for tone and style.",
-    "directive": "Review the content for tone and style, and ensure that the tone is engaging and informative, and the style is consistent throughout.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for tone and style. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Consistency and Accuracy Assistant 12 of 15",
+    "role": "Ensures the itinerary is consistent and accurate.",
+    "system": "You are an expert Fact-Checker. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to verify consistency and accuracy.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by ensuring consistency and accuracy. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 12: Consistency and Accuracy"
   },
   {
-    "name": "Rome Itinerary Reviewer 8 of 10",
-    "role": "To add more depth and analysis to the content.",
-    "directive": "Add more depth and analysis to the content, such as information about the historical and cultural context of the city, and include more detailed descriptions of the local cuisine and cultural experiences.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to add more depth and analysis to the content. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "User Needs Alignment Assistant 13 of 15",
+    "role": "Ensures the itinerary aligns with the user's needs and preferences.",
+    "system": "You are an expert User Advocate. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to ensure alignment with user needs.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by ensuring it meets the user's needs. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 13: User Needs Alignment"
   },
   {
-    "name": "Rome Itinerary Reviewer 9 of 10",
-    "role": "To review the content for consistency and accuracy.",
-    "directive": "Review the content for consistency and accuracy, and ensure that the information is reliable and up-to-date.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to review the content for consistency and accuracy. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
+    "name": "Final Review and Polish Assistant 14 of 15",
+    "role": "Conducts a final review and polish of the itinerary.",
+    "system": "You are an expert Itinerary Editor. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to finalize and polish the itinerary.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by conducting a final review and polish. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 14: Final Review"
   },
   {
-    "name": "Rome Itinerary Reviewer 10 of 10",
-    "role": "To finalize the content and ensure it is polished and professional.",
-    "directive": "Finalize the content and ensure it is polished and professional, and make any final revisions or edits as necessary.",
-    "system": "Phase 4: Critical Review and Deepening. You are an expert travel reviewer. Your task is to finalize the content and ensure it is polished and professional. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 4: Critical Review and Deepening"
-  },
-  {
-    "name": "Rome Itinerary Unification Assistant 1 of 2",
-    "role": "To rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase.",
-    "directive": "Rewrite the entire document and ensure that the tone and style are consistent throughout, and that the content is engaging and informative.",
-    "system": "Phase 5: Final Unification & Polish. You are an expert travel writer. Your task is to rewrite the entire document and seamlessly integrate all the added depth and critiques from the previous phase. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 5: Final Unification & Polish"
-  },
-  {
-    "name": "Rome Itinerary Unification Assistant 2 of 2",
-    "role": "To finalize the document and ensure it is polished and professional-grade.",
-    "directive": "Finalize the document and ensure it is polished and professional-grade, and make any final revisions or edits as necessary.",
-    "system": "Phase 5: Final Unification & Polish. You are an expert travel writer. Your task is to finalize the document and ensure it is polished and professional-grade. Consider the content from the previous phase.",
-    "prompt": "<PREVIOUS_RESULT>",
-    "phaseName": "Phase 5: Final Unification & Polish"
+    "name": "Presentation Assistant 15 of 15",
+    "role": "Formats the final itinerary for clarity and readability.",
+    "system": "You are an expert Presentation Specialist. For the following user question: \"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?\", your job is to format the itinerary for clarity.",
+    "prompt": "This is the previous solution: <PREVIOUS_RESULT>, please improve it by formatting for clarity and readability. Respond with a new full and complete version of the solution.",
+    "phaseName": "Phase 15: Final Presentation"
   }
 ]
 ```

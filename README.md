@@ -305,6 +305,7 @@ The infrastructure is defined using the AWS CDK and is located in the `infra` fo
 
 Before deploying, you must enable access to the foundation model you plan to use in Amazon Bedrock:
 
+- Checkout the [AWS Bedrock model access documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html)
 - Open the [Amazon Bedrock console](https://console.aws.amazon.com/bedrock/) in your target AWS region.
 - Request and enable access to the model(s) (e.g., Claude, Llama, Titan) for your AWS account.
 - Once access is granted, configure the model identifier in `infra/lib/settings.ts`.

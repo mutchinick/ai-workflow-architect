@@ -59,7 +59,7 @@ export class SendQueryApiLambdaConstruct extends Construct {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
         WORKFLOW_SERVICE_BUCKET_NAME: s3Bucket.bucketName,
       },
-      timeout: settings.Lambda.timeout,
+      timeout: settings.API.TIMEOUT,
       logGroup,
     })
 

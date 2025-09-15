@@ -51,13 +51,12 @@ export class ProcessWorkflowStepWorkerConstruct extends Construct {
    */
   private createProcessWorkflowStepWorkerQueue(scope: Construct, id: string, dlq: Queue): Queue {
     const queueName = `${id}-Queue`
-    const { maxReceiveCount, receiveMessageWaitTime, visibilityTimeout } = settings.SQS
     const queue = new Queue(scope, queueName, {
       queueName,
-      visibilityTimeout,
-      receiveMessageWaitTime,
+      visibilityTimeout: settings.WORKER.TIMEOUT,
+      receiveMessageWaitTime: settings.WORKER.RECEIVE_MESSAGE_WAIT_TIME,
       deadLetterQueue: {
-        maxReceiveCount,
+        maxReceiveCount: settings.WORKER.MAX_RECEIVE_COUNT,
         queue: dlq,
       },
     })
@@ -94,10 +93,10 @@ export class ProcessWorkflowStepWorkerConstruct extends Construct {
       environment: {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
         WORKFLOW_SERVICE_BUCKET_NAME: s3Bucket.bucketName,
-        BEDROCK_MODEL_ID: settings.BedrockModelId,
+        BEDROCK_MODEL_ID: settings.Bedrock.MODEL_ID,
       },
-      timeout: settings.Lambda.timeout,
-      memorySize: settings.Lambda.memorySize,
+      timeout: settings.WORKER.TIMEOUT,
+      memorySize: settings.WORKER.MEMORY_SIZE_MB,
       logGroup,
       bundling: {
         externalModules: ['@aws-sdk/*'],
@@ -116,13 +115,12 @@ export class ProcessWorkflowStepWorkerConstruct extends Construct {
       }),
     )
 
-    const { batchSize, maxBatchingWindow, maxConcurrency, reportBatchItemFailures } = settings.LambdaSQS
     lambdaFunc.addEventSource(
       new SqsEventSource(queue, {
-        batchSize,
-        reportBatchItemFailures,
-        maxBatchingWindow,
-        maxConcurrency,
+        batchSize: settings.WORKER.BATCH_SIZE,
+        reportBatchItemFailures: settings.WORKER.REPORT_BATCH_ITEM_FAILURES,
+        maxBatchingWindow: settings.WORKER.MAX_BATCHING_WINDOW,
+        maxConcurrency: settings.WORKER.MAX_CONCURRENCY,
       }),
     )
 

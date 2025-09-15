@@ -48,9 +48,9 @@ export class InvokeBedrockApiLambdaConstruct extends Construct {
       entry: join(servicesRoot, 'src/test-bedrock-service/handlers/invokeBedrockApi.ts'),
       handler: 'handler',
       environment: {
-        BEDROCK_MODEL_ID: settings.BedrockModelId,
+        BEDROCK_MODEL_ID: settings.Bedrock.MODEL_ID,
       },
-      timeout: settings.Lambda.timeout,
+      timeout: settings.API.TIMEOUT,
       logGroup,
       bundling: {
         externalModules: ['@aws-sdk/*'],
@@ -79,7 +79,7 @@ export class InvokeBedrockApiLambdaConstruct extends Construct {
     const lambdaIntegrationName = `${id}-LambdaIntegration`
     const lambdaIntegration = new HttpLambdaIntegration(lambdaIntegrationName, lambdaFunc, {
       payloadFormatVersion: PayloadFormatVersion.VERSION_2_0,
-      timeout: settings.LambdaIntegration.timeout,
+      timeout: settings.API.TIMEOUT,
     })
 
     httpApi.addRoutes({

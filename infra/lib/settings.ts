@@ -1,29 +1,27 @@
 import { Duration } from 'aws-cdk-lib'
 
 export const settings = {
-  SQS: {
-    visibilityTimeout: Duration.seconds(60),
-    receiveMessageWaitTime: Duration.seconds(20),
-    maxReceiveCount: 10,
+  WORKER: {
+    TIMEOUT: Duration.seconds(60),
+    MEMORY_SIZE_MB: 256,
+    MAX_CONCURRENCY: 2,
+    MAX_RECEIVE_COUNT: 10,
+    RECEIVE_MESSAGE_WAIT_TIME: Duration.seconds(20),
+    BATCH_SIZE: 10,
+    MAX_BATCHING_WINDOW: Duration.seconds(0),
+    REPORT_BATCH_ITEM_FAILURES: true,
   },
-  LambdaSQS: {
-    batchSize: 10,
-    reportBatchItemFailures: true,
-    maxBatchingWindow: Duration.seconds(0),
-    maxConcurrency: 2,
+  API: {
+    TIMEOUT: Duration.seconds(29),
+    MEMORY_SIZE_MB: 256,
   },
-  Lambda: {
-    timeout: Duration.seconds(60),
-    memorySize: 256,
+  Bedrock: {
+    MODEL_ID: 'us.meta.llama4-scout-17b-instruct-v1:0',
+    // MODEL_ID: 'meta.llama3-3-70b-instruct-v1:0',
+    // MODEL_ID: 'us.amazon.nova-premier-v1:0',
+    // MODEL_ID: 'us.meta.llama3-3-70b-instruct-v1:0',
+    // MODEL_ID: 'us.deepseek.r1-v1:0',
+    // MODEL_ID: 'us.mistral.mistral-large-2402-v1:0',
+    // MODEL_ID: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   },
-  LambdaIntegration: {
-    timeout: Duration.seconds(29),
-  },
-  // BedrockModelId: 'meta.llama3-3-70b-instruct-v1:0',
-  // BedrockModelId: 'us.amazon.nova-premier-v1:0',
-  // BedrockModelId: 'us.meta.llama3-3-70b-instruct-v1:0',
-  BedrockModelId: 'us.meta.llama4-scout-17b-instruct-v1:0',
-  // BedrockModelId: 'us.deepseek.r1-v1:0',
-  // BedrockModelId: 'us.mistral.mistral-large-2402-v1:0',
-  // BedrockModelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
 }

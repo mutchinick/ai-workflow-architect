@@ -51,7 +51,7 @@ export class GetLatestWorkflowApiLambdaConstruct extends Construct {
       environment: {
         WORKFLOW_SERVICE_BUCKET_NAME: s3Bucket.bucketName,
       },
-      timeout: settings.Lambda.timeout,
+      timeout: settings.API.TIMEOUT,
       logGroup,
     })
 

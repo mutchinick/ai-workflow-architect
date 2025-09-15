@@ -51,7 +51,7 @@ export class CreateJobApiLambdaConstruct extends Construct {
       environment: {
         EVENT_STORE_TABLE_NAME: dynamoDbTable.tableName,
       },
-      timeout: settings.Lambda.timeout,
+      timeout: settings.API.TIMEOUT,
       logGroup,
     })
 

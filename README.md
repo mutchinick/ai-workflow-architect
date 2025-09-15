@@ -103,7 +103,7 @@ Your final output MUST be a single JSON array of "Assistant Steps".
 Design the complete assistant workflow for the following user question:\n<question>"I am planning a trip to Rome, Italy. Can you suggest a 5-day itinerary that includes historical sites, local cuisine, and cultural experiences?</question>
 ```
 
-### Example Architect Response (Abridged for Readability)
+### Example Architect Response
 
 This is an example of the kind of JSON the architect would produce. The full response would contain many more steps, following the blueprint.
 
@@ -301,7 +301,28 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 
 The infrastructure is defined using the AWS CDK and is located in the `infra` folder.
 
-#### 1. Install Dependencies
+#### 1. Enable Bedrock Model Access
+
+Before deploying, you must enable access to the foundation model you plan to use in Amazon Bedrock:
+
+- Open the [Amazon Bedrock console](https://console.aws.amazon.com/bedrock/) in your target AWS region.
+- Request and enable access to the model(s) (e.g., Claude, Llama, Titan) for your AWS account.
+- Once access is granted, configure the model identifier in `infra/lib/settings.ts`.
+
+Example:
+
+```ts
+export const settings = {
+  ...
+  Bedrock: {
+    MODEL_ID: "us.meta.llama4-scout-17b-instruct-v1:0", // Add your desired Bedrock Model ID
+  },
+};
+```
+
+This ensures that the workers can successfully call the Bedrock API.
+
+#### 2. Install Dependencies
 
 First, navigate to the `services` directory and install the Node.js dependencies for the Lambda functions.
 
@@ -310,7 +331,7 @@ cd services
 npm install
 ```
 
-#### 2. Configure Deployment ID
+#### 3. Configure Deployment ID
 
 _Only if you want to change it. It's not required and should work out of the box. If you do change it, just be mindful with the length because some AWS resources impose limits_
 
@@ -324,7 +345,7 @@ _Example `infra/package.json`:_
 },
 ```
 
-#### 3. Set up AWS Credentials
+#### 4. Set up AWS Credentials
 
 The deployment script constructs an AWS profile name using the pattern `<deployment_prefix>-<stage>`. You need to set up a corresponding profile in your `~/.aws/credentials` file.
 
@@ -341,7 +362,7 @@ region = us-east-1
 
 > Choose the AWS region you want to deploy to. The example uses `us-east-1` (N. Virginia).
 
-#### 4. Deploy the Stack
+#### 5. Deploy the Stack
 
 Navigate to the `infra` folder, install its dependencies, and run the deploy command, passing the desired stage name as an argument.
 

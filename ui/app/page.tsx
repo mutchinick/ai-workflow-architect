@@ -136,7 +136,7 @@ const ChatStep = ({
   totalSteps,
   isCollapsed,
   onToggleCollapse,
-  displayPrompts,
+  displayPrompts: showPrompts,
 }: {
   step: Step;
   index: number;
@@ -177,16 +177,16 @@ const ChatStep = ({
           <div className={`text-xs ${textColor}`}>
             {step.assistant?.role} ({step.assistant?.phaseName})
           </div>
-          {displayPrompts && step.assistant && (
+          {showPrompts && step.assistant && (
             <>
               <div
-                className={`text-xs ${textColor} mb-2 mt-2 mr-2 p-1 outline outline-1 outline-gray-300`}
+                className={`text-sm mb-2 mt-2 mr-2 p-2 outline outline-1 outline-gray-300`}
               >
                 <span className="font-bold">System: </span>
                 {step.assistant?.system}
               </div>
               <div
-                className={`text-xs ${textColor} p-1 mr-2 outline outline-1 outline-gray-300`}
+                className={`text-sm mb-2 mt-2 mr-2 p-2 outline outline-1 outline-gray-300`}
               >
                 <span className="font-bold">Prompt: </span>
                 {step.assistant?.prompt}
@@ -420,14 +420,16 @@ const WorkflowVisualizerPage: NextPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 Response Evolution
               </h2>
-              <div className="flex items-center mb-5 text-gray-600">
-                <input
-                  type="checkbox"
-                  checked={displayPrompts}
-                  onChange={() => setDisplayPrompts(!displayPrompts)}
-                  className="mr-2"
-                />
-                Show Prompts
+              <div className="ml-2 mr-2 border-b-3 border-gray-300 outline-gray-300 p-2 mb-5 flex justify-between">
+                <label className="inline-flex items-center text-gray-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={displayPrompts}
+                    onChange={() => setDisplayPrompts(!displayPrompts)}
+                    className="mr-2"
+                  />
+                  Show Prompts
+                </label>
               </div>
               {steps.map((step, index) => (
                 <ChatStep

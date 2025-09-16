@@ -12,6 +12,8 @@ import remarkGfm from "remark-gfm";
 interface Assistant {
   name: string;
   role: string;
+  system: string;
+  prompt: string;
   phaseName: string;
 }
 
@@ -134,12 +136,14 @@ const ChatStep = ({
   totalSteps,
   isCollapsed,
   onToggleCollapse,
+  displayPrompts: showPrompts,
 }: {
   step: Step;
   index: number;
   totalSteps: number;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  displayPrompts: boolean;
 }) => {
   const isLastStep = index === totalSteps - 1;
   const stepColor = isLastStep
@@ -173,6 +177,22 @@ const ChatStep = ({
           <div className={`text-xs ${textColor}`}>
             {step.assistant?.role} ({step.assistant?.phaseName})
           </div>
+          {showPrompts && step.assistant && (
+            <>
+              <div
+                className={`text-sm mb-2 mt-2 mr-2 p-2 outline outline-1 outline-gray-300`}
+              >
+                <span className="font-bold">System: </span>
+                {step.assistant?.system}
+              </div>
+              <div
+                className={`text-sm mb-2 mt-2 mr-2 p-2 outline outline-1 outline-gray-300`}
+              >
+                <span className="font-bold">Prompt: </span>
+                {step.assistant?.prompt}
+              </div>
+            </>
+          )}
         </div>
         <ChevronIcon isCollapsed={isCollapsed} />
       </button>
@@ -205,6 +225,7 @@ const WorkflowVisualizerPage: NextPage = () => {
   const [isPolling, setIsPolling] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [displayPrompts, setDisplayPrompts] = useState(false);
 
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -399,6 +420,17 @@ const WorkflowVisualizerPage: NextPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 Response Evolution
               </h2>
+              <div className="ml-2 mr-2 border-b-3 border-gray-300 outline-gray-300 p-2 mb-5 flex justify-between">
+                <label className="inline-flex items-center text-gray-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={displayPrompts}
+                    onChange={() => setDisplayPrompts(!displayPrompts)}
+                    className="mr-2"
+                  />
+                  Show Prompts
+                </label>
+              </div>
               {steps.map((step, index) => (
                 <ChatStep
                   key={step.stepId || index}
@@ -407,6 +439,7 @@ const WorkflowVisualizerPage: NextPage = () => {
                   totalSteps={steps.length}
                   isCollapsed={!!collapsedSteps[step.stepId]}
                   onToggleCollapse={() => handleToggleCollapse(step.stepId)}
+                  displayPrompts={displayPrompts}
                 />
               ))}
             </div>

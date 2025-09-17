@@ -5,6 +5,10 @@ import type { NextPage } from "next";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  ClipboardDocumentIcon,
+  ClipboardDocumentCheckIcon,
+} from "@heroicons/react/24/outline";
 
 // ==============================================
 // Type Definitions
@@ -136,14 +140,14 @@ const ChatStep = ({
   totalSteps,
   isCollapsed,
   onToggleCollapse,
-  displayPrompts: showPrompts,
+  showPrompts,
 }: {
   step: Step;
   index: number;
   totalSteps: number;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
-  displayPrompts: boolean;
+  showPrompts: boolean;
 }) => {
   const isLastStep = index === totalSteps - 1;
   const stepColor = isLastStep
@@ -210,6 +214,102 @@ const ChatStep = ({
 };
 
 /**
+ * SolutionsComparison component displays a side-by-side comparison of two solutions.
+ * @param solutionA The first solution to compare.
+ * @param solutionB The last solution to compare.
+ * @returns The rendered SolutionsComparison component.
+ */
+const SolutionsComparison = ({
+  question,
+  solutionA,
+  solutionB,
+  isCollapsed,
+}: {
+  question: string;
+  solutionA: string;
+  solutionB: string;
+  isCollapsed: boolean;
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  if (isCollapsed) return null;
+
+  const fullPrompt = `
+Compare the following two solutions.
+
+Evaluate them as if you were grading a consultant's response.
+  
+Focus on:
+
+1. Completeness - does the solution address the question fully?
+2. Clarity & explanations - does it teach, not just tell?
+3. Accuracy & correctness - are claims and steps factually sound?
+4. Practicality & applicability - can a learner realistically follow it?
+5. Structure & readability - is it organized and free of contradictions?
+6. Depth & insight - does it offer reasoning, context, or best practices?
+
+Relative grading:
+- Best solution should usually land between 75-95.
+- Worst solution should usually land between 10-30.
+
+Do not provide your solution to the answer, just the evaluation.
+
+Finish with a short TL;DR starting with the relative numerical grades and explaining why one is better in this question's context.
+
+This is the original question or task they were solving for along with the two solutions to compare.
+
+---
+
+Question: ${question}
+
+---
+
+This is Solution A: ${solutionA}
+
+---
+
+This is Solution B: ${solutionB}
+
+`;
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(fullPrompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-gray-50 p-[32px] rounded-lg mb-[32px] outline outline-1 outline-gray-300">
+      <h2 className="text-md font-semibold mb-2 text-gray-700">
+        Solutions Evaluation Prompt
+      </h2>
+      <p className="text-sm text-gray-600 mb-3">
+        Copy this prompt as is then paste it into your LLM of choice to get a
+        detailed comparison of the two solutions.
+      </p>
+      <div className="relative">
+        <textarea
+          readOnly
+          value={fullPrompt}
+          className="w-full h-48 p-3 border border-gray-300 rounded-lg font-mono text-sm text-gray-800 bg-white"
+        />
+        <button
+          onClick={handleCopy}
+          className="absolute top-2 right-2 p-2 rounded-md bg-gray-200 hover:bg-gray-300"
+          title="Copy to clipboard"
+        >
+          {copied ? (
+            <ClipboardDocumentCheckIcon className="h-5 w-5 text-green-600 cursor-pointer" />
+          ) : (
+            <ClipboardDocumentIcon className="h-5 w-5 text-gray-600 cursor-pointer" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/**
  * The main page component for the AI Workflow Visualizer.
  * @returns The main page component for the AI Workflow Visualizer.
  */
@@ -225,7 +325,8 @@ const WorkflowVisualizerPage: NextPage = () => {
   const [isPolling, setIsPolling] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [displayPrompts, setDisplayPrompts] = useState(false);
+  const [showPrompts, setShowPrompts] = useState(false);
+  const [showCompareSolutions, setShowCompareSolutions] = useState(false);
 
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -362,7 +463,7 @@ const WorkflowVisualizerPage: NextPage = () => {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Ask your question here..."
-              className="w-full p-3 border-none focus:outline-none resize-none overflow-hidden bg-transparent"
+              className="w-full h-24 max-h-96 p-3 border-none focus:outline-none resize-none overflow-hidden bg-transparent"
               disabled={isLoading}
               rows={1}
             />
@@ -420,17 +521,40 @@ const WorkflowVisualizerPage: NextPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 Response Evolution
               </h2>
-              <div className="ml-2 mr-2 border-b-3 border-gray-300 outline-gray-300 p-2 mb-5 flex justify-between">
-                <label className="inline-flex items-center text-gray-600 cursor-pointer">
+              <div className="ml-2 mr-2 p-2 mb-5 flex justify-start gap-4">
+                <label className="inline-flex items-center text-gray-600 cursor-pointer outline outline-1 outline-gray-300 p-3 rounded-lg">
                   <input
                     type="checkbox"
-                    checked={displayPrompts}
-                    onChange={() => setDisplayPrompts(!displayPrompts)}
+                    checked={showPrompts}
+                    onChange={() => setShowPrompts(!showPrompts)}
                     className="mr-2"
                   />
-                  Show Prompts
+                  Show Assistants Workflow Prompts
+                </label>
+                <label className="inline-flex items-center text-gray-600 cursor-pointer outline outline-1 outline-gray-300 p-3 rounded-lg">
+                  <input
+                    type="checkbox"
+                    checked={showCompareSolutions}
+                    onChange={() =>
+                      setShowCompareSolutions(!showCompareSolutions)
+                    }
+                    className="mr-2"
+                  />
+                  Show Solutions Evaluation Prompt
                 </label>
               </div>
+              <SolutionsComparison
+                isCollapsed={
+                  !(
+                    showCompareSolutions &&
+                    steps.length >= 2 &&
+                    steps.every((step) => step.stepStatus === "completed")
+                  )
+                }
+                question={question}
+                solutionA={steps[1]?.llmResult || ""}
+                solutionB={steps[steps.length - 1]?.llmResult || ""}
+              />
               {steps.map((step, index) => (
                 <ChatStep
                   key={step.stepId || index}
@@ -439,7 +563,7 @@ const WorkflowVisualizerPage: NextPage = () => {
                   totalSteps={steps.length}
                   isCollapsed={!!collapsedSteps[step.stepId]}
                   onToggleCollapse={() => handleToggleCollapse(step.stepId)}
-                  displayPrompts={displayPrompts}
+                  showPrompts={showPrompts}
                 />
               ))}
             </div>

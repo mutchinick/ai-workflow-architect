@@ -43,7 +43,9 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL;
  * @param query The query to send to the workflow.
  * @returns The ID of the newly created workflow.
  */
-async function startWorkflow(query: string): Promise<{ workflowId: string }> {
+async function startWorkflow(
+  query: string
+): Promise<{ workflowId: string; query: string }> {
   if (!apiBaseUrl) {
     throw new Error(
       "NEXT_PUBLIC_WORKFLOW_SERVICE_API_BASE_URL is not defined in your .env.local file."
@@ -214,12 +216,12 @@ const ChatStep = ({
 };
 
 /**
- * SolutionsComparison component displays a side-by-side comparison of two solutions.
+ * CompareSolutions component displays a side-by-side comparison of two solutions.
  * @param solutionA The first solution to compare.
  * @param solutionB The last solution to compare.
- * @returns The rendered SolutionsComparison component.
+ * @returns The rendered CompareSolutions component.
  */
-const SolutionsComparison = ({
+const CompareSolutions = ({
   question,
   solutionA,
   solutionB,
@@ -232,8 +234,20 @@ const SolutionsComparison = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
+  // Check if the component is collapsed; if so, render nothing
   if (isCollapsed) return null;
 
+  // When workflow not finished, show a placeholder
+  if (!solutionA || !solutionB)
+    return (
+      <div className="bg-gray-50 p-[32px] rounded-lg mb-[32px] outline outline-1 outline-gray-300">
+        <h2 className="text-md font-semibold text-gray-700">
+          Compare Solutions Prompt waiting for data...
+        </h2>
+      </div>
+    );
+
+  // When workflow finished, show the full prompt with solutions
   const fullPrompt = `
 Compare the following two solutions.
 
@@ -270,7 +284,7 @@ This is Solution A: ${solutionA}
 
 This is Solution B: ${solutionB}
 
-`;
+`.trim();
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(fullPrompt);
@@ -281,7 +295,7 @@ This is Solution B: ${solutionB}
   return (
     <div className="bg-gray-50 p-[32px] rounded-lg mb-[32px] outline outline-1 outline-gray-300">
       <h2 className="text-md font-semibold mb-2 text-gray-700">
-        Solutions Evaluation Prompt
+        Compare Solutions Prompt
       </h2>
       <p className="text-sm text-gray-600 mb-3">
         Copy this prompt as is then paste it into your LLM of choice to get a
@@ -316,6 +330,7 @@ This is Solution B: ${solutionB}
 const WorkflowVisualizerPage: NextPage = () => {
   const [question, setQuestion] = useState("");
   const [workflowId, setWorkflowId] = useState<string | null>(null);
+  const [query, setQuery] = useState<string | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
   const [collapsedSteps, setCollapsedSteps] = useState<Record<string, boolean>>(
     {}
@@ -417,6 +432,7 @@ const WorkflowVisualizerPage: NextPage = () => {
     setIsPolling(false);
     setIsPaused(false);
     setWorkflowId(null);
+    setQuery(null);
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
     }
@@ -432,6 +448,7 @@ const WorkflowVisualizerPage: NextPage = () => {
     try {
       const data = await startWorkflow(question);
       setWorkflowId(data.workflowId);
+      setQuery(data.query);
       setIsPolling(true);
     } catch (err) {
       console.error(err);
@@ -463,7 +480,7 @@ const WorkflowVisualizerPage: NextPage = () => {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Ask your question here..."
-              className="w-full h-24 max-h-96 p-3 border-none focus:outline-none resize-none overflow-hidden bg-transparent"
+              className="w-full h-24 max-h-96 p-3 border-none focus:outline-none resize-none overflow-hidden bg-transparent overflow-y-auto"
               disabled={isLoading}
               rows={1}
             />
@@ -521,7 +538,7 @@ const WorkflowVisualizerPage: NextPage = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 Response Evolution
               </h2>
-              <div className="ml-2 mr-2 p-2 mb-5 flex justify-start gap-4">
+              <div className="mr-2 mb-5 flex justify-start gap-4">
                 <label className="inline-flex items-center text-gray-600 cursor-pointer outline outline-1 outline-gray-300 p-3 rounded-lg">
                   <input
                     type="checkbox"
@@ -540,18 +557,12 @@ const WorkflowVisualizerPage: NextPage = () => {
                     }
                     className="mr-2"
                   />
-                  Show Solutions Evaluation Prompt
+                  Show Compare Solutions Prompt
                 </label>
               </div>
-              <SolutionsComparison
-                isCollapsed={
-                  !(
-                    showCompareSolutions &&
-                    steps.length >= 2 &&
-                    steps.every((step) => step.stepStatus === "completed")
-                  )
-                }
-                question={question}
+              <CompareSolutions
+                isCollapsed={!showCompareSolutions}
+                question={query || ""}
                 solutionA={steps[1]?.llmResult || ""}
                 solutionB={steps[steps.length - 1]?.llmResult || ""}
               />

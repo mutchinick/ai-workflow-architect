@@ -418,7 +418,9 @@ Then, launch the application, open it in your browser, ask a question, and watch
 npm run dev
 ```
 
-Here are a few screenshots to give you a feel for the UI:
+## Here are a few screenshots to give you a feel for the UI:
+
+A quick look at a workflow in action. You can see how each assistant step is executed in sequence, with the UI updating as results come in.
 
 ![AI Workflow Architect](_readme/ai-workflow-architect-ui-sample.png)
 

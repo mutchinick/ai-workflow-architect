@@ -285,6 +285,10 @@ This is Solution B: ${solutionB}
   );
 };
 
+// ==============================================
+// Main Page Component
+// ==============================================
+
 /**
  * The main page component for the AI Workflow Visualizer.
  * @returns The main page component for the AI Workflow Visualizer.

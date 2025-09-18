@@ -14,7 +14,9 @@ Sometimes it yields really good results, sometimes not so much. It depends on th
 
 **One more issue:** designing a linear structure from the start isn't always optimal. Simulating a more conversational workflow might work better, and that's something I'll probably test as well.
 
-Overall, it was a good experiment.
+**It's doesn't work for simpler stuff:** if you ask a super simple question, like "what is the result of `2 + 2`?" the workflow will actually make things worse. The first answer is always best for trivial stuff, and the final result will just be nonsense.
+
+Yet, overall, it was a good experiment.
 
 ## Example Workflow Generation
 
@@ -416,6 +418,14 @@ Then, launch the application, open it in your browser, ask a question, and watch
 npm run dev
 ```
 
-Here is a screenshot!
+Here are a few screenshots to give you a feel for the UI:
 
 ![AI Workflow Architect](_readme/ai-workflow-architect-ui-sample.png)
+
+You can drill into each workflow step and inspect both the `system prompt` and the `user prompt` that was sent to the model.
+
+![Inspect System and Prompt](_readme/ai-workflow-architect-ui-prompts.png)
+
+There's also a handy feature that generates a prompt you can copy-paste into ChatGPT, Gemini, Claude, etc., to compare the first solution with the final, iterated result.
+
+![Prompt to Compare Results](_readme/ai-workflow-architect-ui-compare.png)

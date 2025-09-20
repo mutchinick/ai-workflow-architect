@@ -492,6 +492,34 @@ describe(`Workflow Service ProcessWorkflowStepWorker ProcessWorkflowStepWorkerSe
   })
 
   it(`calls InvokeBedrockClient.invoke with the expected system and prompt replacing
+      <ORIGINAL_QUESTION> with the actual original user question`, async () => {
+    const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
+    const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()
+    const mockSaveWorkflowClient = buildMockSaveWorkflowClient_succeeds()
+    const mockEventStoreClient = buildEventStoreClient_succeeds()
+    const processWorkflowStepWorkerService = new ProcessWorkflowStepWorkerService(
+      mockReadWorkflowClient,
+      mockInvokeBedrockClient,
+      mockSaveWorkflowClient,
+      mockEventStoreClient,
+    )
+    jest.spyOn(Workflow.prototype, 'getCurrentStep').mockReturnValueOnce({
+      stepId: 'mockStepId-2',
+      stepStatus: 'pending',
+      executionOrder: 2,
+      assistant: mockAssistants[1],
+      llmSystem: mockAssistants[1].system,
+      llmPrompt: `Test prompt with <ORIGINAL_QUESTION>`,
+      llmResult: '',
+    })
+    await processWorkflowStepWorkerService.processWorkflowStep(mockIncomingWorkflowAssistantsDeployedEvent)
+    expect(mockInvokeBedrockClient.invoke).toHaveBeenCalledWith(
+      mockAssistants[1].system,
+      `Test prompt with ${mockQuery}`,
+    )
+  })
+
+  it(`calls InvokeBedrockClient.invoke with the expected system and prompt replacing
       <PREVIOUS_RESULT> with the actual previous LLM result`, async () => {
     const mockReadWorkflowClient = buildMockReadWorkflowClient_succeeds()
     const mockInvokeBedrockClient = buildMockInvokeBedrockClient_succeeds()

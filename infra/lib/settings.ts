@@ -21,7 +21,6 @@ export const settings = {
     // MODEL_ID: 'us.amazon.nova-premier-v1:0',
     // MODEL_ID: 'us.meta.llama3-3-70b-instruct-v1:0',
     // MODEL_ID: 'us.deepseek.r1-v1:0',
-    // MODEL_ID: 'us.mistral.mistral-large-2402-v1:0',
     // MODEL_ID: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   },
 }

@@ -187,6 +187,12 @@ export class ProcessWorkflowStepWorkerService implements IProcessWorkflowStepWor
       llmPrompt = llmPrompt.replace('<PREVIOUS_RESULT>', previousResult)
     }
 
+    // NOTE: Just in case we modify the WorkflowArchitectAssistant to use <ORIGINAL_QUESTION>
+    if (llmPrompt.includes('<ORIGINAL_QUESTION>')) {
+      const originalQuestion = workflow.instructions.query
+      llmPrompt = llmPrompt.replace('<ORIGINAL_QUESTION>', originalQuestion)
+    }
+
     const llmSystem = currentStep.llmSystem
     const invokeBedrockResult = await this.invokeBedrockClient.invoke(llmSystem, llmPrompt)
     if (Result.isFailure(invokeBedrockResult)) {

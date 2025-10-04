@@ -228,8 +228,7 @@ Focus on:
 6. Depth & insight - does it offer reasoning, context, or best practices?
 
 Relative grading:
-- Best solution should usually land between 75-95.
-- Worst solution should usually land between 10-30.
+- Grade the solutions relative to each other with scores between 0 and 100 each one.
 
 Do not provide your solution to the answer, just the evaluation.
 

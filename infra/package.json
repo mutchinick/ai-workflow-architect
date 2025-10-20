@@ -17,10 +17,10 @@
     "watch": "tsc -w",
     "build": "tsc --build -v -f",
     "build:lint": "run-s format:check lint build",
-    "bootstrap": "cross-env ts-node bin/cdk-runner.ts bootstrap",
-    "synth": "cross-env ts-node bin/cdk-runner.ts synth",
-    "deploy": "cross-env WRITE_ENV_FILES=true ts-node bin/cdk-runner.ts deploy",
-    "destroy": "cross-env ts-node bin/cdk-runner.ts destroy"
+    "bootstrap": "ts-node bin/cdk-runner.ts --cdk-command=bootstrap --deployment-stage=dev",
+    "synth": "ts-node bin/cdk-runner.ts --cdk-command=synth --deployment-stage=dev",
+    "deploy": "ts-node bin/cdk-runner.ts --cdk-command=deploy --deployment-stage=dev --write-env-files=true",
+    "destroy": "ts-node bin/cdk-runner.ts --cdk-command=destroy --deployment-stage=dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",

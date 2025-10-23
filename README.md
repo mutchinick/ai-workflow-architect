@@ -328,8 +328,9 @@ cd ../infra
 npm run destroy
 ```
 
-Once deployed, the stack automatically writes the required API URLs into the `.env` files, so the UI will connect out of the box.  
-Open [http://localhost:3000](http://localhost:3000) and start exploring your workflow
+Once deployed, the stack automatically writes the required API URLs into the `.env` files, so the UI will connect out of the box.
+
+> Now you can open [http://localhost:3000](http://localhost:3000) and start exploring your workflow
 
 ---
 

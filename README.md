@@ -299,11 +299,43 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 
 ---
 
+## Quick Start
+
+**(More comprehensive explanation and options below, in "How to Deploy" section)**
+
+Enable access to your desired Amazon Bedrock model in the [Bedrock console](https://console.aws.amazon.com/bedrock/), then run the following commands from the repository root:
+
+```bash
+# 1. Build and prepare Lambda services
+cd services
+npm install
+npm run build
+
+# 2. Deploy infrastructure (default stage: dev)
+cd ../infra
+npm install
+npm run deploy
+
+# 3. Run the local Next.js UI (this one runs locally, it's not deployed)
+cd ../ui
+npm install
+npm run dev
+
+# 4. Teardown the infrastructure (default stage: dev)
+cd ../infra
+npm run destroy
+```
+
+Once deployed, the stack automatically writes the required API URLs into the `.env` files, so the UI will connect out of the box.  
+Open [http://localhost:3000](http://localhost:3000) and start exploring your workflow
+
+---
+
 ## How to Deploy
 
 The infrastructure is defined using the AWS CDK and is located in the `infra` folder.
 
-#### 1. Enable Bedrock Model Access
+### 1. Enable Bedrock Model Access
 
 Before deploying, you must enable access to the foundation model you plan to use in Amazon Bedrock:
 
@@ -325,7 +357,7 @@ export const settings = {
 
 This ensures that the workers can successfully call the Bedrock API.
 
-#### 2. Install Dependencies
+### 2. Install Dependencies
 
 First, navigate to the `services` directory and install the Node.js dependencies for the Lambda functions.
 
@@ -334,7 +366,7 @@ cd services
 npm install
 ```
 
-#### 3. Configure Deployment ID
+### 3. Configure Deployment ID
 
 _Only if you want to change it. It's not required and should work out of the box. If you do change it, just be mindful with the length because some AWS resources impose limits_
 
@@ -348,43 +380,109 @@ _Example `infra/package.json`:_
 },
 ```
 
-#### 4. Set up AWS Credentials
+### 4. Set up AWS Credentials
 
-The deployment script constructs an AWS profile name using the pattern `<deployment_prefix>-<stage>`. You need to set up a corresponding profile in your `~/.aws/credentials` file.
+The deployment script now relies on the **standard AWS credential chain**, which means you don’t need to hardcode any profile logic.  
+In most cases, the easiest setup is to just use the **default profile** from your AWS credentials file (see option 4.b below).
 
-For a `deployment_prefix` of `aiWorkflowArchitect` and a `stage` of `dev`, the profile name would be `aiWorkflowArchitect-dev`.
+When you run a deploy command, AWS automatically looks for credentials in the following order:
 
-_Example `~/.aws/credentials`:_
+**4.a. Environment variables**  
+ Export credentials directly in your shell before deploying:
+
+```bash
+export AWS_ACCESS_KEY_ID=AKIA...
+export AWS_SECRET_ACCESS_KEY=abc123...
+export AWS_REGION=us-east-1
+```
+
+**4.b. Default profile**  
+ If you already have a `[default]` section in your `~/.aws/credentials` file, the script will automatically use it:
 
 ```ini
-[aiWorkflowArchitect-dev]
+[default]
 aws_access_key_id = AKIA...
 aws_secret_access_key = SeHzc6...
 region = us-east-1
 ```
 
-> Choose the AWS region you want to deploy to. The example uses `us-east-1` (N. Virginia).
-
-#### 5. Deploy the Stack
-
-Navigate to the `infra` folder, install its dependencies, and run the deploy command, passing the desired stage name as an argument.
+**4.c. Explicit profile via environment variable**  
+ You can tell AWS which profile to use by exporting it before running the command:
 
 ```bash
-# If you are in the services folder
+export AWS_PROFILE=custom-profile
+```
+
+The profile must exist in your `~/.aws/credentials` file:
+
+```ini
+[custom-profile]
+aws_access_key_id = AKIA...
+aws_secret_access_key = xyz789...
+region = us-east-1
+```
+
+**4.d. Explicit profile via CLI flag**  
+ You can also pass a specific profile name directly when deploying:
+
+```bash
+npm run deploy -- --aws-profile=custom-profile
+```
+
+Just like the previous option, the profile must be defined in your `~/.aws/credentials` file:
+
+```ini
+[custom-profile]
+aws_access_key_id = AKIA...
+aws_secret_access_key = xyz789...
+region = us-east-1
+```
+
+> NOTE: Choose the AWS region you want to deploy to. The example uses `us-east-1` (N. Virginia).
+
+### 5. Deploy the Stack
+
+Navigate to the `infra` folder, install its dependencies, and deploy using the provided npm scripts.
+
+```bash
+# If you are currently in the services folder
 cd ../infra
 
 # Install infra dependencies
 npm install
 
-# Deploy to the 'dev' stage
-npm run deploy dev
+# Deploy to the default 'dev' stage
+npm run deploy
 ```
 
-You can use any stage name you like, which is great for spinning up ephemeral test environments (e.g., `npm run deploy my-test`). Just make sure the profile for that stage is set correctly in the AWS credentials file.
+By default, the deploy script runs with the `--deployment-stage dev` flag (as defined in the `package.json` scripts).  
+This automatically appends the stage name (for example, `-dev`) to the deployment prefix forming the stack and resource names, keeping each environment isolated.
 
-The CDK will synthesize the stack and may prompt you to approve the creation of IAM roles and policies. Accept the changes to proceed. The deployment typically takes 4-5 minutes.
+If you want to deploy a different stage — for example, `staging` or `prod` — simply override it when running the command:
 
-> **NOTE:** After a successful deployment, the script automatically writes the necessary environment variables (like API base URLs) into `.env` files. This makes it easy to start testing the system immediately. These files are configured for the two testing methods detailed in the upcoming sections: one for the VSCode REST Client and another for the Next.js UI.
+```bash
+# E.g. deploy to staging
+npm run deploy -- --deployment-stage staging
+
+# E.g. deploy to prod
+npm run deploy -- --deployment-stage prod
+```
+
+You can also specify a different AWS profile if needed:
+
+```bash
+# E.g. deploy to staging using your "custom-profile" AWS profile
+npm run deploy -- --deployment-stage staging --aws-profile custom-profile
+```
+
+Check the **`scripts`** section in the `package.json` to see or modify the default deployment settings.
+
+The CDK will synthesize the stack and may prompt you to approve the creation of IAM roles and policies. Accept the changes to proceed.  
+Deployment typically takes around **4–5 minutes**.
+
+> **NOTE:** After a successful deployment, the script automatically writes the relevant CDK outputs (like API base URLs) into `.env` files.
+
+> These files are used both by the **VSCode REST Client** and the **Next.js UI**, so you can start testing right away.
 
 ---
 
@@ -393,8 +491,11 @@ The CDK will synthesize the stack and may prompt you to approve the creation of 
 If you want to teardown the deployed infrastructure in AWS just run the following command from the `infra` folder.
 
 ```bash
-# Assuming you have deployed to the 'dev' stage
-npm run destroy dev
+# Assuming you have deployed to the default 'dev' stage
+npm run destroy
+
+# E.g. destroy staging
+npm run destroy -- --deployment-stage staging
 ```
 
 ---

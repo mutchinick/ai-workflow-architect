@@ -8,6 +8,9 @@ import { hideBin } from 'yargs/helpers'
 type CdkCommand = 'bootstrap' | 'synth' | 'deploy' | 'destroy'
 
 const argv = yargs(hideBin(process.argv))
+  .parserConfiguration({
+    'duplicate-arguments-array': false,
+  })
   .scriptName('cdk-runner')
   .usage('$0 --cdk-command <command> --deployment-stage <stage> [--aws-profile <name>] [options]')
   .option('cdk-command', {
@@ -23,6 +26,7 @@ const argv = yargs(hideBin(process.argv))
   })
   .option('aws-profile', {
     type: 'string',
+    demandOption: false,
     describe: 'AWS CLI profile name to pass to CDK. If omitted, CDK uses the default credential chain.',
   })
   .option('require-approval', {
@@ -92,15 +96,18 @@ function getCdkCliArgs(
   outputsFilePath: string
 } {
   const awsProfile = argv['aws-profile']
+  const envAwsProfile = process.env.AWS_PROFILE
+  const profileToUse = awsProfile || envAwsProfile
+  if (awsProfile) {
+    console.info(`cdk-runner: Using explicit AWS profile = ${awsProfile}`)
+  } else if (envAwsProfile) {
+    console.info(`cdk-runner: Using found AWS_PROFILE env var = ${envAwsProfile}`)
+  } else {
+    console.info('cdk-runner: Using AWS default credential chain = (No profile provided)')
+  }
+  const profileArg = profileToUse ? `--profile ${profileToUse}` : ''
+
   const requireApproval = argv['require-approval']
-
-  const profileArg = awsProfile ? `--profile ${awsProfile}` : ''
-  console.info(
-    awsProfile
-      ? `cdk-runner: Using explicit AWS profile "${awsProfile}"`
-      : 'cdk-runner: No profile provided. Using AWS default credential chain',
-  )
-
   const approvalArg = `--require-approval ${requireApproval}`
 
   const outputsFileName = `outputs.${deploymentStage}.json`
@@ -130,6 +137,7 @@ function runCdkCommand(
   const envVarsString = `NODE_ENV=p DEPLOYMENT_PREFIX=${deploymentPrefix} DEPLOYMENT_STAGE=${deploymentStage}`
   const cliArgsString = cliArgs.filter(Boolean).join(' ')
   const fullCommand = `cross-env ${envVarsString} cdk ${cdkCommand} ${cliArgsString}`
+
   execSync(fullCommand, { stdio: 'inherit' })
 }
 

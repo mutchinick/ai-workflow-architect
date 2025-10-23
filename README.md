@@ -34,6 +34,8 @@ The user would send a question like this to the system's API:
 
 The following `system` and `prompt` are combined and sent to the Workflow Architect LLM. The `system` prompt contains the high-level blueprint and rules, while the `prompt` contains the specific user question for this task.
 
+You can modify and improve the prompt to your liking in the [WorkflowArchitectAssistant.ts](./services/src/workflow-service/assistants/WorkflowArchitectAssistant.ts) file.
+
 #### System Prompt
 
 ```text

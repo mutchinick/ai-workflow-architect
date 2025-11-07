@@ -2,25 +2,55 @@ import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { exit } from 'process'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
+type CdkCommand = 'bootstrap' | 'synth' | 'deploy' | 'destroy'
+
+const argv = yargs(hideBin(process.argv))
+  .parserConfiguration({
+    'duplicate-arguments-array': false,
+  })
+  .scriptName('cdk-runner')
+  .usage('$0 --cdk-command <command> --deployment-stage <stage> [--aws-profile <name>] [options]')
+  .option('cdk-command', {
+    type: 'string',
+    choices: ['bootstrap', 'synth', 'deploy', 'destroy'],
+    demandOption: true,
+    describe: 'CDK command to run',
+  })
+  .option('deployment-stage', {
+    type: 'string',
+    demandOption: false,
+    describe: 'Deployment stage (e.g. dev, staging, prod). Required.',
+  })
+  .option('aws-profile', {
+    type: 'string',
+    demandOption: false,
+    describe: 'AWS CLI profile name to pass to CDK. If omitted, CDK uses the default credential chain.',
+  })
+  .option('require-approval', {
+    type: 'string',
+    choices: ['any-change', 'never'],
+    default: 'any-change',
+    describe: 'CDK require-approval mode (maps to --require-approval <mode>).',
+  })
+  .option('write-env-files', {
+    type: 'boolean',
+    default: false,
+    describe: 'Write selected CDK outputs into .env files (only on deploy).',
+  })
+  .help()
+  .strict()
+  .parseSync()
 
 /**
  * SECTION: Read and validate inputs
  */
-function getCdkCommand(): string {
-  const cdkCommand = process.argv[2]
+function getCdkCommand(): CdkCommand {
+  const cdkCommand = argv['cdk-command']
   console.info(`cdk-runner: CDK command = ${cdkCommand}`)
-  if (!cdkCommand) {
-    console.error('Missing CDK command. Usage: "npm run <cdk-command> <stage>". Aborting...')
-    exit(1)
-  }
-
-  const validCommands = ['bootstrap', 'synth', 'deploy', 'destroy']
-  if (!validCommands.includes(cdkCommand)) {
-    console.error(`cdk-runner: Invalid CDK command. Usage: "npm run ${validCommands.join('|')} <stage>". Aborting...`)
-    exit(1)
-  }
-
-  return cdkCommand
+  return cdkCommand as CdkCommand
 }
 
 /**
@@ -40,16 +70,16 @@ function getDeploymentPrefix(): string {
  *
  */
 function getDeploymentStage(): string {
-  const deploymentStageArg = process.argv[3]
-  const deploymentStageEnv = process.env.DEPLOYMENT_STAGE
-  const deploymentStage = deploymentStageArg || deploymentStageEnv
-
-  console.info(`cdk-runner: Deployment stage = ${deploymentStage}`)
+  const deploymentStage = argv['deployment-stage'] || process.env.DEPLOYMENT_STAGE
   if (!deploymentStage) {
-    console.error('cdk-runner: Missing deployment stage. Usage: "npm run <cdk-command> <stage>". Aborting...')
+    console.error(
+      'cdk-runner: Deployment stage not provided. Please provide it via "--deployment-stage" argument ' +
+        'or with the DEPLOYMENT_STAGE environment variable. Aborting...',
+    )
     exit(1)
   }
 
+  console.info(`cdk-runner: Deployment stage = ${deploymentStage}`)
   return deploymentStage
 }
 
@@ -65,14 +95,20 @@ function getCdkCliArgs(
   outputsFileArg: string
   outputsFilePath: string
 } {
-  const shouldOmitProfile = Boolean(process.env.CDK_OMIT_PROFILE)
-  const shouldOmitApproval = Boolean(process.env.CDK_OMIT_APPROVAL)
+  const awsProfile = argv['aws-profile']
+  const envAwsProfile = process.env.AWS_PROFILE
+  const profileToUse = awsProfile || envAwsProfile
+  if (awsProfile) {
+    console.info(`cdk-runner: Using explicit AWS profile = ${awsProfile}`)
+  } else if (envAwsProfile) {
+    console.info(`cdk-runner: Using found AWS_PROFILE env var = ${envAwsProfile}`)
+  } else {
+    console.info('cdk-runner: Using AWS default credential chain = (No profile provided)')
+  }
+  const profileArg = profileToUse ? `--profile ${profileToUse}` : ''
 
-  console.info(`cdk-runner: Omit profile = ${shouldOmitProfile}`)
-  console.info(`cdk-runner: Omit approval = ${shouldOmitApproval}`)
-
-  const profileArg = shouldOmitProfile ? '' : `--profile ${deploymentPrefix}-${deploymentStage}`
-  const approvalArg = shouldOmitApproval ? '--require-approval never' : '--require-approval any-change'
+  const requireApproval = argv['require-approval']
+  const approvalArg = `--require-approval ${requireApproval}`
 
   const outputsFileName = `outputs.${deploymentStage}.json`
   const outputsFilePath = path.resolve(process.cwd(), outputsFileName)
@@ -89,12 +125,17 @@ function getCdkCliArgs(
 /**
  * SECTION: Run CDK
  */
-function runCdkCommand(cdkCommand: string, deploymentPrefix: string, deploymentStage: string, cliArgs: string[]): void {
+function runCdkCommand(
+  cdkCommand: CdkCommand,
+  deploymentPrefix: string,
+  deploymentStage: string,
+  cliArgs: string[],
+): void {
   console.info(`cdk-runner: Stack name = ${deploymentPrefix}-${deploymentStage}`)
   console.info('cdk-runner: executing CDK...\n')
 
   const envVarsString = `NODE_ENV=p DEPLOYMENT_PREFIX=${deploymentPrefix} DEPLOYMENT_STAGE=${deploymentStage}`
-  const cliArgsString = cliArgs.join(' ')
+  const cliArgsString = cliArgs.filter(Boolean).join(' ')
   const fullCommand = `cross-env ${envVarsString} cdk ${cdkCommand} ${cliArgsString}`
 
   execSync(fullCommand, { stdio: 'inherit' })
@@ -105,14 +146,22 @@ function runCdkCommand(cdkCommand: string, deploymentPrefix: string, deploymentS
  */
 function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: string, deploymentStage: string): void {
   const outputsFileContents = readFileSync(outputsFilePath, 'utf8')
-  const outputsJson = JSON.parse(outputsFileContents) as Record<string, Record<string, string>>
+  const outputsJson = JSON.parse(outputsFileContents) as Record<string, Record<string, string | number>>
 
   const stackName = `${deploymentPrefix}-${deploymentStage}`
   const outputs = outputsJson[stackName]
   const outputPrefix = `${deploymentPrefix}${deploymentStage}`
 
+  if (!outputs) {
+    console.error(
+      `cdk-runner: No outputs found for stack "${stackName}" in ${outputsFilePath}. Available keys: ${Object.keys(
+        outputsJson,
+      ).join(', ')}`,
+    )
+    exit(1)
+  }
+
   const envFilesConfig = [
-    // API tests .env files (used by Rest Client files)
     {
       envFilePath: '../_restclient/test-template-service/.env',
       envVariables: [
@@ -140,7 +189,6 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
         },
       ],
     },
-    // Services .env file (used by services)
     {
       envFilePath: '../services/.env',
       envVariables: [
@@ -158,7 +206,6 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
         },
       ],
     },
-    // UI .env file (used by ui)
     {
       envFilePath: '../ui/.env.local',
       envVariables: [
@@ -177,14 +224,15 @@ function writeOutputsToEnvFiles(outputsFilePath: string, deploymentPrefix: strin
         },
       ],
     },
-  ]
+  ] as const
 
   console.info('')
 
   envFilesConfig.forEach(({ envFilePath, envVariables }) => {
     let envFileContents = ''
     envVariables.forEach(({ cdkOutputName, envVarName }) => {
-      const cdkOutputValue = outputs[cdkOutputName]
+      const raw = outputs[cdkOutputName]
+      const cdkOutputValue = raw == null ? '' : String(raw)
       if (cdkOutputValue) {
         const envVarValue = cdkOutputValue.endsWith('/') ? cdkOutputValue.slice(0, -1) : cdkOutputValue
         envFileContents += `${envVarName}=${envVarValue}\n`
@@ -219,14 +267,11 @@ function main(): void {
   }
 
   try {
-    const writeEnvFiles = Boolean(process.env.WRITE_ENV_FILES)
-    if (writeEnvFiles && cdkCommand === 'deploy') {
+    if (argv['write-env-files'] && cdkCommand === 'deploy') {
       const { outputsFilePath } = cdkCliArgs
       writeOutputsToEnvFiles(outputsFilePath, deploymentPrefix, deploymentStage)
-    } else if (writeEnvFiles) {
-      console.warn(
-        'cdk-runner: Notice that "WRITE_ENV_FILES=true" is only valid for the "deploy" CDK command. Skipping...',
-      )
+    } else if (argv['write-env-files']) {
+      console.warn('cdk-runner: "--write-env-files" is only valid for "--cdk-command deploy". Skipping...')
     }
   } catch (error) {
     console.error('cdk-runner: Failed to write .env files. Aborting...')

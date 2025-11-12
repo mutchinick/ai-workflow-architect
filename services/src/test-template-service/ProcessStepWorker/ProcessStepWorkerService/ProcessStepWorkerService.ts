@@ -1,7 +1,7 @@
 import { Failure, Result, Success } from '../../../errors/Result'
 import { IEventStoreClient } from '../../../event-store/EventStoreClient'
-import { StepProcessedEvent, StepProcessedEventData } from '../../events/StepProcessedEvent'
 import { JobCreatedEvent } from '../../events/JobCreatedEvent'
+import { StepProcessedEvent, StepProcessedEventData } from '../../events/StepProcessedEvent'
 
 export interface IProcessStepWorkerService {
   processStep: (
@@ -37,7 +37,8 @@ export class ProcessStepWorkerService implements IProcessStepWorkerService {
       return inputValidationResult
     }
 
-    const publishEventResult = await this.publishStepProcessedEvent(incomingEvent)
+    const jobId = incomingEvent.eventData.jobId
+    const publishEventResult = await this.publishStepProcessedEvent(jobId)
     Result.isFailure(publishEventResult)
       ? console.error(`${logCtx} exit failure:`, { publishEventResult, incomingEvent })
       : console.info(`${logCtx} exit success:`, { publishEventResult, incomingEvent })
@@ -66,14 +67,13 @@ export class ProcessStepWorkerService implements IProcessStepWorkerService {
    *
    */
   private async publishStepProcessedEvent(
-    incomingEvent: JobCreatedEvent,
+    jobId: string,
   ): Promise<
     Success<void> | Failure<'InvalidArgumentsError'> | Failure<'DuplicateEventError'> | Failure<'UnrecognizedError'>
   > {
     const logCtx = 'ProcessStepWorkerService.publishStepProcessedEvent'
-    console.info(`${logCtx} init:`, { incomingEvent })
+    console.info(`${logCtx} init:`, { jobId })
 
-    const jobId = incomingEvent.eventData.jobId
     const eventData: StepProcessedEventData = { jobId, processed: true }
     const buildEventResult = StepProcessedEvent.fromData(eventData)
     if (Result.isFailure(buildEventResult)) {

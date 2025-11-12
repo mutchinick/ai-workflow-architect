@@ -45,8 +45,8 @@ export class ProcessStepWorkerController implements IProcessStepWorkerController
     for (const record of sqsEvent.Records) {
       // If the failure is transient then we add it to the batch errors to requeue and retry
       // If the failure is non-transient then we ignore it to remove it from the queue
-      const createJobResult = await this.processStepSafe(record)
-      if (Result.isFailureTransient(createJobResult)) {
+      const processStepResult = await this.processStepSafe(record)
+      if (Result.isFailureTransient(processStepResult)) {
         sqsBatchResponse.batchItemFailures.push({ itemIdentifier: record.messageId })
       }
     }
@@ -73,26 +73,26 @@ export class ProcessStepWorkerController implements IProcessStepWorkerController
     }
 
     const unverifiedEvent = parseInputEventResult.value as IncomingEventBridgeEvent
-    const incomingCreateJobEventResult = EventStoreEventBuilder.fromEventBridge(validEventsMap, unverifiedEvent)
-    if (Result.isFailure(incomingCreateJobEventResult)) {
-      console.error(`${logCtx} failure exit:`, { incomingCreateJobEventResult, unverifiedEvent })
-      return incomingCreateJobEventResult
+    const incomingEventResult = EventStoreEventBuilder.fromEventBridge(validEventsMap, unverifiedEvent)
+    if (Result.isFailure(incomingEventResult)) {
+      console.error(`${logCtx} failure exit:`, { incomingEventResult, unverifiedEvent })
+      return incomingEventResult
     }
 
-    const incomingCreateJobEvent = incomingCreateJobEventResult.value
-    if (incomingCreateJobEvent instanceof JobCreatedEvent === false) {
-      const message = `Expected JobCreatedEvent but got ${incomingCreateJobEvent}`
+    const incomingEvent = incomingEventResult.value
+    if (incomingEvent instanceof JobCreatedEvent === false) {
+      const message = `Expected JobCreatedEvent but got ${incomingEvent}`
       const failure = Result.makeFailure('InvalidArgumentsError', message, false)
-      console.error(`${logCtx} exit failure:`, { failure, incomingCreateJobEvent })
+      console.error(`${logCtx} exit failure:`, { failure, incomingEvent })
       return failure
     }
 
-    const createJobResult = await this.processStepWorkerService.processStep(incomingCreateJobEvent)
-    Result.isFailure(createJobResult)
-      ? console.error(`${logCtx} exit failure:`, { createJobResult, incomingCreateJobEvent })
-      : console.info(`${logCtx} exit success:`, { createJobResult, incomingCreateJobEvent })
+    const processStepResult = await this.processStepWorkerService.processStep(incomingEvent)
+    Result.isFailure(processStepResult)
+      ? console.error(`${logCtx} exit failure:`, { processStepResult, incomingEvent })
+      : console.info(`${logCtx} exit success:`, { processStepResult, incomingEvent })
 
-    return createJobResult
+    return processStepResult
   }
 
   /**
